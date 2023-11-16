@@ -1,0 +1,35 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<!-- Main Section -->
+
+<section class="heros-section text-center">
+  <div class="container container--narrow">
+      <div class="heros-section__box">
+          <h2><span>Messages</span></h2>
+      </div>
+  </div>
+</section>
+
+<main class="messagePage my-xl">
+  <div class="content-box">
+      <h2 class="message__subject">{{ main_subject }}</h2>
+      <a href="{% url 'inbox-sent-messages' %}" class="button-inbox">Go Back</a>
+
+      {% for message in all_messages %}
+      <div class="message">
+          {% if message.sender %}
+          <a href="{% url 'user-profile' message.sender.id  %}" class="message__author">{{message.name}}</a>
+          {% else %}
+          <p class="message__author">{{message.name}}</p>
+          {% endif %}
+          <p class="message__date">{{message.created}}</p>
+          <div class="message__body">{{message.body|linebreaksbr}}</div>
+      </div>
+      {% endfor %}
+      
+      <a href="{% url 'create-message' all_messages.0.sender.id %}?parent_id={{all_messages.0.id}}">Reply</a>
+  </div>
+</main>
+
+{% endblock content %}

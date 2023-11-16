@@ -1,0 +1,57 @@
+{% if queryset.has_other_pages %}
+<div class="pagination">
+    <ul class="container">
+
+        <!-- First Page - Show only if NOT on the first page -->
+        {% if queryset.number != 1 %}
+        <li>
+            <a href="?page=1&filter={{ filter_type }}{% if search_query %}&search_query={{ search_query }}{% endif %}" class="btn page-link" data-page="1">
+                First Page
+            </a>
+        </li>
+        {% endif %}
+
+        {% if queryset.has_previous %}
+        <li>
+            <a href="?page={{queryset.previous_page_number}}&filter={{ filter_type }}{% if search_query %}&search_query={{ search_query }}{% endif %}" class="btn page-link" data-page="{{queryset.previous_page_number}}">
+                &#10094; Prev
+            </a>
+        </li>
+        {% endif %}
+
+        {% for page in custom_range %}
+            {% if page == queryset.number %}
+                <li>
+                    <a href="?page={{page}}&filter={{ filter_type }}{% if search_query %}&search_query={{ search_query }}{% endif %}" class="btn page-link btn--sub" data-page="{{page}}">
+                        {{page}}
+                    </a>
+                </li>
+            {% else %}
+                <li>
+                    <a href="?page={{page}}&filter={{ filter_type }}{% if search_query %}&search_query={{ search_query }}{% endif %}" class="btn page-link" data-page="{{page}}">
+                        {{page}}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if queryset.has_next %}
+        <li>
+            <a href="?page={{queryset.next_page_number}}&filter={{ filter_type }}{% if search_query %}&search_query={{ search_query }}{% endif %}" class="btn page-link" data-page="{{queryset.next_page_number}}">
+                Next &#10095;
+            </a>
+        </li>
+        {% endif %}
+
+        <!-- Last Page - Show only if NOT on the last page -->
+        {% if queryset.number != queryset.paginator.num_pages %}
+        <li>
+            <a href="?page={{queryset.paginator.num_pages}}&filter={{ filter_type }}{% if search_query %}&search_query={{ search_query }}{% endif %}" class="btn page-link" data-page="{{queryset.paginator.num_pages}}">
+                Last Page
+            </a>
+        </li>
+        {% endif %}
+
+    </ul>
+</div>
+{% endif %}

@@ -1,0 +1,26 @@
+
+<div class="{{ comment_class|default:'comment' }}">
+    <p>{{ comment.content }}</p>
+    {% if comment.user == request.user.profile %}
+        <form method="POST" action="{% url 'project' project.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="delete_comment" value="{{ comment.id }}">
+            <button type="submit" class="btn btn-danger" onclick="return confirmDelete()">Delete</button>
+        </form>
+    {% endif %}
+    <button class="like-btn {% if request.user.profile in comment.likes.all %}like-btn--selected{% endif %}" onclick="handleLike('{{ comment.id }}')">Like</button>
+    <span class="likes-count">{{ comment.likes.count }}</span>
+    <button class="reply-btn" onclick="toggleReplyForm('{{ comment.id }}')">Reply</button>
+    <div id="reply-form-{{ comment.id }}" class="reply-form" style="display:none;">
+        <form method="POST" action="{% url 'project' project.id %}">
+            {% csrf_token %}
+            {{ CommentForm.as_p }}
+            <input type="hidden" name="parent" value="{{ comment.id }}">
+            <button type="submit" class="btn btn--sub btn--main">Submit Reply</button>
+        </form>
+    </div>
+    {% for reply in comment.replies.all %}
+        {% include '_comment.html' with comment=reply comment_class='reply' %}
+    {% endfor %}
+</div>
+

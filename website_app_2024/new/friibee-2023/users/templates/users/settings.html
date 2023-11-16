@@ -1,0 +1,57 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<section class="heros-section text-center" style="margin-bottom: -20px;">
+    <div class="container container--narrow">
+        <div class="heros-section__box">
+            <h2>Your <span>Settings</span></h2>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+<main class="settingsPage my-xl">
+  <div class="content-box">
+        <h3 style="margin-bottom: 40px;">Manage Your Account</h3>
+    <div class="settings" style="display: flex; flex-direction: column; gap: 20px; align-items: flex-start;">
+
+        <h5 style="font-size: 1.6em;">Edit Profile</h5>
+        <!-- Button to Edit Profile -->
+        <a class="tag tag--pill tag--main settings__btn" href="{% url 'edit-account' %}">
+            <i class="im im-edit"></i>
+            Edit Profile
+        </a>
+
+        <h5 style="font-size: 1.6em;">Privacy Settings</h5>
+        <a class="tag tag--pill tag--main settings__btn" href="{% url 'privacy-settings' %}">
+            <i class="im im-edit"></i>
+            Privacy Settings
+        </a>
+
+        <h5 style="font-size: 1.6em;">Notification Settings</h5>
+        <a class="tag tag--pill tag--main settings__btn" href="{% url 'notification-settings' %}">
+            <i class="im im-edit"></i>
+            Notification Settings
+        </a>
+
+        <h5 style="font-size: 1.6em;">Change Password</h5>
+        <!-- Button to Change Password -->
+        <a class="tag tag--pill tag--main settings__btn" href="{% url 'change-password' %}">
+            <i class="im im-edit"></i>
+            Change Password
+        </a>
+
+        <h5 style="font-size: 1.6em;">Deactivate Account</h5>
+        <!-- Button to Deactivate Account -->
+        <a class="tag tag--pill tag--main settings__btn" href="{% url 'deactivate-account' %}" onclick="return confirm('Are you sure you want to permanently deactivate your account?')">
+            <i class="im im-edit"></i>
+            Deactivate Account
+        </a>
+
+    </div>
+  </div>
+</main>
+</div>
+
+{% endblock %}

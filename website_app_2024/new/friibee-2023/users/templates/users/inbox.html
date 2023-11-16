@@ -1,0 +1,141 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<!-- Main Section -->
+<section class="heros-section text-center">
+  <div class="container container--narrow">
+      <div class="heros-section__box">
+          <h2><span>Inbox</span></h2>
+      </div>
+  </div>
+</section>
+<button class="batten2-inbox" onclick="goBack()">Go Back</button>
+
+
+<main class="inbox my-xl">
+  <div class="content-box">
+    <h3 class="inbox__title">Messages (<span>{{totalMessagesCount}}</span>)</h3>
+    <button class="batten2-inbox" onclick="window.location.href='{% url 'sent-messages' %}'">Sent messages</button>
+
+    <ul class="messages">
+      {% for message in messageRequests %}
+      {% if message.is_read == False %}
+      <li class="message message--unread" data-id="{{message.id}}">
+      {% else %}
+      <li class="message" data-id="{{message.id}}">
+      {% endif %}
+
+        <a href="{% url 'message' message.id %}">
+          <span class="message__author">{{message.name}}</span>
+          <span class="message__subject">{{message.subject}}</span>
+          <div class="message__details">
+            <span class="message__date">{{message.created}}</span>
+            <button class="batten-inbox" onclick="return deleteMessage('{{message.id}}')">Delete</button>
+          </div>
+        </a>
+
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</main>
+
+<style>
+/* Flexbox Layout for positioning */
+.message__details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Adjusting the space between the date and the button */
+.message__date {
+  margin-right: 10px;
+}
+
+/* Button styles for "Delete" and "Sent messages" buttons */
+.batten-inbox {
+  background-color: #ff0000; /* Red background */
+  color: #ffffff; /* White text color */
+  border: none; /* Remove the default button border */
+  padding: 8px 16px; /* Add some padding around the text */
+  border-radius: 4px; /* Add rounded corners */
+  cursor: pointer; /* Change the cursor to a pointer on hover */
+}
+
+.batten-inbox:hover {
+  background-color: #cc0000; /* Darker red on hover */
+}
+
+.batten2-inbox {
+  background-color: #007bff; /* Blue background */
+  color: #ffffff; /* White text color */
+  border: none; /* Remove the default button border */
+  padding: 8px 16px; /* Add some padding around the text */
+  border-radius: 4px; /* Add rounded corners */
+  cursor: pointer; /* Change the cursor to a pointer on hover */
+}
+
+.batten2-inbox:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+</style>
+
+<script>
+// Function for the back button
+function goBack() {
+    window.history.back();
+}
+
+function deleteMessage(messageId) {
+    let confirmation = confirm("Are you sure you want to delete this message?");
+    if (confirmation) {
+        fetch(`/delete-message/${messageId}/`, {  // adjusted URL
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')  // Django requires a CSRF token for POST, PUT, DELETE requests
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // remove the message element from the DOM
+                const messageElement = document.querySelector(`.message[data-id="${messageId}"]`);
+                messageElement.parentNode.removeChild(messageElement);
+
+                // reduce the count of total messages by one
+                const countElement = document.querySelector('.inbox__title span');
+                const count = parseInt(countElement.textContent);
+                countElement.textContent = count - 1;
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Prevent the default form submission action
+    return false;
+}
+
+// Function to get the CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+</script>
+
+
+{% endblock content %}

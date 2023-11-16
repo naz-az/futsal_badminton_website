@@ -1,0 +1,292 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .center-container {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 0vh;
+    }
+
+    .cardz {
+        width: 40%;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, .5);
+        text-align: center;  /* Added this line */
+        margin-left: 100px;  /* Adjust the value as necessary */
+        margin-right: 100px; /* Adjust the value as necessary */
+
+    }
+
+    .imgg {
+        width: 100%;
+        height: auto;
+    }
+
+    .cardz__body {
+        margin-top: 0px;
+    }
+
+    .cardz__body h3, .cardz__body p {
+        margin: 5px 0;
+    }
+
+    .buttonz {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 60%;
+        gap: 10px; /* This will control the gap between the elements in the flex container */
+    }
+
+    .buttonz .btnz {
+        position: relative;
+        padding: 8px 20px;  
+        font-size: 1.2em;
+        border-radius: 10px; 
+        cursor: pointer;
+        margin-right: 30px; /* Adjust as needed to move the button right */
+    }
+
+    .buttonz .btnz:last-child {
+        margin-right: 0; /* This ensures that the rightmost button doesn't have a margin, keeping things centered */
+    }
+
+    .btnz:disabled,
+    .btnz--disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .btnz:hover {
+        opacity: 0.65;
+    }
+
+    .btnz.btn-danger {
+        background-image: linear-gradient(to right bottom, #961f3d, #9c213c, #a2233b, #a8263a, #ae2939, #b32c39, #b92e39, #be3139, #c4343a, #ca373c, #d03b3d, #d63e3e);
+        color: white;
+        border: 2px solid #ff5d5d; 
+    }
+
+    .btnz.btn-success {
+        background-image: linear-gradient(to right bottom, #1c6417, #21681b, #256c20, #2a7024, #2e7428, #347a2e, #398033, #3f8639, #488f42, #51984a, #59a253, #62ab5c);
+        color: white;
+        border: 2px solid #00cd00;
+    }
+
+
+
+    .likeForm-popup {
+        position: absolute; /* Absolute position */
+        bottom: 60%;      /* Positioned at the bottom of the parent element */
+        right: 0;          /* Right aligned */
+        transform: translateY(100%); /* Move it down by its own height */
+        background: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, .5);
+        display: none;     /* Hidden by default */
+        z-index: 1000;
+        margin-right: 120px;     /* Ensure it appears on top of other elements */
+    }
+
+    .show-popup {
+        display: block; /* Show the popup */
+    }
+
+
+    .hidden {
+    display: none;
+    }
+
+    .custom-size {
+    font-size: 24px;  /* Or any other size you want */
+}
+
+.buttonz .btn-special {
+    position: relative;
+    padding: 8px 20px;  
+    border-radius: 10px; 
+    cursor: pointer;
+    margin-right: 10px; /* Adjust as needed to move the button right */
+    background-image: linear-gradient(to right bottom, #db5124, #d75024, #d44f24, #d04e23, #cd4d23, #cd4a22, #cc4721, #cc4420, #cf3d1e, #d2341c, #d6291b, #d91a1a);    color: white; /* Text color for the button */
+    border: none; /* No border */
+    transition: opacity 0.3s;
+}
+
+.buttonz .btn-special:hover {
+    opacity: 0.8;
+}
+
+.buttonz .btn-special:disabled,
+.buttonz .btn-special--disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-go-deal {
+    display: inline-block;
+    background-color: #ffc107;  /* Adjust color as needed */
+    padding: 10px 20px;
+    margin-top: 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-go-deal:hover {
+    background-color: #e0a800;  /* Adjust hover color as needed */
+}
+
+</style>
+
+<main>
+    <section class="herose-section text-center">
+        <div class="container container--narrow">
+            <div class="herose-section__box">
+                <h2>Swipe <span>Page</span></h2>
+            </div>
+        </div>
+    </section>
+
+     <div class="center-container">
+
+        <!-- Place for the "Go to deal" button -->
+        <div id="deal-button-container" style="margin-bottom: 20px;"></div>
+
+        <div class="buttonz">
+            <button type="button" class="btnz btn-danger btn-lg" id="dislike" onclick="handleDislike()">
+                <i class="fas fa-thumbs-down"></i>
+            </button>
+
+            <div id="project-display" class="cardz">
+                <!-- A placeholder for the project will be replaced with actual data by JavaScript -->
+            </div>
+
+            <button type="button" class="btnz btn-success btn-lg" id="like" onclick="handleLike()">
+                <i class="fas fa-thumbs-up"></i>
+            </button>
+
+            <div id="likeForm" class="likeForm-popup">
+                <h2 class="custom-size">Pick an action</h2>
+                <button class="btn-special" onclick="keepPicking()">Keep Picking</button>
+                <button class="btn-special" id="favoriteAction" onclick="handleFavorite()"></button>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProjectIndex = 0;
+        const projects = JSON.parse('{{ projects|escapejs }}');
+        let userAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+
+        function handleDislike() {
+            currentProjectIndex++;
+            if (currentProjectIndex >= projects.length) currentProjectIndex = 0;
+            displayProject();
+            document.getElementById('likeForm').classList.remove('show-popup');
+        }
+
+        function handleLike() {
+            let project = projects[currentProjectIndex];
+            document.getElementById('favoriteAction').textContent = project.is_favorite ? "Remove from Favorites" : "Add to Favorites";
+            document.getElementById('likeForm').classList.add('show-popup');
+        }
+
+        function keepPicking() {
+            document.getElementById('likeForm').classList.remove('show-popup');
+            handleDislike();
+        }
+
+        function displayProject() {
+            const project = projects[currentProjectIndex];
+            const displayDiv = document.getElementById('project-display');
+            const dealButtonContainer = document.getElementById('deal-button-container');
+
+            if (project.deal_link) {
+                const dealUrl = project.deal_link.startsWith('http://') || project.deal_link.startsWith('https://') 
+                                ? project.deal_link 
+                                : 'http://' + project.deal_link;
+                                
+                dealButtonContainer.innerHTML = `
+                    <a href="${dealUrl}" target="_blank" class="btn-go-deal">
+                        Go to deal
+                    </a>
+                `;
+            }
+            else {
+                dealButtonContainer.innerHTML = ''; // Clear the container if there's no deal link
+            }
+
+            displayDiv.innerHTML = `
+                <a href="/project/${project.id}/">
+                    <img class="imgg" src="${project.imageURL}" alt="project thumbnail" />
+                    <div class="cardz__body">
+                        <h3 style="font-size: 22px;">${project.title}</h3>
+                    </div>
+                </a>
+                <div class="cardz__body">
+                    <p>By ${project.owner.name}</p>
+                    <p><strong>${project.vote_ratio}%</strong> Positive Feedback (${project.vote_total} Votes)</p>
+                    ${project.tags.map(tag => `<span>${tag}</span>`).join(' ')}
+                </div>
+            `;
+        }
+
+
+        displayProject();
+
+        function handleFavorite() {
+            if (!userAuthenticated) {
+                window.location.href = "{% url 'login' %}";
+                return;
+            }
+
+            let project = projects[currentProjectIndex];
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', `/toggle-favorite/${project.id}/`, true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    let response = JSON.parse(xhr.responseText);
+                    alert(`Project was ${response.status} favorites`);
+                    project.is_favorite = response.status === "added";
+                    document.getElementById('favoriteAction').textContent = project.is_favorite ? "Remove from Favorites" : "Add to Favorites";
+                    document.getElementById('likeForm').classList.remove('show-popup');
+                    handleDislike();
+                }
+            }
+            xhr.send();
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.keyCode === 37) {
+                handleDislike();
+            } else if (event.keyCode === 39) {
+                handleLike();
+            } else if (event.keyCode === 38) {
+                // Handle the "Go to deal" action when the up arrow key is pressed
+                const dealButton = document.querySelector('.btn-go-deal');
+                if (dealButton) {
+                    window.open(dealButton.href, '_blank');
+                }
+            }
+        });
+
+
+        // Add double-click event listener to the project card
+        document.getElementById('project-display').addEventListener('dblclick', handleFavorite);
+
+
+    </script>
+</main>
+{% endblock %}

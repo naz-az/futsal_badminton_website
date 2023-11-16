@@ -1,0 +1,109 @@
+{% load static %}
+
+<head>
+    <!-- other head elements... -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<!-- Header Section -->
+<header class="header">
+    <div class="container container--narrow">
+        <a href="{% url 'projects' %}" class="header__logo">
+            <img src="{% static 'images/friibee.png' %} " alt="DevSearch Logo" />
+        </a>
+
+        <nav class="header__nav">
+            <input type="checkbox" id="responsive-menu" />
+            <label for="responsive-menu" class="toggle-menu">
+                <span>Menu</span>
+                <div class="toggle-menu__lines"></div>
+            </label>
+            <ul class="header__menu">
+                <li class="header__menuItem"><a href="{% url 'projects' %}">Deals</a></li>
+                <li class="header__menuItem"><a href="{% url 'profiles' %}">Users</a></li>
+                {% comment %} <li class="header__menuItem"><a href="{% url 'smart-food' %}">Smart Food</a></li> {% endcomment %}
+                <li class="header__menuItem"><a href="{% url 'swipe-page' %}">Deal Swipe</a></li>
+
+                {% if request.user.is_authenticated %}
+                <li class="header__menuItem">
+                    <div class="image-icon-wrapper">
+                        <img class="user-image" src="{{ request.user.profile.imageURL }}" alt="{{ request.user.profile.username }}" />
+                        {% if unseen_notifications_count > 0 or unseen_reviews_count > 0 or unreadCount > 0 %}
+                        <i class="fas fa-exclamation-circle fa-lg alert-icon" style="color: red;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="dropdown-content">
+                        <a href="{% url 'account' %}">Profile</a>
+                        <a href="{% url 'favorites' %}">Favorites</a>
+                        {% comment %} <a href="{% url 'inbox' %}">Inbox ({{ totalMessagesCount }})</a> {% endcomment %}
+                        <a href="{% url 'inbox-sent-messages' %}">
+                            Inbox {% if unreadCount > 0 %}<span class="unread-count">Unread: {{ unreadCount }}</span>{% endif %}
+                        </a>
+                        <a href="{% url 'notifications' %}">Notifications {% if unseen_notifications_count > 0 %} ({{ unseen_notifications_count }}) {% endif %}</a>
+                        
+                        <a href="{% url 'categories' %}">Categories</a>
+                        <a href="{% url 'settings' %}">Settings</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    </div>
+                </li>
+
+
+                {% else %}
+                <li class="header__menuItem"><a href="{% url 'login' %}" class="btn btn--sub" style="color: white;">Login/Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<style>
+.dropdown-content {
+    display: none;
+    position: absolute;
+    min-width: 160px;
+    z-index: 1;
+background-image: linear-gradient(to right bottom, #f2edf8, #f3eef8, #f5eff9, #f6f0f9, #f7f1fa, #f6f2fa, #f6f2fb, #f5f3fb, #f3f3fb, #f1f3fa, #eff2f9, #eef2f8);}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);  /* Faded grey horizontal line */
+    margin: 0 8px;  /* Gives a space on left and right so line doesn't touch the edges */
+}
+
+.dropdown-content a:last-child {
+    border-bottom: none;  /* Removes the line for the last element */
+}
+
+.header__menuItem:hover .dropdown-content {
+    display: block;
+}
+
+.image-icon-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.user-image {
+    width:35px; 
+    height:35px; 
+    border-radius:50%;
+}
+
+.alert-icon {
+    position: absolute;
+    bottom: 0;
+    right: -10px;  /* Adjust this value as per your need */
+}
+
+.unread-count {
+    color: red;
+    font-style: italic;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+
+</style>

@@ -1,0 +1,372 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<!-- Main Section -->
+<section class="heros-section text-center">
+  <div class="container container--narrow">
+      <div class="heros-section__box">
+          <h2><span>Messages</span></h2>
+      </div>
+  </div>
+</section>
+
+{% comment %} <button class="batten2-inbox" onclick="goBack()">Go Back</button> {% endcomment %}
+
+<main class="inbox my-xl">
+  <div class="content-box">
+
+  <!-- Add this after the "Sent Messages" button -->
+<button class="tablinks" onclick="location.href='{% url 'create-new-message' %}'">Create New Message</button>
+
+
+    <div class="tab">
+      <button class="tablinks" onclick="openTab(event, 'Inbox')" id="defaultOpen">Inbox</button>
+      <button class="tablinks" onclick="openTab(event, 'Sent')">Sent Messages</button>
+    </div>
+
+    {% comment %} <h3 class="inbox__title">Messages (<span>{{totalMessagesCount}}</span>)</h3> {% endcomment %}
+  <br><br><br><br>
+
+    <!-- Inbox messages -->
+    <div id="Inbox" class="tabcontent inbox">
+      <h3 class="inbox__title">Total Messages (<span>{{totalInboxCount}}</span>)</h3>
+
+      <button class="batten-inbox" onclick="deleteCheckedMessages()">Delete Checked</button>
+  <input type="checkbox" id="selectAllCheckbox"> <label for="selectAllCheckbox">Select All</label>
+
+
+      <ul class="messages">
+        {% for message in messageRequests %}
+        {% if message.is_read == False %}
+        <li class="message message--unread" data-id="{{message.id}}">
+        {% else %}
+        <li class="message" data-id="{{message.id}}">
+        {% endif %}
+
+          <input type="checkbox" class="message-checkbox" data-id="{{message.id}}">
+
+
+          <a href="{% url 'message' message.id %}">
+            <span class="message__author">{{message.name}}</span>
+              <span class="message__subject">
+                  {{message.formatted_subject}}
+              </span>
+
+
+            <span class="message__date">{{message.created}}</span>
+            <button class="batten-inbox" onclick="return deleteMessage('{{message.id}}')">Delete</button>
+          </a>
+
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Sent messages -->
+  <!-- Sent messages -->
+  <!-- Sent messages -->
+<!-- Sent messages -->
+<div id="Sent" class="tabcontent sent">
+    <h3 class="inbox__title">Total Sent Messages (<span>{{sentMessagesCount}}</span>)</h3>
+    
+    <!-- "Delete Checked" button and "Select All" checkbox -->
+    <button class="batten-inbox" onclick="deleteCheckedSentMessages()">Delete Checked</button>
+    <input type="checkbox" id="selectAllCheckboxSent"> <label for="selectAllCheckboxSent">Select All</label>
+    
+    <ul class="messages">
+        {% for message in sentMessages %}
+        <li class="message" data-id="{{message.id}}">
+            
+            <!-- Checkbox for each message -->
+            <input type="checkbox" class="message-checkbox-sent" data-id="{{message.id}}">
+            
+            <div class="message__details">
+                <a href="{% url 'sent-message' message.id %}">
+                    <span class="message__author">{{message.recipient.name}}</span>
+                    <span class="message__subject">{{message.subject}}</span>
+                    <span class="message__date">{{message.created}}</span>
+                </a>
+                <button class="batten-inbox" onclick="deleteMessage('{{message.id}}', true)">Delete</button>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+
+  </div>
+</main>
+
+<style>
+/* Flexbox Layout for positioning */
+.message__details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Adjusting the space between the date and the button */
+.message__date {
+  margin-right: 10px;
+}
+
+/* Button styles for "Delete" and "Sent messages" buttons */
+.batten-inbox {
+  background-color: #ff0000; /* Red background */
+  color: #ffffff; /* White text color */
+  border: none; /* Remove the default button border */
+  padding: 8px 16px; /* Add some padding around the text */
+  border-radius: 4px; /* Add rounded corners */
+  cursor: pointer; /* Change the cursor to a pointer on hover */
+}
+
+.batten-inbox:hover {
+  background-color: #cc0000; /* Darker red on hover */
+}
+
+.batten2-inbox {
+  background-color: #007bff; /* Blue background */
+  color: #ffffff; /* White text color */
+  border: none; /* Remove the default button border */
+  padding: 8px 16px; /* Add some padding around the text */
+  border-radius: 4px; /* Add rounded corners */
+  cursor: pointer; /* Change the cursor to a pointer on hover */
+}
+
+.batten2-inbox:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Style the tab */
+.tab {
+  {% comment %} overflow: hidden;
+  border: 1px solid #ccc; {% endcomment %}
+  background-color: #f1f1f1;
+}
+
+/* Style the tab buttons */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change the color of the tab buttons when hovered */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Style the current tab button (when clicked) */
+.tab button.active {
+  {% comment %} background-color: #ccc; {% endcomment %}
+    background-image: linear-gradient(to right bottom, #a24517, #a94717, #af4917, #b64b16, #bd4d16, #c14c16, #c64a15, #ca4915, #cd4315, #d13c15, #d43416, #d82a17);
+    color: #ffffff;
+}
+
+/* Style the tab content (hidden by default) */
+.tabcontent {
+  display: none;
+  {% comment %} padding: 6px 12px;
+  border: 1px solid #ccc; {% endcomment %}
+  border-top: none;
+}
+
+{% comment %} ./* Inbox */
+.inbox .message__author {
+  margin-right: 20px;
+}
+
+.inbox .message__subject {
+  margin-right: 50px;
+}
+
+.inbox .message__date {
+  margin-right: 20px;
+} {% endcomment %}
+
+/* Sent messages */
+.sent .message__author {
+  margin-right: 100px;
+}
+
+.sent .message__subject {
+  margin-right: 230px;
+}
+
+.sent .message__date {
+  margin-right: 30px;
+}
+
+
+
+</style>
+
+<script>
+// Function for the back button
+function goBack() {
+    window.history.back();
+}
+
+function requestDeleteMessage(messageId, isSentMessage) {
+    // Choose the correct API endpoint based on whether the message is a sent message or not
+    let endpoint = isSentMessage ? `/delete-sent-message/${messageId}/` : `/delete-message/${messageId}/`;
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')  // Django requires a CSRF token for POST, PUT, DELETE requests
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // remove the message element from the DOM
+            const messageElement = document.querySelector(`.message[data-id="${messageId}"]`);
+            messageElement.parentNode.removeChild(messageElement);
+
+            // reduce the count of total messages by one
+            const countElement = document.querySelector('.inbox__title span');
+            const count = parseInt(countElement.textContent);
+            countElement.textContent = count - 1;
+
+            // If it's a sent message, also reduce the count of total sent messages
+            if (isSentMessage) {
+                const sentCountElement = document.querySelector('.sent__title span');
+                const sentCount = parseInt(sentCountElement.textContent);
+                sentCountElement.textContent = sentCount - 1;
+            }
+        } else {
+            console.error('Error:', response.statusText);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function deleteMessage(messageId, isSentMessage) {
+    const confirmation = confirm("Are you sure you want to delete this message?");
+    if (confirmation) {
+        requestDeleteMessage(messageId, isSentMessage);
+    }
+    // Prevent the default form submission action
+    return false;
+}
+
+function deleteCheckedMessages() {
+    const checkedCheckboxes = document.querySelectorAll('.message-checkbox:checked');
+    if (checkedCheckboxes.length === 0) {
+        alert("No messages selected!");
+        return;
+    }
+
+    const confirmation = confirm("Are you sure you want to delete the selected messages?");
+    if (confirmation) {
+        checkedCheckboxes.forEach(checkbox => {
+            const messageId = checkbox.getAttribute("data-id");
+            requestDeleteMessage(messageId, false);
+        });
+    }
+}
+
+
+// Function to get the CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function openTab(evt, tabName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+document.getElementById("defaultOpen").click();
+
+
+
+// Event listener for the "Select All" checkbox
+document.getElementById('selectAllCheckbox').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.message-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+
+// Event listeners for individual message checkboxes
+const messageCheckboxes = document.querySelectorAll('.message-checkbox');
+messageCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if(document.querySelectorAll('.message-checkbox:checked').length === messageCheckboxes.length) {
+            document.getElementById('selectAllCheckbox').checked = true;
+        } else {
+            document.getElementById('selectAllCheckbox').checked = false;
+        }
+    });
+});
+
+
+
+// Event listener for the "Select All" checkbox in Sent Messages
+document.getElementById('selectAllCheckboxSent').addEventListener('change', function() {
+    const checkboxesSent = document.querySelectorAll('.message-checkbox-sent');
+    checkboxesSent.forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+});
+
+// Event listeners for individual sent message checkboxes
+const messageCheckboxesSent = document.querySelectorAll('.message-checkbox-sent');
+messageCheckboxesSent.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if(document.querySelectorAll('.message-checkbox-sent:checked').length === messageCheckboxesSent.length) {
+            document.getElementById('selectAllCheckboxSent').checked = true;
+        } else {
+            document.getElementById('selectAllCheckboxSent').checked = false;
+        }
+    });
+});
+
+// Modify the deleteCheckedMessages function to include the sent messages
+function deleteCheckedSentMessages() {
+    const checkedCheckboxesSent = document.querySelectorAll('.message-checkbox-sent:checked');
+    if (checkedCheckboxesSent.length === 0) {
+        alert("No sent messages selected!");
+        return;
+    }
+
+    const confirmation = confirm("Are you sure you want to delete the selected sent messages?");
+    if (confirmation) {
+        checkedCheckboxesSent.forEach(checkbox => {
+            const messageId = checkbox.getAttribute("data-id");
+            requestDeleteMessage(messageId, true);
+        });
+    }
+}
+
+
+
+</script>
+
+
+{% endblock content %}

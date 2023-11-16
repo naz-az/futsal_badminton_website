@@ -1,0 +1,37 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<!-- Main Section -->
+<section class="heros-section text-center">
+  <div class="container container--narrow">
+      <div class="heros-section__box">
+          <h2><span>Sent Messages</span></h2>
+      </div>
+  </div>
+</section>
+
+<main class="messagePage my-xl">
+  <div class="content-box">
+    <div class="message">
+      <a href="{% url 'inbox-sent-messages' %}" class="button-inbox">Go Back</a> 
+      <h2 class="message__subject">{{message.subject}}</h2>
+        {% if message.recipient %}
+        <a href="{% url 'user-profile' message.recipient.id  %}" class="message__author">{{message.recipient.name}}</a>
+        {% else %}
+        <p class="message__author">{{message.recipient.name}}</p>
+        {% endif %}
+        <p class="message__date">{{message.created}}</p>
+        <div class="message__body">{{message.body|linebreaksbr}}</div>
+    </div>
+  </div>
+</main>
+
+
+<script>
+// Function for the back button
+function goBack() {
+    window.history.back();
+}
+
+</script>
+{% endblock content %}

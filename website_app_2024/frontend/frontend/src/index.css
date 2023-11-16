@@ -1,0 +1,244 @@
+main{
+  min-height: 80vh;
+}
+
+h1{
+font-size: 1.8rem;
+padding:1rem 0;
+}
+
+h2{
+font-size: 1.4rem;
+padding:0.5rem 0;
+}
+
+h3{
+  padding:1rem 0;
+}
+
+.rating span{
+margin:0.1rem;
+}
+
+
+.project-thumbnail {
+  height: 220px;  /* Adjust this value based on your requirements */
+  object-fit: cover;  /* This will ensure the image covers the area without distortion */
+  width: 100%;  /* Ensure the image takes the full width */
+}
+
+.scroll-container {
+  display: flex;
+  align-items: center; /* To ensure vertical alignment */
+}
+
+.tab-wrapper {
+  display: flex;
+  overflow-x: auto;  
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding: 10px 0;
+  flex-grow: 1; /* Ensures it takes up the maximum space between buttons */
+  border-bottom: 1px solid #ccc;
+}
+
+Button {
+  margin: 0 5px;
+}
+
+.scroll-btn {
+  background: #FF5733;
+  color: white;
+  padding: 10px;
+  height: fit-content;
+}
+
+Button.active {
+  background-color: #FF5733;
+  color: white;
+}
+
+
+/* UserProfileDetail.css */
+
+.deal-image {
+  width: 100%;   /* Adjust this value based on your preference */
+  height: 150px; /* Adjust this value based on your preference */
+  background-size: contain; /* This will make sure the image fits inside the div */
+  background-repeat: no-repeat; /* Ensure the image doesn't repeat */
+  background-position: center; /* Center the image */
+}
+
+
+.related-projects-slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+}
+
+.related-project {
+  flex: 0 0 auto;
+  width: 200px;
+}
+
+
+.message-row:hover {
+  cursor: pointer;
+}
+
+
+.red-alert-icon {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute; /* Position it relative to the parent */
+  right: 0;
+  top: 0;
+}
+
+
+.notification-alert-icon {
+  position: absolute; /* Position relative to the nearest positioned ancestor */
+  top: -18px; /* Adjusted for overlap */
+  right: 0px; /* Adjusted for overlap */
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  width: 24px; /* Increased size */
+  height: 24px; /* Increased size */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem; /* Adjust font size if needed */
+  cursor: pointer;
+  transform: translateX(50%); /* Move the icon rightwards to overlap the profile image */
+  z-index: 1; /* Ensure it's above other elements */
+}
+
+
+
+.font-weight-bold {
+  font-weight: bold;
+}
+
+.bold-notification {
+  font-weight: bold !important;
+  /* color: red !important; */
+}
+
+.fw-bold {
+  font-weight: bold !important;
+}
+
+
+.bold-notification-link {
+  font-weight: bold !important;;
+}
+
+
+/* in your CSS file */
+.no-underline {
+  text-decoration: none;
+}
+
+
+/* CSS file */
+.button-disabled {
+  color: #cccccc; /* Mild grey color, change as needed */
+  background-color: #f0f0f0; /* Mild background color, change as needed */
+  cursor: not-allowed;
+  /* Add other styling as necessary to match your design */
+}
+
+
+
+.speech-bubble {
+  position: relative;
+  background: linear-gradient(to right, #f9f9ff, #fff9fe, #fdf6f6);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.speech-bubble:after {
+  content: '';
+  position: absolute;
+  border: 10px solid transparent;
+  border-top-color: #f0f0f0;
+}
+
+/* For messages on the right */
+.speech-bubble.right:after {
+  right: 100%;
+  top: 50%;
+  border-right-color: #f0f0f0;
+  border-top: none;
+  margin-top: -10px;
+}
+
+/* For messages on the left */
+.speech-bubble.left:after {
+  left: 100%;
+  top: 50%;
+  border-left-color: #f0f0f0;
+  border-top: none;
+  margin-top: -10px;
+}
+
+.message-content {
+  margin-bottom: 0;
+}
+
+.reply-button {
+  margin-left: 10px; /* or margin-right for left aligned messages */
+}
+
+
+/* In your CSS file (e.g., Thread.css) */
+
+.thread-container {
+  margin-left: 50px; /* Increase margin as you wish */
+  margin-right: 50px; /* Increase margin as you wish */
+}
+
+.sender-username {
+  text-decoration: none; /* This removes the underline */
+  display: block; /* This makes it possible to center the text */
+  text-align: center; /* This centers the text */
+  color: inherit; /* Optional: This ensures the username has the default text color, you might want to set a specific color */
+}
+
+
+
+/* UserAccount.css */
+.profile-card {
+  width: 350px; /* Set the card width */
+  overflow: hidden; /* Prevents content from spilling outside the card */
+}
+
+.profile-image {
+  width: 100%; /* Ensures the image takes up the full card width */
+  height: 350px; /* Sets the height of the image */
+  object-fit: cover; /* Ensures the image covers the area without distortion */
+}
+
+.user-profile-card {
+  width: 400px;
+  height: 400px;
+  margin: auto; /* Center the card */
+}
+
+.user-profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Maintain aspect ratio */
+}
+
+
+.title, .username, .price, .voting-button, .text {
+  text-decoration: none; 
+  color: black;          
+}

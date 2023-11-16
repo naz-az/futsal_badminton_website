@@ -1,0 +1,127 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .batten {
+        padding: 10px 20px;
+        font-size: 1.2em;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;  /* Changes the cursor to a hand when hovering over the buttons */
+        transition: opacity 0.3s ease;  /* Adds a transition effect when changing the opacity */
+    }
+
+    .batten:hover {
+        opacity: 0.8;  /* Decreases the opacity to 70% when hovering over the buttons */
+    }
+
+    .batten.default {
+        background-image: linear-gradient(to right bottom, #25568b, #275b92, #2a5f99, #2c64a1, #2f69a8, #316eaf, #3372b7, #3577be, #377cc7, #3981cf, #3c87d8, #3e8ce1);
+    }
+
+    .batten.btn-success {
+        background-image: linear-gradient(to right bottom, #2d8b25, #329228, #38992a, #3da12d, #43a82f, #44ad2e, #44b22e, #45b72d, #41bb29, #3cbf25, #37c41f, #30c819);        
+    }
+
+    .batten.btn-danger {
+        background-image: linear-gradient(to right bottom, #8b4725, #934b24, #9a5023, #a25421, #a9591f, #ae5d1e, #b3611d, #b8651b, #bc691b, #c06e1a, #c4721a, #c87719);
+    }
+
+    .kard {
+        max-width: 50%;
+        margin: auto;
+        margin-top: 2em;
+        margin-bottom: 2em;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+    }
+
+    .kard img {
+        width: 100%;
+    }
+
+    .kard .card-body {
+        padding: 2px 16px;
+    }
+</style>
+
+<main>
+    <section class="heros-section text-center">
+        <div class="container container--narrow">
+            <div class="heros-section__box">
+                <h2>Culinary  <span>Vision</span></h2>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container container--narrow text-center">
+            <div class="heros-section__search">
+                <form id='uploadForm' class="form" action="{% url 'smart-food' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input id="fileInput" type="file" name="{{ form.image.name }}" style="display: none;">
+                    <button id="fileButton" type="button" class="batten default">Choose File</button>
+                    <span id="fileLabel">No file chosen</span>
+                    <input type="submit" value="Predict" class="batten btn-success">
+                </form>
+            </div>
+            
+            <div class="column">
+                <div class="kard">
+                    {% if image_path %}
+                    <a class="project">
+                        <div class="uploaded-image">
+                            <img src="{{ image_path }}" alt="Uploaded Image" />
+                        </div>
+                        <div class="card-body">
+                            {% if class and confidence %}
+                                <h3 class="card-title">{{ class }}</h3>
+                                <p><a class="project__author">Confidence: {{ confidence }}%</a></p>
+                            {% endif %}
+                        </div>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="clear-section">
+                <button id="clearButton" class="batten btn-danger">Clear</button>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        var classLabel = "{{ class }}";
+        var confidence = "{{ confidence }}";
+
+        if (!classLabel && !confidence) {
+            document.querySelector('.kard').style.display = "none";
+            document.getElementById('fileLabel').style.display = "inline";
+        } else {
+            document.getElementById('fileLabel').style.display = "none";
+        }
+
+        document.getElementById('fileButton').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            var fileName = e.target.value.split('\\').pop();
+            document.getElementById('fileLabel').textContent = fileName ? fileName : 'No file chosen';
+        });
+
+        document.getElementById('clearButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector('.uploaded-image').innerHTML = "";
+            document.querySelector('.kard').style.display = "none";
+            document.getElementById('fileLabel').textContent = 'No file chosen';
+            document.getElementById('fileLabel').style.display = "inline";
+        });
+    </script>
+
+</main>
+
+{% endblock %}

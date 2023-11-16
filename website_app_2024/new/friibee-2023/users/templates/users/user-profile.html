@@ -1,0 +1,213 @@
+{% extends 'main.html' %}
+{% load custom_filters %}
+
+{% block content %}
+
+<!-- Main Section -->
+<main class="profile my-md">
+
+    <div class="container">
+        {% comment %} <button class="btn btn--sub btn--main" onclick="goBack()"><i class="fas fa-chevron-left"></i></button> {% endcomment %}
+        <div class="layout">
+            <div class="column column--1of3">
+                <div class="card text-center">
+                    <div class="card__body dev">
+                        <img class="avatar avatar--xl" src="{{ profile.imageURL }}" />
+                        <h2 class="dev__name">{{profile.name}}</h2>
+                        <p class="dev__title">{{profile.short_intro}}</p>
+                        <p class="dev__location">Based in {{profile.location}}</p>
+                        <ul class="dev__social">
+
+                        {% if profile.social_facebook %}
+                        <li>
+                            <a title="Facebook" href="{{ profile.social_facebook }}" target="_blank"><i class="fab fa-facebook"></i></a>
+                        </li>
+                        {% endif %}
+
+                        {% if profile.social_twitter %}
+                        <li>
+                            <a title="Twitter" href="{{profile.social_twitter}}" target="_blank"><i class="fab fa-twitter"></i></a>
+                        </li>
+                        {% endif %}
+
+                        {% if profile.social_instagram %}
+                        <li>
+                            <a title="Instagram" href="{{profile.social_instagram}}" target="_blank"><i class="fab fa-instagram"></i></a>
+                        </li>
+                        {% endif %}
+
+                        {% if profile.social_youtube %}
+                        <li>
+                            <a title="YouTube" href="{{profile.social_youtube}}" target="_blank"><i class="fab fa-youtube"></i></a>
+                        </li>
+                        {% endif %}
+
+                        {% if profile.social_website %}
+                        <li>
+                            <a title="Personal Website" href="{{profile.social_website}}" target="_blank"><i class="fas fa-globe"></i></a>
+                        </li>
+                        {% endif %}
+
+                        </ul>
+                        <!-- user-profile.html -->
+
+
+                        {% if request.user.profile.id != profile.id and not profile|has_blocked:request.user.profile.id %}
+                        <a href="{% url 'create-message' profile.id %}" class="btn btn--sub btn--lg" style="margin-bottom: 30px;">Send Message </a>
+                        {% endif %}
+
+
+                        <!-- Follow/Unfollow Button -->
+                        {% if request.user in profile.followers.all %}
+                            <!-- The current user follows this profile, show the "Unfollow" button -->
+                            <form action="{% url 'unfollow-user' profile.id 'profile' %}" method="POST">
+                                {% csrf_token %}
+                                <button class="btn btn--outline-danger" name="follow" value="unfollow" type="submit">
+                                    Unfollow
+                                </button>
+                            </form>
+                        {% else %}
+                            <!-- The current user does not follow this profile, show the "Follow" button -->
+                            <form action="{% url 'follow-user' profile.id %}" method="POST">
+                                {% csrf_token %}
+                                <button class="btn btn--outline-success" name="follow" value="follow" type="submit">
+                                    Follow
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+
+
+                    </div>
+                </div>
+            </div>
+            <div class="column column--2of3">
+                <div class="devInfo">
+                    <h3 class="devInfo__title">About Me</h3>
+                    <p class="devInfo__about">{{profile.bio}}</p>
+                </div>
+                <div class="devInfo">
+                    <h3 class="devInfo__title">Categories</h3>
+                    <div class="devInfo__skills">
+
+                        {% for skill in topSkills %}
+                        <div class="devSkill">
+                            <h4 class="devSkill__title">{{skill.name}}</h4>
+                            <p class="devSkill__info">{{skill.description}}</p>
+                        </div>
+                        {% endfor %}
+
+
+
+                        <h3 class="devInfo__subtitle">Other Categories</h3>
+                        <div class="devInfo__otherSkills">
+
+                            {% for skill in otherSkills %}
+                            <span class="tag tag--pill tag--sub tag--lg">
+                                <small>{{skill}}</small>
+                            </span>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </div>
+                <div class="devInfo">
+                    <h3 class="devInfo__title">Deals</h3>
+                    <div class="grid grid--two">
+
+                        {% if profile.project_set.count == 0 %}
+                            <p>No deals posted by user</p>
+                        {% else %}
+                            {% for project in profile.project_set.all %}
+                                {% if forloop.counter <= 2 %}
+                                    <div class="column">
+                                        <div class="card project">
+                                            <a href="{% url 'project' project.id %}" class="project">
+                                                <img class="project__thumbnail" src="{{project.imageURL}}"
+                                                    alt="project thumbnail" />
+                                                <div class="card__body">
+                                                    <h3 class="project__title">{{project.title}}</h3>
+                                                    <p><a class="project__author"
+                                                            href="{% url 'user-profile' project.owner.id %}">By
+                                                            {{project.owner.name}}</a>
+                                                    </p>
+                                                    <p class="project--rating">
+                                                        <span style="font-weight: bold;">{{project.vote_ratio}}%</span> Postitive
+                                                        Feedback ({{project.vote_total}} Vote{{project.vote_total|pluralize:"s"}})
+                                                    </p>
+                                                    <div class="project__tags">
+                                                        {% for tag in project.tags.all %}
+                                                        <span class="tag tag--pill tag--main">
+                                                            <small>{{tag}}</small>
+                                                        </span>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="column hiddenProject" style="display:none;">
+                                        <div class="card project">
+                                            <a href="{% url 'project' project.id %}" class="project">
+                                                <img class="project__thumbnail" src="{{project.imageURL}}"
+                                                    alt="project thumbnail" />
+                                                <div class="card__body">
+                                                    <h3 class="project__title">{{project.title}}</h3>
+                                                    <p><a class="project__author"
+                                                            href="{% url 'user-profile' project.owner.id %}">By
+                                                            {{project.owner.name}}</a>
+                                                    </p>
+                                                    <p class="project--rating">
+                                                        <span style="font-weight: bold;">{{project.vote_ratio}}%</span> Postitive
+                                                        Feedback ({{project.vote_total}} Vote{{project.vote_total|pluralize:"s"}})
+                                                    </p>
+                                                    <div class="project__tags">
+                                                        {% for tag in project.tags.all %}
+                                                        <span class="tag tag--pill tag--main">
+                                                            <small>{{tag}}</small>
+                                                        </span>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            {% if profile.project_set.count > 2 %}
+                                <button id="showAllDealsBtn" onclick="toggleProjects()">Show All Deals</button>
+                            {% endif %}
+                        {% endif %}
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+
+    // Function for the back button
+    function goBack() {
+        window.history.back();
+    }
+
+    function toggleProjects() {
+        let projects = document.querySelectorAll('.hiddenProject');
+        let btn = document.getElementById('showAllDealsBtn');
+        if (projects[0].style.display === "none") {
+            projects.forEach(project => project.style.display = "");
+            btn.innerText = "Show Less";
+        } else {
+            projects.forEach(project => project.style.display = "none");
+            btn.innerText = "Show All Deals";
+        }
+    }
+
+</script>
+
+{% endblock content %}

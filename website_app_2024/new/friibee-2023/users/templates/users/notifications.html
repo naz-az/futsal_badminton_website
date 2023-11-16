@@ -1,0 +1,105 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<style>
+    .notification-title {
+        font-size: 22px; 
+    }
+</style>
+
+<section class="heros-section text-center" style="margin-bottom: -20px;">
+    <div class="container container--narrow">
+        <div class="heros-section__box">
+            <h2>Your <span>Notifications</span></h2>
+        </div>
+    </div>
+</section>
+
+<div class="container">    
+<main class="messagePage my-xl">
+  <div class="content-box">
+        <h3 class="notification-title">Unread Messages</h3>
+    <div class="message">
+        <h3 class="inbox__title">New Messages (<span>{{unreadCount}}</span>)</h3>
+
+      <a class="tag tag--pill tag--sub tag--lg" href="{% url 'inbox-sent-messages' %}"><i class="im im-angle-left">View Inbox</i></a>
+      <h2 class="message__subject">{{message.subject}}</h4>
+        {% if message.sender %}
+        <a href="{% url 'user-profile' message.sender.id  %}" class="message__author">{{message.name}}</a>
+        {% else %}
+        <p class="message__author">{{message.name}}</p>
+        {% endif %}
+        <p class="message__date">{{message.created}}</p>
+        <div class="message__body">{{message.body|linebreaksbr}}</div>
+    </div>
+  </div>
+
+<div class="content-box" style="margin-top: 30px;">
+    <h3 class="notification-title">New Followers</h3>
+    <div class="message">
+        {% for follower in new_followers|slice:":10"  %}
+            <div class="follower">
+                <a href="{% url 'user-profile' follower.profile.id %}">
+                    <img src="{{ follower.profile.imageURL }}" alt="{{ follower.profile.name }}'s profile picture" 
+                        style="width:30px; height:30px; border-radius:50%; border: 2px solid gold;" />
+                </a>
+                <p style="font-size: 20px;">
+                    <a href="{% url 'user-profile' follower.profile.id %}" style="text-decoration: none; color: black;">
+                        <strong style="font-size: 20px;">
+                            {% if follower.profile.name %}
+                                {{ follower.profile.name }}
+                            {% else %}
+                                {{ follower.username }}
+                            {% endif %}
+                        </strong>
+                    </a> started following you.
+                </p>
+            </div>
+            {% if not forloop.last %}
+                <hr style="margin-bottom: 20px;">
+            {% endif %}
+        {% empty %}
+            <p>No new followers yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="content-box" style="margin-top: 30px;">
+    <h3 class="notification-title">Reviews on Your Posts</h3>
+    <div class="message">
+        {% for review in all_reviews|slice:":10"  %}
+            <div class="review">
+                <a href="{% url 'user-profile' review.owner.id %}">
+                    <img src="{{ review.owner.imageURL }}" alt="{{ review.owner.name }}'s profile picture" 
+                        style="width:30px; height:30px; border-radius:50%; border: 2px solid gold;" />
+                </a>
+                <p style="font-size: 20px;">
+                    <a href="{% url 'user-profile' review.owner.id %}" style="text-decoration: none; color: black;">
+                        <strong style="font-size: 20px;">
+                            {% if review.owner.name %}
+                                {{ review.owner.name }}
+                            {% else %}
+                                {{ review.owner.username }}
+                            {% endif %}
+                        </strong>
+                    </a> sent a review for project 
+                    <a href="{% url 'project' review.project.id %}" style="text-decoration: none; color: black;">
+                        <strong style="font-size: 20px;">{{ review.project.title }}</strong>
+                    </a>
+                </p>
+                <p><strong>{{ review.body }}</strong></p>
+                <p style="margin-bottom: 20px;">
+            </div>
+            {% if not forloop.last %}
+                <hr style="margin-bottom: 20px;">
+            {% endif %}
+        {% empty %}
+            <p>No reviews yet.</p>
+        {% endfor %}
+
+    </div>
+</div>
+
+
+{% endblock %}

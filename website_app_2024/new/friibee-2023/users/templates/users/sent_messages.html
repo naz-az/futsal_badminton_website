@@ -1,0 +1,87 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<!-- Main Section -->
+
+<section class="heros-section text-center">
+  <div class="container container--narrow">
+      <div class="heros-section__box">
+          <h2><span>Sent Messages</span></h2>
+      </div>
+  </div>
+</section>
+<button class="btn btn--sub btn--main" onclick="goBack()">Go Back</button>
+
+<main class="inbox my-xl">
+  <div class="content-box">
+    <h3 class="inbox__title">Sent Messages (<span>{{totalSentMessagesCount}}</span>)</h3>
+
+    <ul class="messages">
+      {% for message in sentMessages %}
+      <li class="message" data-id="{{message.id}}">
+        <a href="{% url 'sent-message' message.id %}">
+          <span class="message__author">{{message.recipient.name}}</span>
+          <span class="message__subject">{{message.subject}}</span>
+          <span class="message__date">{{message.created}}</span>
+        </a>
+        <button class="btn btn--sub btn--main" onclick="deleteMessage('{{message.id}}')">Delete</button>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</main>
+
+<script>
+    // Function for the back button
+    function goBack() {
+        window.history.back();
+    }
+
+function deleteMessage(messageId) {
+    let confirmation = confirm("Are you sure you want to delete this message?");
+    if (confirmation) {
+        fetch(`/delete-sent-message/${messageId}/`, {  // adjusted URL
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')  // Django requires a CSRF token for POST, PUT, DELETE requests
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // remove the message element from the DOM
+                const messageElement = document.querySelector(`.message[data-id="${messageId}"]`);
+                messageElement.parentNode.removeChild(messageElement);
+                
+                // reduce the count of total messages by one
+                const countElement = document.querySelector('.inbox__title span');
+                const count = parseInt(countElement.textContent);
+                countElement.textContent = count - 1;
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+
+    // Function to get the CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+
+{% endblock content %}

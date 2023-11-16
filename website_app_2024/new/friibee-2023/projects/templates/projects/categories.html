@@ -1,0 +1,208 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+
+<main>
+    <section class="heros-section text-center">
+        <div class="container container--narrow">
+            <div class="heros-section__box">
+                <h2>Categories</h2>
+            </div>
+        </div>
+    </section>
+
+<div class="content-box">
+    <div class="tab-wrapper">
+        <button id="scrollLeft" class="scroll-btn">&#8678;</button> <!-- Left arrow -->
+        <div class="tab">
+            {% for tag in tags %}
+                <button class="tablinks" onclick="openTab(event, 'tag{{ tag.id }}')" {% if forloop.first %}id="defaultOpen"{% endif %}>{{ tag.name }}</button>
+            {% endfor %}
+        </div>
+        <button id="scrollRight" class="scroll-btn">&#8680;</button> <!-- Right arrow -->
+    </div>
+
+        {% for tag in tags %}
+            <div id="tag{{ tag.id }}" class="tabcontent">
+                <h3 class="inbox__title">{{ tag.name }}'s Deals</h3>
+
+                <!-- Display projects related to the current tag -->
+                <div class="projects-container">
+                    {% for project in tag.project_set.all %}
+                        <div class="project-card">
+                            <a href="{% url 'project' project.id %}">
+                                <img src="{{ project.imageURL }}" alt="{{ project.title }}">
+                                <h4>{{ project.title }}</h4>
+                            </a>
+                            <p>Rating: {{ project.vote_ratio }}% ({{ project.vote_total }} votes)</p>
+                            <p>Price: RM {{ project.price }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <style>
+        /* Tab Styles */
+
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        .tab button.active {
+            background-image: linear-gradient(to right bottom, #a24517, #a94717, #af4917, #b64b16, #bd4d16);
+            color: #ffffff;
+        }
+
+        .tabcontent {
+            display: none;
+        }
+
+        /* Add the following styles */
+        .tab-wrapper {
+            width: 100%; /* or specify a fixed width if you want */
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: rgba(155, 155, 155, 0.5) transparent; /* Firefox */
+        }
+
+        .tab-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .tab-wrapper::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .tab-wrapper::-webkit-scrollbar-thumb {
+            background-color: rgba(155, 155, 155, 0.5);
+            border-radius: 20px;
+            border: 3px solid transparent;
+        }
+
+        .tab {
+            display: flex;
+            flex-wrap: nowrap;
+        }
+
+        .tab button {
+            /* ... your existing styles ... */
+            flex: 0 0 auto; /* This prevents the button from shrinking and ensures it takes as much space as its content */
+        }
+
+
+        .content-box {
+            position: relative; /* Added to position the arrows relative to this container */
+        }
+
+        /* Adjust the following styles for the scroll buttons */
+        .scroll-btn {
+            position: absolute; /* Changed from fixed to absolute */
+            top: 1%;
+            background-color: #000; /* Color set to black */
+            color: #fff; /* Text color set to white for visibility */
+            border: none;
+            cursor: pointer;
+            z-index: 1000; /* Increase z-index to ensure it appears on top */
+            font-size: 20px;
+            padding: 10px;
+            border-radius: 50%;
+        }
+
+        #scrollLeft {
+            left: -50px; /* Adjust this to set the distance of the left arrow from the left side of the tab box */
+        }
+
+        #scrollRight {
+            right: -50px; /* Adjust this to set the distance of the right arrow from the right side of the tab box */
+        }
+
+        .projects-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .project-card {
+            flex-basis: calc(50% - 10px);  /* 2 per row with a 20px gap */
+            background-color: #f1f1f1;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .project-card img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .project-card h4 {
+            margin-top: 10px;
+        }
+
+    </style>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // If there's a default open tab, click it to open it by default
+        var defaultTab = document.getElementById("defaultOpen");
+        if (defaultTab) {
+            defaultTab.click();
+        }
+
+        // Add the following code for the scroll buttons
+        document.getElementById("scrollLeft").addEventListener("click", function() {
+            document.querySelector('.tab-wrapper').scrollLeft -= 150;
+        });
+
+        document.getElementById("scrollRight").addEventListener("click", function() {
+            document.querySelector('.tab-wrapper').scrollLeft += 150;
+        });
+
+
+        function getURLParameter(name) {
+            return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+        }
+
+        var tagID = getURLParameter('tag_id');
+
+        if (tagID) {
+            var relevantButton = document.querySelector('.tablinks[onclick="openTab(event, \'tag' + tagID + '\')"]');
+            if (relevantButton) {
+                relevantButton.click();
+                setTimeout(function() {
+                    relevantButton.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                }, 100);  // slight delay to ensure correct positioning
+            }
+        }
+    </script>
+
+</main>
+
+{% endblock %}

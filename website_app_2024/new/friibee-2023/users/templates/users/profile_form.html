@@ -1,0 +1,78 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<style>
+    .preview-image {
+        width: 200px;
+        height: auto; /* This will maintain the aspect ratio of the image */
+    }
+</style>
+<!-- Main Section -->
+<main class="formPage my-xl">
+    <div class="content-box">
+        <div class="formWrapper">
+            <button class="btn btn--sub btn--main" onclick="goBack()">Go Back</button>
+            <br>
+
+            <form class="form" method="POST" action="{% url 'edit-account' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form__field">
+                    <label for="formInput#text">{{field.label}}</label>
+                    
+                    {% if field.name == "profile_image" %}
+                        <p>Currently: {{ form.instance.profile_image.name }}</p>
+                        
+                        <!-- Display the existing profile image below the current filename -->
+                        {% if form.instance.profile_image %}
+                            <div>
+                                <img src="{{ form.instance.profile_image.url }}" alt="Current Profile Image" class="preview-image" />
+                            </div>
+                        {% endif %}
+                        
+                        {{field}}
+                        
+                        <!-- Placeholder for the new profile image preview -->
+                        <div id="profileImagePreview" class="preview-image"></div>
+                    {% else %}
+                        {{field}}
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+
+                <input class="btn btn--sub btn--lg  my-md" type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+
+    // JavaScript function to preview newly selected image
+    function readURL(input, target) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                document.getElementById(target).innerHTML = `<img src="${e.target.result}" alt="Newly Selected Image" class="preview-image" />`;
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Attach the function to the "change" event of the profile_image input
+    document.querySelector('[name="profile_image"]').addEventListener('change', function() {
+        readURL(this, 'profileImagePreview');
+    });
+
+
+
+</script>
+
+{% endblock content %}

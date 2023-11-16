@@ -1,0 +1,16 @@
+{% extends 'main.html' %}
+
+
+{% block content %}
+
+<div class="form__field">
+    <label for="recipient">Recipient</label>
+    <select name="recipient" id="recipient">
+        {% for user in all_users %}
+        <option value="{{ user.id }}">{{ user.username }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+
+{% endblock content %}
