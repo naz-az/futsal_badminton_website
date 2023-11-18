@@ -19,14 +19,18 @@ import RelatedProjectsSlider from '../components/RelatedProjectsSlider';
 import VotingButtons from '../components/VotingButtons';
 import Comment from '../components/Comment';
 import PostComment from '../components/PostComment';
+import AttendButton from '../components/AttendButton';
 
 function ProjectScreen() {
-  const [project, setProject] = useState({ project_images: [] });
+  const [project, setProject] = useState({ project_images: [], attendees: [] });
   const [comments, setComments] = useState([]);
   const [content, setContent] = useState('');
   const route = useRoute();
   const { id } = route.params;
+  console.log("Project ID:", id); // Add this line to check the ID
+
   const auth = useContext(AuthContext);
+  const [token, setToken] = useState(null); // State to store the token
 
   const currentUserId = auth.user?.profile.id;
   const [replyingTo, setReplyingTo] = useState(null);
@@ -36,7 +40,22 @@ function ProjectScreen() {
   const [selectedImage, setSelectedImage] = useState('');
   const currentUser = auth.user;
 
+  const [isAttending, setIsAttending] = useState(false);
+  const [attendees, setAttendees] = useState([]);
+
   const navigation = useNavigation();
+
+
+  useEffect(() => {
+    // Fetch and set the token
+    const getToken = async () => {
+      const storedToken = await AsyncStorage.getItem("token");
+      console.log("Token fetched: ", storedToken); // Debugging log
+      setToken(storedToken);
+    };
+
+    getToken();
+  }, []);
 
   const processImageUrl = (imageUrl) => {
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
@@ -56,8 +75,12 @@ function ProjectScreen() {
     async function fetchProject() {
       try {
         const { data } = await axios.get(`http://127.0.0.1:8000/api/projects/${id}`);
-        setProject(data.project);
-        setSelectedImage(processImageUrl(data.project.featured_image));
+        setProject({
+          ...data.project,
+          start_date: new Date(data.project.start_date).toLocaleString(),
+          end_date: new Date(data.project.end_date).toLocaleString(),
+        });
+        setSelectedImage(data.project.featured_image);
       } catch (error) {
         console.error('Error fetching project:', error);
       }
@@ -150,6 +173,125 @@ function ProjectScreen() {
     // Open the link using a suitable method, such as Linking from react-native or a webview
   };
 
+
+  useEffect(() => {
+    const checkAttendanceStatus = async () => {
+      if (auth.isAuthenticated && id) { // Ensure id is defined
+        try {
+          const token = await AsyncStorage.getItem("token");
+          const response = await axios.get(`http://127.0.0.1:8000/api/attendance/is-attending/${id}/`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setIsAttending(response.data.isAttending);
+        } catch (error) {
+          console.error('Error checking attendance:', error);
+        }
+      }
+    };
+  
+    checkAttendanceStatus();
+  }, [id, auth.isAuthenticated]);
+  
+
+  const handleAddAttendance = async () => {
+    if (!auth.isAuthenticated) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      await axios.post(`http://127.0.0.1:8000/api/attendance/add/${id}/`, {}, config);
+      setIsAttending(true);
+    
+      // Re-fetch attendees to update the list
+      fetchAttendees();
+    } catch (error) {
+      console.error("Error adding attendance:", error);
+    }
+  };
+  
+  
+  const handleRemoveAttendance = async () => {
+    if (!auth.isAuthenticated) {
+      navigation.navigate('Login');
+      return;
+    }
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      await axios.delete(`http://127.0.0.1:8000/api/attendance/remove/${id}/`, config);
+      setIsAttending(false);
+    
+      // Re-fetch attendees to update the list
+      fetchAttendees();
+    } catch (error) {
+      console.error("Error removing attendance:", error);
+    }
+  };
+  
+  
+
+  const fetchAttendees = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(`http://127.0.0.1:8000/api/projects/${id}/attendees/`, config);
+      setAttendees(response.data);
+    } catch (error) {
+      console.error('Error fetching attendees:', error);
+    }
+  };
+
+  // useEffect for fetching attendees initially
+  useEffect(() => {
+    fetchAttendees();
+  }, [id]);  // Make sure to include 'id' as a dependency
+
+
+  const navigateToProfile = (attendeeId) => {
+    // Determine if the current user is the owner
+    const isCurrentUserOwner = currentUserId === attendeeId;
+
+    // Define the route and parameters based on the ownership condition
+    const route = isCurrentUserOwner ? 'UserAccount' : 'UserProfileDetail';
+    const params = isCurrentUserOwner ? {} : { id: attendeeId };
+
+    // Navigate to the appropriate route with parameters
+    navigation.navigate(route, params);
+};
+
+
+const renderItem = ({ item }) => (
+  <TouchableOpacity 
+    style={styles.items} 
+    onPress={() => navigateToProfile(item.attendee.id)}
+  >
+    <Image 
+      source={{ uri: processImageUrl(item.attendee.profile_image) }} // Use processImageUrl here
+      style={styles.image}
+    />
+    <Text style={styles.text}>
+      {item.attendee.name} (@{item.attendee.username})
+    </Text>
+  </TouchableOpacity>
+);
+
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.goBackButtonContainer}>
@@ -200,7 +342,26 @@ function ProjectScreen() {
 
       <View style={styles.cardContainer}>
         <Text style={styles.cardDetail}>Price: <Text style={styles.cardDetailValue}>${project.price}</Text></Text>
-        <Text style={styles.cardDetail}>Brand: <Text style={styles.cardDetailValue}>{project.brand}</Text></Text>
+        {/* <Text style={styles.cardDetail}>Brand: <Text style={styles.cardDetailValue}>{project.brand}</Text></Text> */}
+
+        <ScrollView style={styles.container}>
+      <View style={styles.item}>
+        <Text style={styles.label}>Start Date & Time:</Text>
+        <Text style={styles.value}>{project.start_date || 'N/A'}</Text>
+      </View>
+
+      <View style={styles.item}>
+        <Text style={styles.label}>End Date & Time:</Text>
+        <Text style={styles.value}>{project.end_date || 'N/A'}</Text>
+      </View>
+
+      <View style={styles.item}>
+        <Text style={styles.label}>Location:</Text>
+        <Text style={styles.value}>{project.location}</Text>
+      </View>
+
+      {/* Attendees List and other UI components */}
+    </ScrollView>
 
         {/* Tags Section */}
         <View style={styles.tagsContainer}>
@@ -214,6 +375,12 @@ function ProjectScreen() {
           ))}
         </View>
 
+      {/* Add the AttendButton component */}
+      {console.log("Rendering AttendButton with token: ", token)} {/* Debugging log */}
+
+      {token && <AttendButton projectId={project.id} token={token} />}
+
+
         {/* Deal Link */}
         <TouchableOpacity
                   onPress={() => {
@@ -224,7 +391,7 @@ function ProjectScreen() {
                   }}
                   style={styles.dealButton}
                 >
-          <Text style={styles.dealButtonText}>Go to deal</Text>
+          <Text style={styles.dealButtonText}>Go to event link</Text>
         </TouchableOpacity>
 
         {/* Favourites Button */}
@@ -232,13 +399,22 @@ function ProjectScreen() {
           style={isFavorited ? styles.removeFavouriteButton : styles.addFavouriteButton} 
           onPress={isFavorited ? handleRemoveFavorite : handleAddFavorite}>
           <Text style={styles.favouriteButtonText}>
-            {isFavorited ? 'Remove from Favourites' : 'Add to Favourites'}
+            {isFavorited ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
           </Text>
         </TouchableOpacity>
       </View>
 
       {/* Voting Buttons Component */}
       <VotingButtons projectId={id} />
+
+      <View style={styles.container}>
+      <Text style={styles.header}>Attendees ({attendees.length})</Text>
+      <FlatList
+        data={attendees}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    </View>
 
 
       {/* Comments Section */}
@@ -394,6 +570,37 @@ const styles = StyleSheet.create({
     marginBottom: 50,
     paddingHorizontal: 10,
   },
+  item: {
+    marginVertical: 8,
+    paddingHorizontal: 10,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  value: {
+    fontSize: 14,
+    color: '#333',
+  },
+  image: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+  text: {
+    color: '#000',
+  },
+  header: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  items: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  }, 
 });
 
 export default ProjectScreen;

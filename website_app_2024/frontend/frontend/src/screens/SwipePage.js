@@ -3,6 +3,7 @@ import { Button, Card, Container, Modal, Badge } from "react-bootstrap";
 import axios from "axios"; // Import axios for API calls
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 import VotingButtons from "../components/VotingButtons"; // The path to your VotingButtons component
+import AttendButton from "../components/AttendButton";
 
 function SwipePage() {
   const [projects, setProjects] = useState([]);
@@ -250,6 +251,7 @@ function SwipePage() {
     }
   };
   
+  const [showFullText, setShowFullText] = useState(false);
 
 // Remember to remove the 'mousemove' event listener in `handleDragEnd` as well
 // document.removeEventListener('mousemove', handleMouseMove);
@@ -276,7 +278,7 @@ function SwipePage() {
             marginRight: "50px", // Spacing between the button and the card
           }}
         >
-<Button variant="danger" onClick={handleDislike} style={{ fontSize: '30px', padding: '10px 20px' }}>
+<Button variant="primary" onClick={handleDislike} style={{ fontSize: '30px', padding: '10px 20px' }}>
 <i className="fa-solid fa-xmark"></i>
           </Button>
         </div>
@@ -289,7 +291,7 @@ function SwipePage() {
             alignItems: "center",
           }}
         >
-          {currentProject.deal_link && (
+          {/* {currentProject.deal_link && (
             <Button
               variant="warning"
               style={{ marginBottom: "40px", fontSize: '20px', padding: '10px 20px' }}
@@ -302,12 +304,14 @@ function SwipePage() {
                 window.open(url, "_blank");
               }}
             >
-              Go to deal <i className="fa-solid fa-arrow-up-right-from-square" style={{marginLeft: "8px"}}></i>
+              Go to event <i className="fa-solid fa-arrow-up-right-from-square" style={{marginLeft: "8px"}}></i>
             </Button>
-          )}
+          )} */}
   
+  <AttendButton projectId={currentProject.id} token={localStorage.getItem("token")} fontSize="22px" />
+
   <Card
-  style={{ ...dragStyle, width: '450px', height: '800px',cursor: isDragging ? 'grabbing' : 'grab' }} // Apply dynamic styles for dragging
+  style={{ ...dragStyle, width: '450px', height: '900px',cursor: isDragging ? 'grabbing' : 'grab', marginTop:"30px" }} // Apply dynamic styles for dragging
   onMouseDown={handleDragStart} // Update the mouse down handler
   onDoubleClick={isFavorited ? confirmRemoveFavorite : handleAddFavorite}
 >
@@ -320,6 +324,8 @@ function SwipePage() {
       onMouseDown={handleDragStart} // Add the mouse down event handler only to the image
       draggable="false" // This prevents the default browser image dragging
     />
+      </Link>
+
     <Card.Body onMouseDown={handleDragStart} style={{ cursor: 'grab', minHeight: "300px" }}>
       <Card.Title style={{ fontSize: "30px", marginBottom:"15px" }}>
         {currentProject.title}
@@ -350,20 +356,38 @@ function SwipePage() {
                     </Card.Text>
 
   
+                    <Card.Text>
+  <strong>Start:</strong> {currentProject.start_date ? new Date(currentProject.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+<Card.Text>
+  <strong>End:</strong> {currentProject.end_date ? new Date(currentProject.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+<Card.Text>
+  <strong>Location:</strong> {currentProject.location ? 
+      (showFullText ? currentProject.location : `${currentProject.location.split(' ').slice(0, 8).join(' ')}...`) 
+      : 'Location not available'}
+  <Button variant="link" onClick={() => setShowFullText(!showFullText)}>
+    {showFullText ? 'Show Less' : 'Show More'}
+  </Button>
+</Card.Text>
+
+
+
                 <div>
                   {currentProject.tags &&
                     currentProject.tags.map((tag, index) => (
-                      <Button variant="primary" className="me-2" style={{ fontSize: "12px", padding: "5px 10px" }}>
+                      <Button variant="danger" className="me-2" style={{ fontSize: "12px", padding: "5px 10px" }}>
                       {tag.name}
                     </Button>
                     ))}
                 </div>
-                <Card.Text style={{ fontSize: '16px', marginTop: '10px' }}>
+                {/* <Card.Text style={{ fontSize: '16px', marginTop: '10px' }}>
                     <Badge bg="dark">{currentProject.brand}</Badge>
-                </Card.Text>
+                </Card.Text> */}
 
                 </Card.Body>
-  </Link>
 </Card>
         </div>
   

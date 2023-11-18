@@ -96,6 +96,12 @@ urlpatterns = [
 
     path('register/', views.register_user, name='register'),
 
+
+    path('attendance/add/<str:project_id>/', views.addAttendance, name='add-attendance'),
+    path('attendance/remove/<str:project_id>/', views.removeAttendance, name='remove-attendance'),
+    path('attendance/is-attending/<str:project_id>/', views.checkAttendance, name='check-attendance'),
+    path('projects/<str:project_id>/attendees/', views.get_attendees, name='project-attendees'),
+
 # '/api/followed-tags'
 # `/api/follow-tag/${tagId}`
     # path('create-message/<str:pk>/', views.create_message, name="create-message"),
@@ -115,6 +121,8 @@ urlpatterns = [
     # path('messages/<int:thread_id>/', views.get_messages, name='get-messages'),
     # path('send/', views.send_message, name='send-message'),
     # path('reply/<uuid:msg_id>/', views.reply_to_message, name='reply-message'),
+
+
 
     path('notifications/', views.get_notifications),
     path('notifications/clear/', views.clear_all_notifications),

@@ -102,8 +102,13 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 
+from projects.models import Attendance  # Import the Attendance model
+class AttendanceSerializer(serializers.ModelSerializer):
+    attendee = ProfileSerializer()  # Nested serializer to include profile details
 
-
+    class Meta:
+        model = Attendance
+        fields = '__all__'
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -112,6 +117,8 @@ class ProjectSerializer(serializers.ModelSerializer):
     upvotes = serializers.SerializerMethodField()
     tags = TagSerializer(many=True, required=False)  # Add required=False for tags
     project_images = ImageSerializer(many=True, read_only=True)
+    start_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")  # Adjust format as needed
+    end_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")    # Adjust format as needed
 
 
     class Meta:

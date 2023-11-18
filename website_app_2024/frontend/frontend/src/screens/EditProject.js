@@ -14,7 +14,9 @@ const EditProject = () => {
     price: "",
     tags: [],
     newTag: "",
-    
+    location: "",       // New state variable for location
+    start_date: "",     // New state variable for start date/time
+    end_date: "",       // New state variable for end date/time
   });
 
   const [imagePreviews, setImagePreviews] = useState({
@@ -42,6 +44,17 @@ const EditProject = () => {
 
   const [visibleTagCount, setVisibleTagCount] = useState(10); // For managing visible tags
 
+  const convertDateTimeFormat = (isoString) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
@@ -54,7 +67,13 @@ const EditProject = () => {
         
         if (response.data) {
           const project = response.data.project;
-          setProjectData(project);
+          setProjectData({
+            ...project,
+            location: project.location || "", 
+  start_date: convertDateTimeFormat(project.start_date),
+  end_date: convertDateTimeFormat(project.end_date),
+            // ... other fields ...
+          });
           setSelectedTags(project.tags.map(tag => tag.id)); // Assuming each tag has an id
           // Console logs for debugging
           console.log("Featured Image:", project.featured_image);
@@ -415,7 +434,7 @@ setImagePreviews(prevState => ({
 ))}
 
             {/* Brand */}
-            <Form.Group controlId="brand">
+            {/* <Form.Group controlId="brand">
               <Form.Label>Brand</Form.Label>
               <Form.Control
                 type="text"
@@ -424,7 +443,41 @@ setImagePreviews(prevState => ({
                 value={projectData.brand}
                 onChange={handleChange}
               />
-            </Form.Group>
+            </Form.Group> */}
+
+<Form.Group controlId="location">
+  <Form.Label>Location</Form.Label>
+  <Form.Control
+    type="text"
+    placeholder="Enter location"
+    name="location"
+    value={projectData.location}
+    onChange={handleChange}
+  />
+</Form.Group>
+
+
+<Form.Group controlId="start_date">
+  <Form.Label>Start Date and Time</Form.Label>
+  <Form.Control
+    type="datetime-local"
+    name="start_date"
+    value={projectData.start_date}
+    onChange={handleChange}
+  />
+</Form.Group>
+
+
+<Form.Group controlId="end_date">
+  <Form.Label>End Date and Time</Form.Label>
+  <Form.Control
+    type="datetime-local"
+    name="end_date"
+    value={projectData.end_date}
+    onChange={handleChange}
+  />
+</Form.Group>
+
 
             {/* Deal Link */}
             <Form.Group controlId="deal_link">

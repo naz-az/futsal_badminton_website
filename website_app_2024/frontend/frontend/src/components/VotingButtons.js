@@ -122,7 +122,7 @@ const VotingButtons = ({ projectId }) => {
       </Button>
       <span className="me-2">{voteCount}</span>
       <Button
-        variant={vote === "DOWN" ? "danger" : "secondary"}
+        variant={vote === "DOWN" ? "primary" : "secondary"}
         onClick={() => handleVote("DOWN")}
       >
         <i className="fa-regular fa-thumbs-down"></i>{" "}

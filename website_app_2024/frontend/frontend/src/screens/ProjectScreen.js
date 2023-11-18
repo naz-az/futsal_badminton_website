@@ -23,7 +23,7 @@ import PostComment from "../components/PostComment";
 
 
 function ProjectScreen() {
-  const [project, setProject] = useState({ project_images: [] });
+  const [project, setProject] = useState({ project_images: [], attendees: [] });
   const [comments, setComments] = useState([]);
   const [content, setContent] = useState("");
   const { id } = useParams();
@@ -39,6 +39,8 @@ function ProjectScreen() {
   const [isFavorited, setIsFavorited] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState(''); // State to track the selected image
+  
+  const currentUserProfile = auth.user?.profile; // Assuming `profile` is part of the user object
 
 
   const currentUser = auth.user; // Assuming `user` holds the current user information
@@ -46,6 +48,8 @@ function ProjectScreen() {
 
   const navigate = useNavigate(); // This is the function we'll use for navigation
 
+  const [isAttending, setIsAttending] = useState(false);
+  const [attendees, setAttendees] = useState([]);
 
   const refreshComments = useCallback(() => {
     axios
@@ -54,12 +58,26 @@ function ProjectScreen() {
       .catch((error) => console.error("Error refreshing comments:", error));
   }, [id]);
 
+  const convertToMalaysianTime = (isoString) => {
+    const date = new Date(isoString);
+    const offset = 8; // Malaysian Time Zone Offset (UTC+8)
+    const localTime = new Date(date.getTime() + offset * 3600 * 1000);
+    return localTime.toISOString().substring(0, 16); // Adjust format as needed
+  };
+  
+  
+  
   useEffect(() => {
     async function fetchProject() {
       try {
         const { data } = await axios.get(`/api/projects/${id}`);
-        setProject(data.project);
-        setSelectedImage(data.project.featured_image); // Initialize with the featured image
+        setProject({
+          ...data.project,
+          start_date: convertToMalaysianTime(data.project.start_date),
+          end_date: convertToMalaysianTime(data.project.end_date),
+        });
+                setSelectedImage(data.project.featured_image); // Initialize with the featured image
+        
       } catch (error) {
         console.error('Error fetching project:', error);
       }
@@ -149,6 +167,89 @@ function ProjectScreen() {
     }
   };
 
+ 
+  useEffect(() => {
+    async function checkAttendanceStatus() {
+      if (auth.isAuthenticated) {
+        try {
+          const response = await axios.get(`/api/attendance/is-attending/${id}/`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          setIsAttending(response.data.isAttending);
+        } catch (error) {
+          console.error('Error checking attendance:', error);
+        }
+      }
+    }
+  
+    checkAttendanceStatus();
+  }, [id, auth.isAuthenticated]);
+
+  
+
+  const handleAddAttendance = async () => {
+    if (!auth.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      };
+      await axios.post(`/api/attendance/add/${id}/`, {}, config);
+      setIsAttending(true);
+      // Optimistically update the attendees list
+      setAttendees(prevAttendees => [...prevAttendees, { attendee: currentUserProfile }]);
+    } catch (error) {
+      console.error("Error adding attendance:", error);
+    }
+  };
+  
+  const handleRemoveAttendance = async () => {
+    if (!auth.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      };
+      await axios.delete(`/api/attendance/remove/${id}/`, config);
+      setIsAttending(false);
+      // Optimistically update the attendees list
+      setAttendees(prevAttendees => prevAttendees.filter(attendee => attendee.attendee.id !== currentUserId));
+    } catch (error) {
+      console.error("Error removing attendance:", error);
+    }
+  };
+  
+
+  useEffect(() => {
+    const fetchAttendees = async () => {
+        try {
+            // Configuration for the authorization header
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            };
+
+            const response = await axios.get(`/api/projects/${id}/attendees/`, config);
+            setAttendees(response.data);
+        } catch (error) {
+            console.error('Error fetching attendees:', error);
+        }
+    };
+
+    fetchAttendees();
+}, [id]);
+
 
 
   return (
@@ -177,51 +278,54 @@ function ProjectScreen() {
 
 
 
-        <Col md={3}>
-          <ListGroup variant="flush">
+        <Col md={6}>
+          <Card>
+            <ListGroup variant="flush">
+
             <ListGroup.Item>
               <h3>{project.title}</h3>
             </ListGroup.Item>
-
-            <Link to={currentUserId === project.owner?.id ? '/user/account' : `/profiles/${project.owner?.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-  <ListGroup.Item className="mb-2 d-flex align-items-center">
-    {project.owner?.profile_image && (
-      <img
-        src={project.owner.profile_image}
-        alt={`${project.owner.name}'s profile`}
-        style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '10px' }}
-      />
-    )}
-    {project.owner?.name}
-  </ListGroup.Item>                
-</Link>
+            
 
 
 
+<ListGroup.Item>
+  <Row>
+    <Col>Start Date & Time:</Col>
+    <Col>
+      <strong>{project.start_date ? new Date(project.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'} </strong> 
+    </Col>
+  </Row>
+</ListGroup.Item>
+
+<ListGroup.Item>
+  <Row>
+    <Col>End Date & Time:</Col>
+    <Col>
+      <strong>  {project.end_date ? new Date(project.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'} </strong> 
+    </Col>
+  </Row>
+</ListGroup.Item>
 
 
-            <ListGroup.Item>Price: ${project.price}</ListGroup.Item>
-            <ListGroup.Item>Description: {project.description}</ListGroup.Item>
-          </ListGroup>
-        </Col>
 
-        <Col md={3}>
-          <Card>
-            <ListGroup variant="flush">
+
+
+              
               <ListGroup.Item>
                 <Row>
                   <Col>Price:</Col>
                   <Col>
-                    <strong>${project.price}</strong>
+                    <strong>RM{project.price}</strong>
                   </Col>
                 </Row>
               </ListGroup.Item>
 
               <ListGroup.Item>
                 <Row>
-                  <Col>Brand:</Col>
+                  <Col>Location:</Col>
                   <Col>
-                    <strong>{project.brand}</strong>
+                    <strong>{project.location}</strong>
                   </Col>
                 </Row>
               </ListGroup.Item>
@@ -238,7 +342,7 @@ function ProjectScreen() {
                             to={`/categories?tag_id=${tag.id}`}
                           >
                             <Button
-                              variant="primary"
+                              variant="danger"
                               className="mr-2"
                               style={{
                                 fontSize: "12px",
@@ -269,22 +373,45 @@ function ProjectScreen() {
                         window.open(url, "_blank");
                       }}
                     >
-                      Go to deal
+                      Go to Link
                     </Button>
                   </Col>
                 </Row>
               </ListGroup.Item>
 
+
+
+
+              <ListGroup.Item>
+  <Row>
+    <Col>
+      {isAttending ? (
+        <Button variant="primary" onClick={handleRemoveAttendance}>
+                    <i className="fa-solid fa-xmark" style={{ marginRight: '0.3rem' }}></i> Cancel Attending
+        </Button>
+      ) : (
+        <Button variant="outline-success" onClick={handleAddAttendance}>
+          <i className="fa-solid fa-check" style={{ marginRight: '0.3rem' }}></i> Attend
+        </Button>
+      )}
+    </Col>
+  </Row>
+</ListGroup.Item>
+
+
+
+
+
               <ListGroup.Item>
                 <Row>
                   <Col>
                     {isFavorited ? (
-                      <Button variant="danger" onClick={handleRemoveFavorite}>
-                        Remove from Favourites
+                      <Button variant="info" onClick={handleRemoveFavorite}>
+                        <i className="fa-solid fa-bookmark" style={{ marginRight: '0.3rem' }}></i> Remove bookmark
                       </Button>
                     ) : (
-                      <Button variant="outline-danger" onClick={handleAddFavorite}>
-                        Add to Favourites
+                      <Button variant="outline-info" onClick={handleAddFavorite}>
+                        <i className="fa-regular fa-bookmark" style={{ marginRight: '0.3rem' }}></i> Bookmark
                       </Button>
                     )}
                   </Col>
@@ -310,6 +437,56 @@ function ProjectScreen() {
       </Row>
 
 
+      <Row style={{ marginTop: '1.5rem'}}>
+      <Col md={9}>
+          <ListGroup variant="flush">
+
+
+            <Link to={currentUserId === project.owner?.id ? '/user/account' : `/profiles/${project.owner?.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+  <ListGroup.Item className="mb-2 d-flex align-items-center">
+    {project.owner?.profile_image && (
+      <img
+        src={project.owner.profile_image}
+        alt={`${project.owner.name}'s profile`}
+        style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '10px' }}
+      />
+    )}
+    {project.owner?.name}
+  </ListGroup.Item>                
+</Link>
+
+
+
+
+
+            <ListGroup.Item>Price: RM{project.price}</ListGroup.Item>
+            <ListGroup.Item>Description: {project.description}</ListGroup.Item>
+          </ListGroup>
+
+          <ListGroup.Item style={{ marginTop: '1.5rem'}}>
+  <h4>Attendees ({attendees.length})</h4>
+  <ListGroup>
+      {attendees.map((attendance, index) => (
+          <ListGroup.Item key={index}>
+            <Link to={currentUserId === attendance.attendee.id ? '/user/account' : `/profiles/${attendance.attendee.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Image 
+                  src={attendance.attendee.profile_image} 
+                  roundedCircle 
+                  style={{ width: '30px', height: '30px', marginRight: '10px' }}  // Small icon size
+              />
+              {attendance.attendee.name} (@{attendance.attendee.username})
+            </Link>
+          </ListGroup.Item>
+      ))}
+  </ListGroup>
+</ListGroup.Item>
+
+
+
+
+
+        </Col>
+        </Row>
 
 
 

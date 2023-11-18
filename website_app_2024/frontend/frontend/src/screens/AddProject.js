@@ -15,6 +15,9 @@ const AddProject = () => {
         price: '',
         tags: [],
         newTag: '',
+        location: '',         // New state variable for location
+        start_date: '',       // New state variable for start date/time
+        end_date: '',         // New state variable for end date/time
     });
 
     const [imagePreviews, setImagePreviews] = useState({
@@ -55,7 +58,12 @@ const AddProject = () => {
         setVisibleTagCount(newCount < 10 ? 10 : newCount);
     };
 
-
+    const convertToMalaysianTime = (isoString) => {
+        const date = new Date(isoString);
+        const offset = 8; // Malaysian Time Zone Offset (UTC+8)
+        const localTime = new Date(date.getTime() + offset * 3600 * 1000);
+        return localTime.toISOString().substring(0, 16); // Adjust format as needed
+    };
 
     useEffect(() => {
         // Fetch tags when the component mounts
@@ -90,6 +98,10 @@ const AddProject = () => {
                 setProjectData({ ...projectData, additional_images: updatedImages });
                 setImagePreviews({ ...imagePreviews, additional_images: updatedImagePreviews });
             }
+        } else if (name === 'start_date' || name === 'end_date') {
+            // Convert date-time to Malaysian time before setting the state
+            const formattedDate = convertToMalaysianTime(value);
+            setProjectData({ ...projectData, [name]: formattedDate });
         } else {
             setProjectData({ ...projectData, [name]: value });
         }
@@ -333,7 +345,7 @@ const handleRemoveTagFromProject = (tagId) => {
                         ))}
 
                         {/* Brand */}
-                        <Form.Group controlId="brand">
+                        {/* <Form.Group controlId="brand">
                             <Form.Label>Brand</Form.Label>
                             <Form.Control 
                                 type="text" 
@@ -342,23 +354,46 @@ const handleRemoveTagFromProject = (tagId) => {
                                 value={projectData.brand}
                                 onChange={handleChange} 
                             />
-                        </Form.Group>
+                        </Form.Group> */}
 
-                        {/* Deal Link */}
-                        <Form.Group controlId="deal_link">
-                            <Form.Label>Deal Link</Form.Label>
-                            <Form.Control 
-                                type="text" 
-                                placeholder="http://example.com/deal"
-                                name="deal_link" 
-                                value={projectData.deal_link}
-                                onChange={handleChange} 
-                            />
-                        </Form.Group>
+                {/* Location Input */}
+                <Form.Group controlId="location">
+                    <Form.Label>Location</Form.Label>
+                    <Form.Control 
+                        type="text" 
+                        placeholder="Enter event location" 
+                        name="location" 
+                        value={projectData.location}
+                        onChange={handleChange} 
+                    />
+                </Form.Group>
+
+                {/* Start Date/Time Input */}
+                <Form.Group controlId="start_date">
+                    <Form.Label>Start Date and Time</Form.Label>
+                    <Form.Control 
+                        type="datetime-local" 
+                        name="start_date" 
+                        value={projectData.start_date}
+                        onChange={handleChange} 
+                    />
+                </Form.Group>
+
+                {/* End Date/Time Input */}
+                <Form.Group controlId="end_date">
+                    <Form.Label>End Date and Time</Form.Label>
+                    <Form.Control 
+                        type="datetime-local" 
+                        name="end_date" 
+                        value={projectData.end_date}
+                        onChange={handleChange} 
+                    />
+                </Form.Group>
+
 
                         {/* Price */}
                         <Form.Group controlId="price">
-                            <Form.Label>Price</Form.Label>
+                            <Form.Label>Price (per person)</Form.Label>
                             <Form.Control 
                                 type="number" 
                                 step="0.01"
@@ -368,6 +403,19 @@ const handleRemoveTagFromProject = (tagId) => {
                                 onChange={handleChange} 
                             />
                         </Form.Group>
+
+                        {/* Deal Link */}
+                        <Form.Group controlId="deal_link">
+                            <Form.Label>Link</Form.Label>
+                            <Form.Control 
+                                type="text" 
+                                placeholder="http://example.com/deal"
+                                name="deal_link" 
+                                value={projectData.deal_link}
+                                onChange={handleChange} 
+                            />
+                        </Form.Group>
+
 
             {/* Tags */}
             {/* <Form.Group controlId="tags">
@@ -453,7 +501,7 @@ const handleRemoveTagFromProject = (tagId) => {
 
                         {/* Submit Button */}
                         <Button variant="primary" type="submit">
-                            Add Project
+                            Add Event
                         </Button>
                     </Form>
                 </Col>

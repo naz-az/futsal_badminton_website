@@ -6,6 +6,8 @@ import AuthContext from '../context/authContext';
 
 import friibeeLogo from '../assets/images/friibee.png';
 
+import kickmates from '../assets/images/1kickmates-high-resolution-logo-black.png';
+
 import axios from 'axios'; // Ensure axios is imported
 
 function Header() {
@@ -237,11 +239,11 @@ const clearMessageNotifications = async () => {
 
 
   return (
-<Navbar bg="primary" variant="dark" expand="lg" collapseOnSelect className="d-flex align-items-center">
+<Navbar bg="light" variant="light" expand="lg" collapseOnSelect className="d-flex align-items-center">
       <Container>
         <LinkContainer to="/">
           <Navbar.Brand>
-            <img src={friibeeLogo} alt="Friibee" height="40" />
+            <img src={kickmates} alt="Friibee" height="40" />
           </Navbar.Brand>
         </LinkContainer>
 
@@ -249,7 +251,7 @@ const clearMessageNotifications = async () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
             <LinkContainer to="/">
-              <Nav.Link>Deals</Nav.Link>
+              <Nav.Link>Meets</Nav.Link>
             </LinkContainer>
 
             <LinkContainer to="/profiles">
@@ -257,7 +259,7 @@ const clearMessageNotifications = async () => {
             </LinkContainer>
 
             <LinkContainer to="/swipe-page">
-              <Nav.Link>Swipe Deals</Nav.Link>
+              <Nav.Link>Swipe</Nav.Link>
             </LinkContainer>
 
             <LinkContainer to="/categories">
@@ -290,7 +292,7 @@ const clearMessageNotifications = async () => {
                   <NavDropdown.Item>Followers</NavDropdown.Item>
                 </LinkContainer>
                 <LinkContainer to="/favourites">
-                  <NavDropdown.Item>Favorites</NavDropdown.Item>
+                  <NavDropdown.Item>Bookmarks</NavDropdown.Item>
                 </LinkContainer>
 
 

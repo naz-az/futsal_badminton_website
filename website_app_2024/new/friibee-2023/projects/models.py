@@ -24,6 +24,9 @@ class Project(models.Model):
     tags = models.ManyToManyField('Tag', blank=True)
     created = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)  
+    location = models.CharField(max_length=1024, null=True, blank=True)  # New field for location
+    start_date = models.DateTimeField(null=True, blank=True)  # New field for event start date/time
+    end_date = models.DateTimeField(null=True, blank=True)    # New field for event end date/time
 
     id = models.UUIDField(default=uuid.uuid4, unique=True,
                           primary_key=True, editable=False)
@@ -69,6 +72,15 @@ class Project(models.Model):
         down_votes = Vote.objects.filter(project=self, vote_type=Vote.DOWN).count()
         return up_votes - down_votes
 
+
+
+class Attendance(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    attendee = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    date_joined = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['project', 'attendee']]
 
 
 

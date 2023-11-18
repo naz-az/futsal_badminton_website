@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import VotingButtons from "../components/VotingButtons";
 import FavoriteButton from "../components/FavoriteButton";
 import AuthContext from '../context/authContext';
+import AttendButton from "../components/AttendButton";
 
 function UserProfileDetail() {
   const [profile, setProfile] = useState({});
@@ -209,6 +210,10 @@ function UserProfileDetail() {
     return `btn ${isDisabled ? 'button-disabled' : ''}`;
   }
   
+
+  const [showFullText, setShowFullText] = useState(false);
+
+
   return (
     <Container className="my-md">
       <Row>
@@ -397,7 +402,7 @@ function UserProfileDetail() {
   <Card.Header>Deals</Card.Header>
   <Card.Body>
     {projects && projects.length === 0 ? (
-      <p>No deals posted by user</p>
+      <p>No events posted by user</p>
     ) : (
       <>
         {/* Add sorting button group before listing the projects */}
@@ -456,7 +461,7 @@ function UserProfileDetail() {
                   <VotingButtons projectId={project.id} />
 
                   <Card.Text style={{ fontSize: "22px", marginTop: "20px" }}>RM {project.price}</Card.Text>
-
+{/* 
                   <div style={{ marginBottom: "15px" }}>
                     <Button
                       variant="warning"
@@ -470,13 +475,43 @@ function UserProfileDetail() {
                     >
                       Go to deal <i className="fa-solid fa-up-right-from-square" style={{ marginLeft: '8px' }}></i>
                     </Button>
-                  </div>
+                  </div> */}
+
+
+
+                  <Card.Text>
+  <strong>Start:</strong> {project.start_date ? new Date(project.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+<Card.Text>
+  <strong>End:</strong> {project.end_date ? new Date(project.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+        <Card.Text>
+  <strong>Location:</strong> {showFullText ? project.location : `${project.location.split(' ').slice(0, 8).join(' ')}...`}
+  <Button variant="link" onClick={() => setShowFullText(!showFullText)}>
+    {showFullText ? 'Show Less' : 'Show More'}
+  </Button>
+</Card.Text>
+
+
+
+
+<AttendButton projectId={project.id} token={localStorage.getItem("token")} />
+
+
+                    <div style={{ marginBottom: '20px', marginTop: '20px'}}>
+
+                    <FavoriteButton projectId={project.id} token={localStorage.getItem("token")} />
+                    </div>
+
+
 
                   <ButtonGroup>
                     {project.tags.map((tag) => (
                       <Link key={tag.id} to={`/categories?tag_id=${tag.id}`}>
                         <Button
-                          variant="primary"
+                          variant="danger"
                           className="mr-2"
                           style={{
                             fontSize: "12px",
@@ -490,14 +525,14 @@ function UserProfileDetail() {
                     ))}
                   </ButtonGroup>
 
-                  <Card.Text style={{ fontSize: '16px', marginTop: '10px' }}>
+                  {/* <Card.Text style={{ fontSize: '16px', marginTop: '10px' }}>
                     <Badge bg="dark">{project.brand}</Badge>
                 </Card.Text>
 
                     <div>
 
                     <FavoriteButton projectId={project.id} token={localStorage.getItem("token")} />
-                    </div>
+                    </div> */}
 
 
                 </Card.Body>

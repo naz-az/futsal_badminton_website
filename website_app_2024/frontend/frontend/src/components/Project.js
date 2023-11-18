@@ -7,6 +7,8 @@ import VotingButtons from "./VotingButtons"; // make sure this import path is co
 import AuthContext from '../context/authContext'; // Adjust the path as needed
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom v6
+import AttendButton from "./AttendButton";
+
 
 function Project({ project }) {
   const auth = useContext(AuthContext);
@@ -14,6 +16,8 @@ function Project({ project }) {
   const navigate = useNavigate();
 
   const isCurrentUserOwner = auth.user && auth.user.profile.id === project.owner.id;
+
+  const [showFullText, setShowFullText] = useState(false);
 
   useEffect(() => {
     // Implement logic to check if the project is already favorited
@@ -98,29 +102,73 @@ function Project({ project }) {
 
         <Card.Text style={{ fontSize: "22px", marginTop: "20px" }}>RM {project.price}</Card.Text>
 
-        <div style={{ marginBottom: "10px" }}>
-          {" "}
-          {/* Adding margin here */}
-          <Button
-            variant="warning"
-            onClick={() => {
-              const url =
-                project.deal_link.startsWith("http://") ||
-                project.deal_link.startsWith("https://")
-                  ? project.deal_link
-                  : "http://" + project.deal_link;
-              window.open(url, "_blank");
-            }}
-          >
-                       Go to deal <i className="fa-solid fa-up-right-from-square" style={{ marginLeft: '8px' }}></i>
-          </Button>
-        </div>
+        <Card.Text>
+  <strong>Start:</strong> {project.start_date ? new Date(project.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
 
-        <ButtonGroup> {/* Add bottom margin to ButtonGroup */}
+<Card.Text>
+  <strong>End:</strong> {project.end_date ? new Date(project.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+        <Card.Text>
+  <strong>Location:</strong> {showFullText ? project.location : `${project.location.split(' ').slice(0, 8).join(' ')}...`}
+  <Button variant="link" onClick={() => setShowFullText(!showFullText)}>
+    {showFullText ? 'Show Less' : 'Show More'}
+  </Button>
+</Card.Text>
+
+
+
+
+
+
+        {
+  /* <div style={{ marginBottom: "10px" }}>
+    <Button
+      variant="warning"
+      onClick={() => {
+        const url =
+          project.deal_link.startsWith("http://") ||
+          project.deal_link.startsWith("https://")
+            ? project.deal_link
+            : "http://" + project.deal_link;
+        window.open(url, "_blank");
+      }}
+    >
+      Go to deal <i className="fa-solid fa-up-right-from-square" style={{ marginLeft: '8px' }}></i>
+    </Button>
+  </div> */
+}
+
+
+
+        <AttendButton projectId={project.id} token={localStorage.getItem("token")} />
+
+
+
+
+{/* <Card.Text style={{ fontSize: '16px', marginTop: "10px" }}>
+                    <Badge bg="dark">{project.brand}</Badge>
+                </Card.Text> */}
+
+<div style={{ marginTop: "15px" }}> 
+  {isFavorited ? (
+    <Button variant="info" onClick={handleRemoveFavorite}>
+                        <i className="fa-solid fa-bookmark" style={{ marginRight: '0.3rem' }}></i> Remove bookmark
+    </Button>
+  ) : (
+    <Button variant="outline-info" onClick={handleAddFavorite}>
+                        <i className="fa-regular fa-bookmark" style={{ marginRight: '0.3rem' }}></i> Bookmark
+    </Button>
+  )}
+</div>
+
+
+<ButtonGroup style={{ marginTop: "15px" }}> {/* Add bottom margin to ButtonGroup */}
   {project.tags.map((tag) => (
     <Link key={tag.id} to={`/categories?tag_id=${tag.id}`}>
       <Button
-        variant="primary"
+        variant="danger"
         className="mr-2"
         style={{
           fontSize: "12px",
@@ -133,22 +181,6 @@ function Project({ project }) {
     </Link>
   ))}
 </ButtonGroup>
-
-<Card.Text style={{ fontSize: '16px', marginTop: "10px" }}>
-                    <Badge bg="dark">{project.brand}</Badge>
-                </Card.Text>
-
-<div style={{ marginTop: "15px" }}> 
-  {isFavorited ? (
-    <Button variant="danger" onClick={handleRemoveFavorite}>
-      Remove Favourites <i className="fa-solid fa-heart-crack" style={{marginLeft: "5px"}}></i>
-    </Button>
-  ) : (
-    <Button variant="outline-danger" onClick={handleAddFavorite}>
-      Add Favourites <i className="fa-regular fa-heart" style={{marginLeft: "5px"}}></i>
-    </Button>
-  )}
-</div>
 
       </Card.Body>
     </Card>

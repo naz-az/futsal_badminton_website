@@ -7,19 +7,32 @@ import { useNavigation } from '@react-navigation/native';
 // Import custom components (make sure the import paths are correct)
 import VotingButtons from "./VotingButtons";
 import AuthContext from '../context/authContext';
+import AttendButton from "./AttendButton";
+
 
 function Project({ project }) {
   const auth = useContext(AuthContext);
   const [isFavorited, setIsFavorited] = useState(false);
   const navigation = useNavigation();
+  const [token, setToken] = useState(null); // State to store the token
 
   const isCurrentUserOwner = auth.user && auth.user.profile.id === project.owner.id;
 
   useEffect(() => {
+    // Fetch and set the token
+    const getToken = async () => {
+      const storedToken = await AsyncStorage.getItem("token");
+      console.log("Token fetched: ", storedToken); // Debugging log
+      setToken(storedToken);
+    };
+
+    getToken();
+  }, []);
+
+  useEffect(() => {
     const checkFavoriteStatus = async () => {
-      if (auth.isAuthenticated) {
+      if (auth.isAuthenticated && token) {
         try {
-          const token = await AsyncStorage.getItem("token");
           const response = await axios.get(`http://127.0.0.1:8000/api/favorites/is-favorite/${project.id}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -98,6 +111,35 @@ function Project({ project }) {
 
         <Text style={styles.price}>RM {project.price}</Text>
 
+        <View style={styles.item}>
+        <Text style={styles.label}>Start Date & Time:</Text>
+        <Text style={styles.value}>{project.start_date || 'N/A'}</Text>
+      </View>
+
+      <View style={styles.item}>
+        <Text style={styles.label}>End Date & Time:</Text>
+        <Text style={styles.value}>{project.end_date || 'N/A'}</Text>
+      </View>
+
+      <View style={styles.item}>
+        <Text style={styles.label}>Location:</Text>
+        <Text style={styles.value}>{project.location}</Text>
+      </View>
+
+      {/* Add the AttendButton component */}
+      {console.log("Rendering AttendButton with token: ", token)} {/* Debugging log */}
+
+      {token && <AttendButton projectId={project.id} token={token} />}
+
+      <TouchableOpacity 
+        style={favoriteButtonStyle}
+
+  onPress={isFavorited ? handleRemoveFavorite : handleAddFavorite}
+>
+  <Text>{isFavorited ? 'Remove Bookmarks' : 'Add Bookmarks'}</Text>
+</TouchableOpacity>
+
+
         <TouchableOpacity style={styles.dealButton} onPress={() => {
           const url = project.deal_link.startsWith("http://") || project.deal_link.startsWith("https://")
             ? project.deal_link
@@ -121,16 +163,10 @@ function Project({ project }) {
           ))}
         </View>
 
-        <View style={styles.badge}>
+        {/* <View style={styles.badge}>
   <Text style={styles.badgeText}>{project.brand}</Text>
-</View>
-        <TouchableOpacity 
-        style={favoriteButtonStyle}
+</View> */}
 
-  onPress={isFavorited ? handleRemoveFavorite : handleAddFavorite}
->
-  <Text>{isFavorited ? 'Remove Favourites' : 'Add Favourites'}</Text>
-</TouchableOpacity>
 
       </View>
     </ScrollView>
@@ -216,7 +252,18 @@ dealButton: {
     color: 'white', // Text color
     fontSize: 12, // Font size for the badge text
   },
-  
+    item: {
+    marginVertical: 8,
+    // paddingHorizontal: 10,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  value: {
+    fontSize: 14,
+    color: '#333',
+  },
 });
 
 export default Project;

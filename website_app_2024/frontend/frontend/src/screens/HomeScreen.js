@@ -66,7 +66,7 @@ function HomeScreen() {
     const currentProjects = projects.slice(indexOfFirstProject, indexOfLastProject);
 
 
-    const [layout, setLayout] = useState('vertical'); // New state for layout
+    const [layout, setLayout] = useState('horizontal'); // New state for layout
 
     const handleVerticalLayout = () => setLayout('vertical');
     const handleHorizontalLayout = () => setLayout('horizontal');
@@ -113,12 +113,12 @@ function HomeScreen() {
     };
     return (
         <div>
-            <h1>Deals</h1>
+            <h1>Events</h1>
             <div className="d-flex justify-content-center align-items-center mb-3">
                 <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                         type="text"
-                        placeholder="Search for deals"
+                        placeholder="Search for events"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         className="form-control"

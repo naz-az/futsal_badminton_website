@@ -6,6 +6,7 @@ import { Form, Button, Container, Image, Col, Row, Alert } from 'react-bootstrap
 import AuthContext from '../context/authContext';
 
 import friibeeLogo from '../assets/images/friibee-logo.png';
+import kickmates from '../assets/images/1kickmates-high-resolution-logo-black.png';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
@@ -86,7 +87,7 @@ function LoginForm() {
               {alertMessage}
             </Alert>
           }
-        <Image src={friibeeLogo} alt="Friibee logo" width={150} className="mx-auto d-block mb-4" />
+        <Image src={kickmates} alt="kickmates logo" width={250} className="mx-auto d-block mb-4" />
           {/* <h2 className="text-center">FRIIBEE</h2> */}
           <h4 className="text-center mb-4">Account Login</h4>
           <Form onSubmit={handleSubmit}>
@@ -115,7 +116,7 @@ function LoginForm() {
             </p>
             
             
-            <Button variant="danger" type="submit" className="w-100 mb-2">Log In</Button>
+            <Button variant="info" type="submit" className="w-100 mb-2">Log In</Button>
 
             {/* Social Login Buttons */}
             <div className="mt-3">

@@ -6,6 +6,7 @@ import axios from 'axios';
 import AuthContext from '../context/authContext'; // Adjust the path as needed
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom v6
+import AttendButton from "./AttendButton";
 
 function HorizontalProject({ project }) {
 
@@ -15,6 +16,9 @@ function HorizontalProject({ project }) {
   
     // Determine if the current user is the owner of the project
     const isCurrentUserOwner = auth.user && auth.user.profile.id === project.owner.id;
+
+    const [showFullText, setShowFullText] = useState(false);
+
 
     useEffect(() => {
       // Implement logic to check if the project is already favorited
@@ -52,7 +56,7 @@ function HorizontalProject({ project }) {
   
     
     return (
-        <Card className="mb-4 d-flex flex-row" style={{ height: '280px', overflow: 'hidden', padding: '5px 5px' }}> {/* Removed all padding from the Card */}
+        <Card className="mb-4 d-flex flex-row" style={{ height: '380px', overflow: 'hidden', padding: '5px 5px' }}> {/* Removed all padding from the Card */}
             {/* Image Section */}
             <div style={{ width: '30%', height: '100%', marginRight: '20px', padding: '0' }}> {/* Removed all margin and padding */}
                 <Link to={`/project/${project.id}`}>
@@ -65,7 +69,7 @@ function HorizontalProject({ project }) {
             </div>
 
             {/* Title and Owner Name Section */}
-            <div style={{ width: '55%'}} className="d-flex flex-column justify-content-between p-2 text-start mt-3 mb-3"> {/* Apply horizontal padding only */}
+            <div style={{ width: '55%', marginRight: '30px'}} className="d-flex flex-column justify-content-between p-2 text-start mt-3 mb-3"> {/* Apply horizontal padding only */}
                 <Card.Title>
                     <Link to={`/project/${project.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                         {project.title}
@@ -85,7 +89,22 @@ function HorizontalProject({ project }) {
             {project.owner.name}
           </Link>
         </Card.Text>
-                <Card.Text style={{ fontSize: '16px' }}>RM {project.price}</Card.Text>
+                <Card.Text style={{ fontSize: '22px' }}>RM {project.price}</Card.Text>
+
+                <Card.Text>
+  <strong>Start:</strong> {project.start_date ? new Date(project.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+<Card.Text>
+  <strong>End:</strong> {project.end_date ? new Date(project.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+        <Card.Text>
+  <strong>Location:</strong> {showFullText ? project.location : `${project.location.split(' ').slice(0, 8).join(' ')}...`}
+  <Button variant="link" onClick={() => setShowFullText(!showFullText)}>
+    {showFullText ? 'Show Less' : 'Show More'}
+  </Button>
+</Card.Text>
 
                 {/* Integrate VotingButtons component */}
                 <VotingButtons projectId={project.id} />
@@ -94,9 +113,8 @@ function HorizontalProject({ project }) {
             {/* Upvotes, Price, and Tags Section */}
             <div style={{ width: '25%', padding: '0 10px' }} className="d-flex flex-column justify-content-center p-2"> {/* Apply horizontal padding only */}
 
-
-                <div style={{ marginTop: '0px' }} className="mb-2 text-start"> {/* Adding margin here */}
-                    <Button
+  <div style={{ marginTop: '0px' }} className="mb-2 text-start"> {/* Adding margin here */}
+                    {/* <Button
                         variant="warning"
                         onClick={() => {
                             const url =
@@ -109,11 +127,21 @@ function HorizontalProject({ project }) {
                     >
                        Go to deal <i className="fa-solid fa-up-right-from-square" style={{ marginLeft: '8px' }}></i>
 
-                    </Button>
+                    </Button> */}
 
+<AttendButton projectId={project.id} token={localStorage.getItem("token")} style={{ marginRight: '1rem' }} />
 
-<br></br>
-                
+{isFavorited ? (
+    <Button variant="danger" onClick={handleRemoveFavorite} style={{ marginTop: '1rem' }}>
+        <i className="fa-solid fa-bookmark" style={{ marginRight: '0.3rem' }}></i> Remove bookmark
+    </Button>
+) : (
+    <Button variant="outline-danger" onClick={handleAddFavorite} style={{ marginTop: '1rem' }}>
+        <i className="fa-regular fa-bookmark" style={{ marginRight: '0.3rem' }}></i> Bookmark
+    </Button>
+)}
+
+         <br></br>       
 
                 <ButtonGroup>
                     {project.tags.map(tag => (
@@ -140,15 +168,7 @@ function HorizontalProject({ project }) {
                     <Badge bg="dark">{project.brand}</Badge>
                 </Card.Text>
 
-                {isFavorited ? (
-    <Button variant="danger" onClick={handleRemoveFavorite}>
-      Remove Favourites <i className="fa-solid fa-heart-crack" style={{marginLeft: "5px"}}></i>
-    </Button>
-  ) : (
-    <Button variant="outline-danger" onClick={handleAddFavorite}>
-      Add Favourites <i className="fa-regular fa-heart" style={{marginLeft: "5px"}}></i>
-    </Button>
-  )}
+
                 </div>
             </div>
         </Card>

@@ -5,6 +5,8 @@ import { Link } from "react-router-dom"; // Don't forget to import Link to handl
 import { useNavigate } from "react-router-dom";
 import VotingButtons from "../components/VotingButtons";
 import FavoriteButton from "../components/FavoriteButton";
+import AttendButton from "../components/AttendButton";
+
 
 function UserAccount() {
   const [accountData, setAccountData] = useState({
@@ -115,6 +117,7 @@ function UserAccount() {
     // Prepare sortedProjects for rendering
     const sortedProjects = accountData.projects.slice(0, displayedProjects);
 
+    const [showFullText, setShowFullText] = useState(false);
 
 
   
@@ -245,7 +248,7 @@ function UserAccount() {
 {/* First Row for "Deals Posted" title and count */}
 <Row className="mb-2">
   <Col>
-    <h5>Deals Posted ({accountData.projects.length})</h5>
+    <h5>Events Posted ({accountData.projects.length})</h5>
   </Col>
 </Row>
 
@@ -254,7 +257,7 @@ function UserAccount() {
   <Col md={3} className="d-flex align-items-center">
     {/* "Add Deal" button aligned to the left */}
     <Link to="/add-project" className="btn btn-warning">
-      <i className="fa-solid fa-plus"></i> Add Deal
+      <i className="fa-solid fa-plus"></i> Add Event
     </Link>
 
     
@@ -322,7 +325,7 @@ function UserAccount() {
                       RM {project.price}
                     </Card.Text>
 
-                    <div className="mb-3">
+                    {/* <div className="mb-3">
                       <Button
                         variant="warning"
                         onClick={() => {
@@ -336,37 +339,66 @@ function UserAccount() {
                       >
                         Go to deal <i className="fa-solid fa-up-right-from-square" style={{ marginLeft: '8px' }}></i>
                       </Button>
+                    </div> */}
+
+
+<Card.Text>
+  <strong>Start:</strong> {project.start_date ? new Date(project.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+<Card.Text>
+  <strong>End:</strong> {project.end_date ? new Date(project.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+</Card.Text>
+
+        <Card.Text>
+  <strong>Location:</strong> {showFullText ? project.location : `${project.location.split(' ').slice(0, 8).join(' ')}...`}
+  <Button variant="link" onClick={() => setShowFullText(!showFullText)}>
+    {showFullText ? 'Show Less' : 'Show More'}
+  </Button>
+</Card.Text>
+
+
+
+
+<AttendButton projectId={project.id} token={localStorage.getItem("token")} />
+
+
+                    <div style={{ marginBottom: '20px', marginTop: '20px'}}>
+
+                    <FavoriteButton projectId={project.id} token={localStorage.getItem("token")} />
                     </div>
 
-                    <ButtonGroup className="mb-3">
+
+
+
+
+
+                    <ButtonGroup style={{ marginBottom: '20px'}}>
                       {project.tags.map((tag) => (
                         <Link key={tag.id} to={`/categories?tag_id=${tag.id}`}>
-                          <Button variant="primary" className="me-2" style={{ fontSize: "12px", padding: "2px 5px" }}>
+                          <Button variant="danger" className="me-2" style={{ fontSize: "12px", padding: "2px 5px" }}>
                             {tag.name}
                           </Button>
                         </Link>
                       ))}
                     </ButtonGroup>
 
-                    <Card.Text style={{ fontSize: '16px' }}>
+                    {/* <Card.Text style={{ fontSize: '16px' }}>
                     <Badge bg="dark">{project.brand}</Badge>
-                </Card.Text>
+                </Card.Text> */}
 
-                    <div style={{ marginBottom: '20px'}}>
 
-                    <FavoriteButton projectId={project.id} token={localStorage.getItem("token")} />
-                    </div>
 
             <div>
               <Button
-                variant="info"
+                variant="light"
                 size="sm"
                 onClick={() => editProject(project.id)}
               >
                 Edit
               </Button>{" "}
               <Button
-                variant="danger"
+                variant="primary"
                 size="sm"
                 onClick={() => deleteProject(project.id)}
               >

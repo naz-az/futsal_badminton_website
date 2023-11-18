@@ -1,4 +1,4 @@
-import {React, useContext} from "react";
+import {React, useContext, useState} from "react";
 import { Image, Row, Col, Container, Card, Badge, Button, ButtonGroup } from "react-bootstrap";
 import { Link } from "react-router-dom"; // Correct import for Link
 import Slider from "react-slick";
@@ -6,6 +6,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import AuthContext from '../context/authContext';
 import { useNavigate } from 'react-router-dom';
+import FavoriteButton from "./FavoriteButton";
+import AttendButton from "./AttendButton";
 
 const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
   const auth = useContext(AuthContext);
@@ -66,9 +68,11 @@ const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
     ],
   };
 
+  const [showFullText, setShowFullText] = useState(false);
+
   return (
     <Container>
-      <h3>Related Projects</h3>
+      <h3>Related Events</h3>
       <Slider {...settings}>
         {relatedProjects
           .filter((relatedProject) => relatedProject.id !== currentProjectId)
@@ -121,19 +125,74 @@ const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
                       RM {relatedProject.price}
                     </Card.Text>
 
-                  <ButtonGroup className="mb-3">
+
+                    <Card.Text>
+            <strong>Start:</strong>{" "}
+            {relatedProject.start_date
+              ? new Date(relatedProject.start_date).toLocaleString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "numeric",
+                  second: "numeric",
+                })
+              : "N/A"}
+          </Card.Text>
+
+          <Card.Text>
+            <strong>End:</strong>{" "}
+            {relatedProject.end_date
+              ? new Date(relatedProject.end_date).toLocaleString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "numeric",
+                  second: "numeric",
+                })
+              : "N/A"}
+          </Card.Text>
+
+          <Card.Text>
+            <strong>Location:</strong>{" "}
+            {showFullText
+              ? relatedProject.location
+              : `${relatedProject.location.split(" ").slice(0, 8).join(" ")}...`}
+            <Button
+              variant="link"
+              onClick={() => setShowFullText(!showFullText)}
+            >
+              {showFullText ? "Show Less" : "Show More"}
+            </Button>
+          </Card.Text>
+
+          <AttendButton
+            projectId={relatedProject.id}
+            token={localStorage.getItem("token")}
+          />
+
+<div style={{ marginTop: "15px" }}>
+          <FavoriteButton projectId={relatedProject.id} token={localStorage.getItem("token")} />
+
+          </div>
+
+
+                  <ButtonGroup className="mt-3">
                       {relatedProject.tags.map((tag) => (
                         <Link key={tag.id} to={`/categories?tag_id=${tag.id}`}>
-                          <Button variant="primary" className="me-2" style={{ fontSize: "12px", padding: "2px 5px" }}>
+                          <Button variant="danger" className="me-2" style={{ fontSize: "12px", padding: "2px 5px" }}>
                             {tag.name}
                           </Button>
                         </Link>
                       ))}
                     </ButtonGroup>
 
-                    <Card.Text style={{ fontSize: '16px' }}>
+                    {/* <Card.Text style={{ fontSize: '16px' }}>
                     <Badge bg="dark">{relatedProject.brand}</Badge>
-                </Card.Text>
+                </Card.Text> */}
 
 
                 </Card.Body>

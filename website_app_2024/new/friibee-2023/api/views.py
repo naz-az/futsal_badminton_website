@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from .serializers import ProjectSerializer, UserSerializer, TagSerializer, ProfileSerializer, FavoriteSerializer, MessageSerializer, ThreadSerializer, NotificationSerializer
-from projects.models import Project, Review, Tag, Vote, Image
+from .serializers import ProjectSerializer, UserSerializer, TagSerializer, ProfileSerializer, FavoriteSerializer, MessageSerializer, ThreadSerializer, NotificationSerializer, AttendanceSerializer
+from projects.models import Project, Review, Tag, Vote, Image, Attendance
 from projects.utils import searchProjects
 
 from users.models import Profile, Favorite, Msg, Thread,ThreadParticipants, Notif
@@ -2267,3 +2267,46 @@ def deactivate_account(request):
     except Exception as e:
         # In a production environment, consider logging this exception as well.
         return Response({"error": "An error occurred while deleting the account: " + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addAttendance(request, project_id):
+    user = request.user
+    project = Project.objects.get(id=project_id)
+
+    attendance, created = Attendance.objects.get_or_create(attendee=user.profile, project=project)
+    
+    if created:
+        return Response({'detail': 'Added to Attendance!'})
+    return Response({'detail': 'Already attending!'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def removeAttendance(request, project_id):
+    user = request.user
+    attendance = Attendance.objects.filter(attendee=user.profile, project__id=project_id)
+    
+    if attendance.exists():
+        attendance.delete()
+        return Response({'detail': 'Removed from Attendance!'})
+    return Response({'detail': 'Not attending!'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def checkAttendance(request, project_id):
+    user = request.user
+    is_attending = Attendance.objects.filter(attendee=user.profile, project__id=project_id).exists()
+    return Response({'isAttending': is_attending})
+
+# views.py
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_attendees(request, project_id):
+    attendees = Attendance.objects.filter(project__id=project_id)
+    serializer = AttendanceSerializer(attendees, many=True)
+    return Response(serializer.data)

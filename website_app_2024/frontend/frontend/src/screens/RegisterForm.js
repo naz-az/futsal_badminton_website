@@ -4,6 +4,7 @@ import { Form, Button, Container, Image, Col, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import friibeeLogo from '../assets/images/friibee-logo.png';
 import AuthContext from '../context/authContext';
+import kickmates from '../assets/images/1kickmates-high-resolution-logo-black.png';
 
 
 function RegisterForm() {
@@ -63,7 +64,7 @@ function RegisterForm() {
     <Container className="mt-5">
       <Row className="justify-content-md-center">
         <Col md="auto">
-          <Image src={friibeeLogo} alt="Friibee logo" width={150} className="mx-auto d-block mb-3" />
+          <Image src={kickmates} alt="Friibee logo" width={250} className="mx-auto d-block mb-3" />
           <h3 className="text-center">Register an Account</h3>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
@@ -116,7 +117,7 @@ function RegisterForm() {
                 placeholder="Confirm your password..." />
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="w-100 mb-2">Register</Button>
+            <Button variant="info" type="submit" className="w-100 mb-2">Register</Button>
 
             {/* Social Login Buttons */}
             <div className="mt-3">

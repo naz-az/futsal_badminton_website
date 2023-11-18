@@ -41,17 +41,19 @@ function FavoriteButton({ projectId, token }) {
         .catch(error => console.error(`Error ${isFavorited ? 'removing from' : 'adding to'} favorites:`, error));
     };
 
+    
+
     return (
         <div>
-            {isFavorited ? (
-                <Button variant="danger" onClick={handleFavorite}>
-                    Remove Favourite <i className="fa-solid fa-heart-crack" style={{ marginLeft: "5px" }}></i>
-                </Button>
-            ) : (
-                <Button variant="outline-danger" onClick={handleFavorite}>
-                    Add Favourite <i className="fa-regular fa-heart" style={{ marginLeft: "5px" }}></i>
-                </Button>
-            )}
+  {isFavorited ? (
+    <Button variant="info" onClick={handleFavorite}>
+                        <i className="fa-solid fa-bookmark" style={{ marginRight: '0.3rem' }}></i> Remove bookmark
+    </Button>
+  ) : (
+    <Button variant="outline-info" onClick={handleFavorite}>
+                        <i className="fa-regular fa-bookmark" style={{ marginRight: '0.3rem' }}></i> Bookmark
+    </Button>
+  )}
         </div>
     );
 }

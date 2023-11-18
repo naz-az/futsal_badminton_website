@@ -154,8 +154,8 @@ function ThreadMessages() {
   return (
     <Container>
       <h1>Inbox</h1>
-      <Button onClick={() => navigate("/send")}>Create New Message</Button>
-
+      <Button style={{marginBottom: "30px"}} onClick={() => navigate("/send")}>Create New Message</Button>
+<br></br>
       <Button
         variant="danger"
         onClick={() => setShowDeleteConfirm(true)}
@@ -163,7 +163,9 @@ function ThreadMessages() {
       >
         Delete Selected
       </Button>
-      <Table striped bordered hover>
+
+
+      <Table style={{marginTop: "10px"}} striped bordered hover>
         <thead>
           <tr>
             <th>
@@ -173,6 +175,7 @@ function ThreadMessages() {
                   textDecoration: "none",
                   cursor: "pointer",
                   color: "#FFA07A",
+
                 }} // Updated styles here
               >
                 {isAllSelected ? "Deselect All" : "Select All"}
@@ -181,6 +184,8 @@ function ThreadMessages() {
             <th>User</th>
             <th>Message</th>
             <th>Date/Time</th>
+            <th></th>
+
             {/* <th>Sender of last message</th> */}
             {/* <th>Delete</th> */}
             {/* <th>Seen</th> New column for seen status */}
