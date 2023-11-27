@@ -5,6 +5,8 @@ import { View, Text, TouchableOpacity, Image, FlatList, StyleSheet, Modal, Butto
 import AuthContext from "../context/authContext";
 import { useNavigation } from "@react-navigation/native";
 
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 function ThreadMessages() {
   const [threads, setThreads] = useState([]);
   const [selectedThreads, setSelectedThreads] = useState([]);
@@ -110,7 +112,7 @@ function ThreadMessages() {
     return (
       <View style={styles.userInfo}>
         <Image source={{ uri: processedImageUrl }} style={styles.profileImage} />
-        <Text style={styles.username}>{otherParticipant.username}</Text>
+        {/* <Text style={styles.username}>{otherParticipant.username}</Text> */}
       </View>
     );
   };
@@ -122,7 +124,8 @@ function ThreadMessages() {
       onLongPress={() => toggleThreadSelection(item.id)}
     >
       {renderUserInfo(item)}
-      <View style={styles.messageDetails}>
+      <View style={styles.messageSection}>
+        <Text style={styles.username}>{getOtherParticipant(item.participants).username}</Text>
         <Text style={styles.messagePreview}>{getLatestMessage(item.messages)}</Text>
       </View>
       <View style={styles.messageDateContainer}>
@@ -141,11 +144,14 @@ function ThreadMessages() {
       <Text style={styles.title}>Inbox</Text>
 
       <View>
-      <Button 
-        title="Create New Message"
-        onPress={navigateToSendScreen}
-        color="#007bff" // Example color, modify as needed
-      />
+      <TouchableOpacity 
+  style={styles.createButton} 
+  onPress={navigateToSendScreen}
+>
+  <Icon name="add" size={20} color="#ffffff" />
+  <Text style={styles.createButtonText}>Create New Message</Text>
+</TouchableOpacity>
+
     </View>
     
           <FlatList
@@ -172,8 +178,23 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     color: '#333333', // Darker color for better readability
   },
+  messageSection: {
+    flex: 3,
+    justifyContent: 'center',
+    // marginLeft: 20,
+  },
+  username: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#1A202C',
+  },
+  messagePreview: {
+    fontSize: 16,
+    color: '#4A5568',
+  },
+
   item: {
-    backgroundColor: '#E8F9FD', // Softer color for the item background
+    backgroundColor: '#ffffff', // Softer color for the item background
     padding: 15,
     marginVertical: 8,
     flexDirection: 'row',
@@ -197,17 +218,11 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 10,
   },
-  username: {
-    fontWeight: 'bold',
-    color: '#1A202C', // Dark color for username
-  },
+
   messageDetails: {
     flex: 2,
   },
-  messagePreview: {
-    fontSize: 16,
-    color: '#4A5568', // Dark gray for the message preview
-  },
+
   messageDateContainer: {
     flex: 1,
     alignItems: 'flex-end',
@@ -216,7 +231,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#A0AEC0', // Lighter color for the date
   },
-  // ... add other styles for modal, buttons, etc.
+  createButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0d555e',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignSelf: 'flex-start', // Aligns button to the start of the container
+    margin: 5, // Optional, adjust as needed
+  },
+  
+  createButtonText: {
+    color: '#fff',
+    marginLeft: 5,
+  },
+  
 });
 
 export default ThreadMessages;

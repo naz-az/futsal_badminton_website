@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 import AuthContext from '../context/authContext';
 import ReplyForm from './ReplyForm';
+import { useNavigation } from '@react-navigation/native';
 
 const Comment = ({ comment, projectId, onCommentUpdated, currentUser }) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -11,6 +12,9 @@ const Comment = ({ comment, projectId, onCommentUpdated, currentUser }) => {
   const [likeCount, setLikeCount] = useState(0);
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
   const auth = useContext(AuthContext);
+  const navigation = useNavigation();
+  const currentUserId = auth.user?.profile.id;
+  console.log("Current User ID:", currentUserId);
 
   const getProfileLinkPath = (commentUserId) => {
     if (auth.user && commentUserId === auth.user.profile.id) {
@@ -20,9 +24,9 @@ const Comment = ({ comment, projectId, onCommentUpdated, currentUser }) => {
   };
 
   const navigateToProfile = () => {
-    // Assuming 'ProfileScreen' is the name of your profile screen
-    // and you pass the user ID or other necessary data as params
-    navigation.navigate('UserProfileDetail', { userId: comment.user.id });
+    console.log("Comment User ID:", comment.user.id); // Log comment.user.id
+
+    navigation.navigate('UserProfileDetail', { id: comment.user.id });
   };
 
   useEffect(() => {
@@ -75,18 +79,15 @@ const Comment = ({ comment, projectId, onCommentUpdated, currentUser }) => {
 
   const handleLike = async () => {
     if (!currentUser) {
-      // Navigate to login screen using React Navigation or similar
+      // Navigate to login
       return;
     }
-
+    const config = {
+      headers: {
+        Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
+      },
+    };
     try {
-      const token = await AsyncStorage.getItem("token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
       if (isLiked) {
         await axios.delete(`http://127.0.0.1:8000/api/likes/remove/${comment.id}/`, config);
         setLikeCount(prev => prev - 1);
@@ -94,7 +95,6 @@ const Comment = ({ comment, projectId, onCommentUpdated, currentUser }) => {
         await axios.post(`http://127.0.0.1:8000/api/likes/add/${comment.id}/`, {}, config);
         setLikeCount(prev => prev + 1);
       }
-
       setIsLiked(!isLiked);
       if (onCommentUpdated) onCommentUpdated();
     } catch (error) {
@@ -130,7 +130,8 @@ const Comment = ({ comment, projectId, onCommentUpdated, currentUser }) => {
     <View style={styles.card}>
       <View style={styles.row}>
         {/* Profile image column */}
-        <TouchableOpacity onPress={navigateToProfile} style={styles.profileImageContainer}>
+        <TouchableOpacity onPress={() =>navigation.navigate(currentUserId === comment.user?.id ? 'UserAccount' : 'UserProfileDetail', { id: comment.user.id})}   
+        style={styles.profileImageContainer}>
           <Image
             source={{ uri: comment.user.profile_image }}
             style={styles.profileImage}
@@ -228,64 +229,74 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 10,
     backgroundColor: 'white',
-    // Add additional styling for card
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    // Add additional styling for row
+    marginBottom: 5,
   },
   profileImageContainer: {
     flex: 1,
     alignItems: 'center',
-    // Add additional styling
+    marginRight: 15,
   },
   profileImage: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
     borderRadius: 20,
   },
   usernameColumn: {
     flex: 6,
     justifyContent: 'center',
-    // Add additional styling
   },
   username: {
     fontWeight: 'bold',
-    // Add additional styling
+    fontSize: 14,
+    color: '#333',
   },
   date: {
     fontSize: 12,
     color: '#666',
-    // Add additional styling
+    marginTop: 4,
   },
   buttonsColumn: {
     flex: 4,
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    // Add additional styling
   },
   button: {
-    marginHorizontal: 5,
-    padding: 5,
-    // Add additional styling
+    // marginHorizontal: 5,
+    marginRight: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    backgroundColor: '#E8E8E8',
   },
   deleteButton: {
-    // Add styling for delete button
+    backgroundColor: '#FFC0CB',
   },
   likeButton: {
-    // Add styling for like button
+    backgroundColor: '#ADD8E6',
   },
   likedButton: {
-    // Add styling for liked button
+    backgroundColor: '#66c9cd',
   },
   commentContent: {
-    marginTop: 5,
+    marginTop: 10,
     marginBottom: 10,
-    // Add additional styling for comment content
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 18,
   },
   // Add additional styles as needed
 });
+
 
 export default Comment;

@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import VotingButtons from "./VotingButtons";
 import AuthContext from '../context/authContext';
 import AttendButton from "./AttendButton";
-import FavoriteButton from "./FavoriteButton";
+
 
 function Project({ project }) {
   const auth = useContext(AuthContext);
@@ -146,12 +146,10 @@ function Project({ project }) {
 
   // Adjusted style for the featured image to be 1/4 of its original size
   const featuredImageStyle = {
-    width: '28%', // 1/4th width
-    height: 110.5, // 1/4th height assuming original height was 250
+    width: '40%', // 1/4th width
+    height: 152.5, // 1/4th height assuming original height was 250
     resizeMode: 'cover',
     borderRadius: 15,
-    marginBottom: 10,
-
   };
 
   // New style for the horizontal layout of title and owner details
@@ -159,7 +157,7 @@ function Project({ project }) {
     flexDirection: 'row', // Align items in a row
     alignItems: 'center', // Center items vertically
     justifyContent: 'space-between', // Space between items
-    // marginBottom: 10, // Margin at the bottom
+    marginBottom: 10, // Margin at the bottom
   };
 
   // Adjusted style for the project title and owner details
@@ -173,8 +171,8 @@ const buttonContainerStyle = {
   flexDirection: 'row',
   justifyContent: 'flex-start', // Align buttons to start
   alignItems: 'center',
-  // marginTop: 10,
-  // marginBottom: 10,
+  marginTop: 10,
+  marginBottom: 10,
 };
 
 
@@ -205,38 +203,38 @@ const attendButtonStyle = {
     <ScrollView style={styles.container}>
 
 <TouchableOpacity onPress={() => navigation.navigate('ProjectScreen', { id: project.id })}>
-<View style={headerStyle}>
-  <Image
-    source={{ uri: processImageUrl(project.featured_image) }}
-    style={featuredImageStyle}
-  />
-  <View style={titleAndOwnerStyle}>
-    <Text style={styles.title}>{project.title}</Text>
-    <Text style={styles.price}>RM {project.price}</Text>
-    <Text style={styles.value}>
-      {showFullLocation ? project.location : getShortLocation(project.location)}
-    </Text>
+        <View style={headerStyle}>
+          <Image
+            source={{ uri: processImageUrl(project.featured_image) }}
+            style={featuredImageStyle}
+          />
+          <View style={titleAndOwnerStyle}>
+            <Text style={styles.title}>{project.title}</Text>
 
-    {project.location.split(' ').length > 8 && (
-      <TouchableOpacity onPress={() => setShowFullLocation(!showFullLocation)}>
-        <Text style={styles.seeMoreLink}>
-          {showFullLocation ? 'See Less' : 'See More'}
+            <Text style={styles.price}>RM {project.price}</Text>
+
+
+        <Text style={styles.value}>
+          {showFullLocation ? project.location : getShortLocation(project.location)}
         </Text>
-      </TouchableOpacity>
-    )}
+        {project.location.split(' ').length > 8 && (
+          <TouchableOpacity onPress={() => setShowFullLocation(!showFullLocation)}>
+            <Text style={styles.seeMoreLink}>
+              {showFullLocation ? 'See Less' : 'See More'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+<Text style={styles.value}>Start: {project.start_date || 'N/A'}</Text>
+
+<Text style={styles.value}>End: {project.end_date || 'N/A'}</Text>
 
 <Text>Attendees ({attendees.length})</Text>
 
-  </View>
-</View>
-    {/* New Row for Start and End Dates */}
-    <View style={styles.dateRow}>
-      <Text style={styles.dateText}>
-        <Text style={styles.boldText}>Start:</Text> {project.start_date || 'N/A'}
-        <Text style={styles.marginText}> | </Text>
-        <Text style={styles.boldText}>End:</Text> {project.end_date || 'N/A'}
-      </Text>
-    </View>
+
+
+          </View>
+        </View>
       </TouchableOpacity>
 
 
@@ -258,9 +256,24 @@ const attendButtonStyle = {
 
 {/* Left Column */}
 <View style={styles.leftColumn}>
+  {/* Upper Row */}
+  <TouchableOpacity
+  style={styles.upperRow}
+  onPress={() => navigation.navigate(isCurrentUserOwner ? 'UserAccount' : 'UserProfileDetail', { id: project.owner.id })}
+>
+  <Image
+    source={{ uri: processImageUrl(project.owner.profile_image) }}
+    style={styles.profileImage}
+  />
+  <Text style={styles.profileName}>{project.owner.username}</Text>
+</TouchableOpacity>
 
+{/* Right Column */}
+<View style={styles.rightColumn}>
   {/* Voting Buttons */}
   <VotingButtons projectId={project.id} />
+</View>
+
 
 </View>
 
@@ -272,7 +285,7 @@ const attendButtonStyle = {
         style={styles.tagButton} 
         onPress={() => navigation.navigate('Categories', { tag_id: tag.id })}
       >
-        <Text style={styles.tagText}>{tag.name}</Text>
+        <Text>{tag.name}</Text>
       </TouchableOpacity>
     ))}
   </View>
@@ -289,32 +302,16 @@ const attendButtonStyle = {
     />
   )}
 
-<FavoriteButton projectId={project.id} token={token} />
-
+  <TouchableOpacity 
+    style={[commonButtonStyle, favoriteButtonStyle]} // Combine styles
+    onPress={isFavorited ? handleRemoveFavorite : handleAddFavorite}
+  >
+    <Text>{isFavorited ? 'Remove Bookmarks' : 'Add Bookmarks'}</Text>
+  </TouchableOpacity>
 </View>
 
-{/* Right Column */}
-<View style={styles.rightColumn}>
 
 
-    {/* Upper Row */}
-    <TouchableOpacity
-  style={styles.upperRow}
-  onPress={() => navigation.navigate(isCurrentUserOwner ? 'UserAccount' : 'UserProfileDetail', { id: project.owner.id })}
->
-  <Image
-    source={{ uri: processImageUrl(project.owner.profile_image) }}
-    style={styles.profileImage}
-  />
-  <Text style={styles.profileName}>{project.owner.username}</Text>
-</TouchableOpacity>
-
-
-
-
-</View>
-
-<View style={styles.separator}></View>
 
       {/* Attendees List */}
       {/* <View>
@@ -341,35 +338,9 @@ const attendButtonStyle = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // margin: 10, // Adjust the margin as needed
-
     // padding: 100,
   },
-  dateRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 5,
-    marginBottom: 10,
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  boldText: {
-    fontWeight: 'bold',
-  },
-  marginText: {
-    marginLeft: 5, // Adjust the margin as per your requirement
-    marginRight: 5, // Adjust the margin as per your requirement
 
-  },
-  separator: {
-    height: 1, // Height of the separator line
-    backgroundColor: '#CCCCCC', // Color of the separator line
-    marginVertical: 20, // Space above and below the line
-  },
-  
   title: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -407,24 +378,24 @@ dealButton: {
   tagsContainer: {
     flexDirection: 'row',
     marginTop: 10,
-
   },
   tagButton: {
-    backgroundColor: '#f2ebe0',
-    padding: 8,
+    backgroundColor: '#007BFF',
+    padding: 5,
+    marginRight: 6,
     borderRadius: 5,
-    marginRight: 8,
-    // marginRight: 5,
-    // marginBottom: 5,
-  },
-  tagText: {
-    color: '#000000',
-    fontSize: 12,
   },
   brand: {
     fontSize: 16,
     marginTop: 10,
   },
+  tagButton: {
+    backgroundColor: '#19a2b8', // Updated button color
+    padding: 8,
+    marginRight: 8,
+    borderRadius: 5, // Rounded corners for tags
+},
+
   profileContainer: {
     flexDirection: 'row', // Aligns children horizontally
     alignItems: 'center', // Centers children vertically in the container
@@ -491,19 +462,29 @@ dealButton: {
       marginBottom: 10, // Space between upper and lower rows
     },
     profileImage: {
-      width: 25,
-      height: 25,
+      width: 30,
+      height: 30,
       borderRadius: 25,
       marginRight: 10,
     },
     profileName: {
-      fontSize: 14,
+      fontSize: 16,
       fontWeight: 'bold',
     },
     lowerRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       alignItems: 'flex-start',
+    },
+    tagButton: {
+      backgroundColor: '#007BFF',
+      padding: 5,
+      marginRight: 8,
+      marginBottom: 8,
+      borderRadius: 5,
+    },
+    tagText: {
+      color: 'white',
     },
   
     // Right Column Styles

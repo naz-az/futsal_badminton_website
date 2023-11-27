@@ -216,7 +216,7 @@ const handleSubmit = async () => {
 
 
 return (
-    <ScrollView>
+    <ScrollView style={{ backgroundColor: '#ffffff' }}>
         <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
             {/* Success Modal */}
             <Modal

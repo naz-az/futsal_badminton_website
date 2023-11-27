@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Image, TextInput, Button, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TextInput, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -28,7 +28,6 @@ const Thread = () => {
       const response = await axios.get(`http://127.0.0.1:8000/api/threads/${threadId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (response.data && response.data.messages && response.data.participants) {
         setThread(response.data);
       } else {
@@ -66,29 +65,26 @@ const Thread = () => {
     setIsReplying(isReplying === messageId ? null : messageId);
   };
 
-  const findParentMessage = (parentId) => {
-    return thread?.messages.find(message => message.id === parentId);
-  };
-
-
   const renderMessages = (messages, thread, auth, handleReplyClick, isReplying, individualReply, setIndividualReply, sendReply) => {
     return (
       <ScrollView>
         {messages.map((message) => {
           const isOriginalSender = message.sender.id === thread.messages[0].sender.id;
+          const isLoggedUser = message.sender.id === auth.user?.profile?.id;
+
           return (
             <View key={message.id} style={{ flexDirection: 'row', justifyContent: isOriginalSender ? 'flex-start' : 'flex-end', marginVertical: 5 }}>
               <View style={{ flexDirection: isOriginalSender ? 'row' : 'row-reverse', alignItems: 'center' }}>
-                <TouchableOpacity onPress={() => {/* Navigate to user profile */}}>
+                <TouchableOpacity onPress={() => navigation.navigate(isLoggedUser ? 'UserAccount' : 'UserProfileDetail', { id: message.sender.id })}>
                   <Image source={{ uri: processImageUrl(message.sender.profile_image) }} style={{ width: 50, height: 50, borderRadius: 25 }} />
                   <Text style={{ textAlign: 'center' }}>{message.sender.username}</Text>
                 </TouchableOpacity>
-                <View style={{ marginLeft: isOriginalSender ? 10 : 0, marginRight: isOriginalSender ? 0 : 10 }}>
+                <View style={{ marginLeft: isOriginalSender ? 10 : 10, marginRight: isOriginalSender ? 10 : 10 }}>
                   <Text>{message.body}</Text>
                   <Text style={{ fontSize: 12, color: 'grey' }}>{new Date(message.timestamp).toLocaleString()}</Text>
                 </View>
-                <TouchableOpacity onPress={() => handleReplyClick(message.id)} style={{ marginLeft: isOriginalSender ? 10 : 0, marginRight: isOriginalSender ? 0 : 10 }}>
-                  <Text style={{ color: 'blue' }}>Reply</Text>
+                <TouchableOpacity onPress={() => handleReplyClick(message.id)} style={styles.replyButton}>
+                  <Text style={{ color: 'white' }}>Reply</Text>
                 </TouchableOpacity>
               </View>
   
@@ -100,8 +96,8 @@ const Thread = () => {
                     value={individualReply}
                     onChangeText={setIndividualReply}
                   />
-                  <TouchableOpacity onPress={() => sendReply(message.id, message.recipient.id)}>
-                    <Text style={{ color: 'blue', marginLeft: 10 }}>Submit</Text>
+                  <TouchableOpacity onPress={() => sendReply(message.id, message.recipient.id)} style={styles.sendButton}>
+                    <Text style={styles.buttonText}>Submit</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -112,34 +108,32 @@ const Thread = () => {
     );
   };
   
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Thread</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Inbox')} style={styles.backButton}>
+        <Text style={styles.buttonText}>Back to Inbox</Text>
+      </TouchableOpacity>
 
- // Main component render
- return (
-<View style={styles.container}>
-  <Text style={styles.header}>Thread</Text>
-  <TouchableOpacity onPress={() => navigation.navigate('Inbox')}>
-    <Text style={styles.linkText}>Back to Inbox</Text>
-  </TouchableOpacity>
+      {thread && thread.messages ? (
+        renderMessages(thread.messages, thread, auth, handleReplyClick, isReplying, individualReply, setIndividualReply, sendReply)
+      ) : (
+        <Text>Loading thread...</Text>
+      )}
 
-  {thread && thread.messages ? (
-    renderMessages(thread.messages, thread, auth, handleReplyClick, isReplying, individualReply, setIndividualReply, sendReply)
-  ) : (
-    <Text>Loading thread...</Text>
-  )}
-
-  <View style={{ marginTop: 20 }}>
-    <TextInput
-      style={styles.replyInput}
-      multiline
-      value={mainReply}
-      onChangeText={setMainReply}
-      placeholder="Reply to the main thread..."
-    />
-    <TouchableOpacity onPress={() => sendReply(null, thread.participants[1].id)}>
-      <Text style={styles.submitButtonText}>Send</Text>
-    </TouchableOpacity>
-  </View>
-</View>
+      <View style={{ marginTop: 20 }}>
+        <TextInput
+          style={styles.replyInput}
+          multiline
+          value={mainReply}
+          onChangeText={setMainReply}
+          placeholder="Reply to the main thread..."
+        />
+        <TouchableOpacity onPress={() => sendReply(null, thread.participants[1].id)} style={styles.sendButton}>
+          <Text style={styles.buttonText}>Send</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
@@ -147,7 +141,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#ffffff',
   },
   header: {
     fontSize: 20,
@@ -158,6 +152,7 @@ const styles = StyleSheet.create({
   linkText: {
     color: '#007BFF',
     marginTop: 10,
+    marginBottom: 10,
   },
   messageContainer: {
     flexDirection: 'row',
@@ -196,14 +191,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     marginTop: 10,
   },
-  submitButton: {
-    marginLeft: 10,
+  replyButton: {
+    backgroundColor: '#000000',
+    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+        borderRadius: 5,
+
   },
-  submitButtonText: {
-    color: '#007BFF',
+  sendButton: {
+    backgroundColor: '#355271',
+    padding: 8,
+    borderRadius: 5,
+    alignSelf: 'flex-start', // Aligns button to the start of the container
+
   },
- 
-}
-);
+  backButton: {
+    backgroundColor: '#000000',
+    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    alignSelf: 'flex-start', // Aligns button to the start of the container
+    borderRadius: 5,
+
+  },
+  buttonText: {
+    color: '#ffffff',
+    // fontWeight: 'bold',
+  },
+});
 
 export default Thread;

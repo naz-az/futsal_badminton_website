@@ -3,6 +3,7 @@ import axios from 'axios';
 import { View, Text, Image, TouchableOpacity, ScrollView, Modal, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 function FollowersPage() {
     const [followers, setFollowers] = useState([]);
@@ -72,22 +73,23 @@ function FollowersPage() {
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.headerText}>You have {followersCount} followers</Text>
+            <Text style={styles.subtitle}>You have {followersCount} followers</Text>
             {followers.map(profile => (
-                <View key={profile.id} style={styles.profileContainer}>
-                    <TouchableOpacity onPress={() => {/* Navigate to profile detail */}}>
-                    <Image source={{ uri: processImageUrl(profile) }} style={styles.profileImage} />
-                    </TouchableOpacity>
-                    <View style={styles.profileInfo}>
-                        <Text style={styles.profileName}>{profile.name}</Text>
-                        <Text style={styles.profileIntro}>{profile.short_intro?.slice(0, 60) ?? ''}</Text>
+                <View key={profile.id} style={styles.card}>
+                    <View style={styles.leftColumn}>
+                        <TouchableOpacity onPress={() => navigation.navigate('UserProfileDetail', { id: profile.id })}>
+                            <Image source={{ uri: processImageUrl(profile) }} style={styles.profileImage} />
+                        </TouchableOpacity>
                     </View>
-                    <TouchableOpacity onPress={() => handleSendMessage(profile.id)} style={styles.messageButton}>
-                        <Text style={styles.buttonText}>Send Message</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleRemoveClick(profile.id)} style={styles.removeButton}>
-                        <Text style={styles.buttonText}>Remove Follower</Text>
-                    </TouchableOpacity>
+                    <View style={styles.middleColumn}>
+                        <Text style={styles.cardTitle}>{profile.name}</Text>
+                        <Text style={styles.cardText}>{profile.short_intro?.slice(0, 60) ?? ''}</Text>
+                    </View>
+                    <View style={styles.rightColumn}>
+                        <TouchableOpacity onPress={() => handleRemoveClick(profile.id)} style={styles.button}>
+                            <Text style={styles.buttonText}>Remove</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             ))}
 
@@ -110,23 +112,70 @@ function FollowersPage() {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20,
+        flex: 1,
+        padding: 10,
+        backgroundColor: '#ffffff',
+
     },
-    profileContainer: {
+    title: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    subtitle: {
+        fontSize: 18,
+        marginBottom: 20,
+        fontWeight: 'bold',
+    },
+
+    card: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 10,
+        padding: 10,
+        backgroundColor: '#fcfcff',
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
     },
     profileImage: {
-        width: 80,
-        height: 100,
-        marginRight: 10,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        marginRight: 15,
     },
-    profileInfo: {
+    cardBody: {
         flex: 1,
     },
+    cardTitle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    cardText: {
+        fontSize: 12,
+    },
     button: {
-        marginHorizontal: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 6,
+        paddingHorizontal: 16,
+        borderRadius: 4,
+        elevation: 3,
+        backgroundColor: '#333361', // Choose a color that fits your app theme
+    },
+    buttonText: {
+        fontSize: 12,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'white',
+    },
+    buttonPressed: {
+        opacity: 0.8, // Slight opacity change on press
+        transform: [{ scale: 0.96 }], // Slight scale down effect
     },
     modalView: {
         margin: 20,
@@ -142,6 +191,18 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+    },
+    leftColumn: {
+        flex: 1,
+        // Add any additional styling if needed
+    },
+    middleColumn: {
+        flex: 2,
+        // Add any additional styling if needed
+    },
+    rightColumn: {
+        flex: 1,
+        // Add any additional styling if needed
     },
 });
 

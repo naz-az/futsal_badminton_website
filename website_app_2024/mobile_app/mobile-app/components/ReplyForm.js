@@ -40,7 +40,7 @@ const ReplyForm = ({ parentCommentId, projectId, onReplyPosted, onReplySuccess }
       <Button
         title="Post Reply"
         onPress={handleSubmit}
-        color="#007bff"
+        color="#292929"
       />
     </View>
   );

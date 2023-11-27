@@ -104,91 +104,185 @@ function Profile({ profile, currentUserId }) {
     // Add a check to determine if the profile belongs to the current user
     const isCurrentUserProfile = profile.id === currentUserId;
 
-    return (
-        <View style={styles.card}>
-            <TouchableOpacity onPress={navigateToProfileDetail} style={styles.cardBody}>
-                <View style={styles.profileAndButtonContainer}>
-                    <Image
-                        source={{ uri: processImageUrl(profile) }}
-                        style={styles.profileImage}
-                    />
-    
-                    {/* Conditionally render follow/unfollow button */}
-                    {!isCurrentUserProfile && !isUserBlocked && (
-                        isFollowing ? (
-                            <View style={styles.followButton}>
-                                <Button title="Unfollow" onPress={handleUnfollow} />
-                            </View>
-                        ) : (
-                            <View style={styles.followButton}>
-                                <Button title="Follow" onPress={handleFollow} />
-                            </View>
-                        )
-                    )}
-                </View>
-    
-                <View style={styles.textContainer}>
-                    <Text style={styles.cardTitle}>
-                        {profile.name}
-                    </Text>
-                    <Text style={styles.cardText}>
-                        {profile.short_intro?.slice(0, 60) ?? ''}
-                    </Text>
-                    <Text style={styles.cardBio}>
-                        {profile.bio?.split(" ").slice(0, 30).join(" ") ?? ''}
-                    </Text>
-                </View>
-            </TouchableOpacity>
-        </View>
+    const CustomButton = ({ title, onPress, color }) => (
+        <TouchableOpacity onPress={onPress} style={[styles.customButton, { backgroundColor: color }]}>
+            <Text style={styles.customButtonText}>{title}</Text>
+        </TouchableOpacity>
     );
+
+    return (
+//         <View style={styles.card}>
+//             <View style={styles.leftColumn}>
+//                 <TouchableOpacity onPress={() => navigation.navigate('UserProfileDetail', { id: profile.id })}>
+//                     <Image source={{ uri: processImageUrl(profile) }} style={styles.profileImage} />
+//                 </TouchableOpacity>
+//             </View>
+//             <View style={styles.middleColumn}>
+//                 <Text style={styles.cardTitle}>{profile.name}</Text>
+//                 <Text style={styles.cardText}>{profile.short_intro?.slice(0, 60) ?? ''}</Text>
+//             </View>
+//             <View style={styles.rightColumn}>
+//                 {!isCurrentUserProfile && !isUserBlocked && (
+//                     isFollowing ? (
+//                         <CustomButton title="Unfollow" onPress={handleUnfollow} color="#82412d" />
+//                     ) : (
+//                         <CustomButton title="Follow" onPress={handleFollow} color="#0d204f"/>
+//                     )
+//                 )}
+//             </View>
+
+
+//             {/* Bio Section */}
+//             <View style={styles.bioContainer}>
+//                 <Text style={styles.bioText}>
+//                     {profile.bio}
+//                 </Text>
+//             </View>
+
+
+
+//         </View>
+
+        
+//     );
+// }
+
+
+<View style={styles.card}>
+{/* Existing Row for Image, Name, Bio, and Button */}
+<View style={styles.row}>
+    <View style={styles.leftColumn}>
+        <TouchableOpacity onPress={() => navigation.navigate('UserProfileDetail', { id: profile.id })}>
+            <Image source={{ uri: processImageUrl(profile) }} style={styles.profileImage} />
+        </TouchableOpacity>
+    </View>
+    <View style={styles.middleColumn}>
+        <Text style={styles.cardTitle}>{profile.name}</Text>
+        <Text style={styles.cardText}>{profile.short_intro?.slice(0, 60) ?? ''}</Text>
+    </View>
+    <View style={styles.rightColumn}>
+        {!isCurrentUserProfile && !isUserBlocked && (
+            isFollowing ? (
+                <CustomButton title="Unfollow" onPress={handleUnfollow} color="#82412d" />
+            ) : (
+                <CustomButton title="Follow" onPress={handleFollow} color="#0d204f" />
+            )
+        )}
+    </View>
+</View>
+
+{/* New Row for Profile Bio */}
+<View style={styles.bioContainer}>
+    <Text style={styles.bioText}>
+        {profile.bio}
+    </Text>
+</View>
+</View>
+);
 }
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        padding: 15,
+        // flexDirection changed to column
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        marginBottom: 10,
+        padding: 10,
+        backgroundColor: '#fcfcff',
+        borderRadius: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 6,
         elevation: 4,
-        marginBottom: 20,
+    },
+    row: {
         flexDirection: 'row',
+        alignItems: 'center',
     },
-    profileAndButtonContainer: {
-        flexDirection: 'row',
-        alignItems: 'center', // to align the image and button vertically
+    bioContainer: {
+        marginTop: 10, 
+        marginBottom: 10, // Add some space above the bio
+        // padding: 10, // Padding inside the bio container
     },
-    cardBio: {
-        // existing styles
-        flexWrap: 'wrap', // add this line
+    bioText: {
+        fontSize: 14, // Adjust font size as needed
+        color: '#333', // Adjust text color as needed
     },
+    leftColumn: {
+        flex: 1,
+    },
+    middleColumn: {
+        flex: 2,
+        justifyContent: 'center',
+    },
+    rightColumn: {
+        flex: 1,
+        alignItems: 'flex-end',
+    },
+    profileImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+    },
+    cardTitle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    cardText: {
+        fontSize: 12,
+    },
+
+    
+
+
+
     textContainer: {
         // existing styles
         width: '35%', // adjust this value as needed for your layout
         flexWrap: 'wrap', // add this line
+        marginTop: 10,
     },
     
     profileImage: {
-        width: 80,
-        height: 80,
+        width: 60,
+        height: 60,
         borderRadius: 40,
         marginRight: 15,
     },
     cardTitle: {
+        fontSize: 14,
         fontWeight: 'bold',
-        fontSize: 18,
-        color: '#333',
     },
     cardText: {
-        color: '#666',
+        fontSize: 12,
+    },
+    customButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 6,
+        paddingHorizontal: 16,
+        borderRadius: 4,
+        elevation: 3,
+        backgroundColor: '#333361',
+    },
+    customButtonText: {
+        fontSize: 14, // Set the font size as needed
+        color: '#fff',
+        textAlign: 'center',
+    },
+    cardBody2: {
+        flex: 1,
+    },
+    cardTitle2: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    cardText2: {
         fontSize: 14,
     },
-    followButton: {
-        width: 100,   // Set a fixed width
-        height: 40,   // Set a fixed height (optional)
-        // other styling attributes as needed
+    profileInfo: {
+        marginRight: 15,
     },
 });
 

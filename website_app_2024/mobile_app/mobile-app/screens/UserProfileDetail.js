@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, Button, ScrollView, Image, TouchableOpacity, Picker, StyleSheet, Linking } from "react-native";
+import { View, Text, Button, ScrollView, Image, TouchableOpacity, FlatList, Picker, StyleSheet, Linking } from "react-native";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -9,6 +9,8 @@ import AuthContext from '../context/authContext';
 import { FontAwesome5 } from '@fortawesome/react-native-fontawesome';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faYoutube, faFacebook, faInstagram, faTwitter, faSquareJs } from '@fortawesome/free-brands-svg-icons';
+import AttendButton from "../components/AttendButton";
+import ProjectComponent from "../components/ProjectComponent";
 
 function UserProfileDetail() {
   const [profile, setProfile] = useState({});
@@ -30,6 +32,11 @@ function UserProfileDetail() {
   const [selectedSort, setSelectedSort] = useState('newToOld');
   const [token, setToken] = useState(null);
 
+  const [attendees, setAttendees] = useState([]);
+
+  const [currentProjectId, setCurrentProjectId] = useState(null);
+
+  
   useEffect(() => {
     const fetchToken = async () => {
       const fetchedToken = await AsyncStorage.getItem("token");
@@ -215,12 +222,74 @@ function UserProfileDetail() {
   }, [selectedSort, projects]);
   
 
+
+  useEffect(() => {
+    const fetchAttendees = async () => {
+      if (projects.length === 0) {
+        console.log("No projects found for this profile.");
+        return;
+      }
+  
+      const projectId = projects[0].id;  // Fetch attendees for the first project
+      console.log("Fetching attendees for project ID:", projectId);
+  
+      try {
+        const authHeaders = await fetchAuthHeaders();
+        const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/attendees/`, authHeaders);
+        console.log("Attendees API response:", response.data);
+        setAttendees(response.data);
+      } catch (error) {
+        console.error('Error fetching attendees:', error);
+      }
+    };
+  
+    if (projects.length > 0) {
+      fetchAttendees();
+    }
+  }, [projects]);  // Depend on 'projects' as it contains the project IDs
+  
+
+
+
+  const navigateToProfile = (attendeeId) => {
+    // Determine if the current user is the owner
+    const isCurrentUserOwner = currentUserId === attendeeId;
+
+    // Define the route and parameters based on the ownership condition
+    const route = isCurrentUserOwner ? 'UserAccount' : 'UserProfileDetail';
+    const params = isCurrentUserOwner ? {} : { id: attendeeId };
+
+    // Navigate to the appropriate route with parameters
+    navigation.navigate(route, params);
+};
+
+
+  // Function to render each attendee
+  const renderAttendee = ({ item }) => (
+    <TouchableOpacity 
+    style={styles.items} 
+    onPress={() => navigateToProfile(item.attendee.id)}
+  >
+    <Image 
+      source={{ uri: processImageUrl(item.attendee.profile_image) }} // Use processImageUrl here
+      style={styles.attendimage}
+    />
+    <Text style={styles.text}>
+      {item.attendee.name} (@{item.attendee.username})
+    </Text>
+  </TouchableOpacity>
+);
+
+
+
+
+
   
 
   return (
-    <ScrollView style={{ flex: 1, padding: 20 }}>
+    <ScrollView style={{ flex: 1, padding: 20, backgroundColor: '#ffffff' }}>
 
-      <View style={{ alignItems: 'center', marginBottom: 20 }}>
+<View style={styles.profileCard}>
         <Image
           source={{ uri: processImageUrl(profile.profile_image) }}
           style={{ width: 100, height: 100, borderRadius: 50 }}
@@ -229,7 +298,7 @@ function UserProfileDetail() {
         <Text>{profile.short_intro}</Text>
         {profile.location && <Text>Based in {profile.location}</Text>}
   
-        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20 }}>
   {profile.social_facebook && (
     <TouchableOpacity onPress={() => Linking.openURL(profile.social_facebook)}>
       <FontAwesomeIcon icon={faFacebook} size={24} color="blue" style={{ marginHorizontal: 10 }} />
@@ -261,51 +330,51 @@ function UserProfileDetail() {
   )}
 </View>
 
-      </View>
 
-      {profile.id !== currentUserId && !isUserBlocked && (
-        <TouchableOpacity
-  onPress={async () => {
-    if (!await isAuthenticated()) {
-      redirectToLogin();
-    } else {
-      navigation.navigate('Send', { recipient: id });
-    }
-  }}
-  style={styles.button}
->
-  <Text style={styles.buttonText}>Send Message</Text>
-</TouchableOpacity>
+{profile.id !== currentUserId && !isUserBlocked && (
+  <View style={styles.buttonRow}>
+    <TouchableOpacity
+      onPress={async () => {
+        if (!await isAuthenticated()) {
+          redirectToLogin();
+        } else {
+          navigation.navigate('Send', { recipient: id });
+        }
+      }}
+      style={styles.sendMessageButton}
+    >
+      <Text style={styles.buttonText}>Send Message</Text>
+    </TouchableOpacity>
 
-    )}
-
-    {profile.id !== currentUserId && !isUserBlocked && (
-      isFollowing ? (
-        <TouchableOpacity onPress={handleUnfollow} style={styles.outlineButton}>
-          <Text style={styles.buttonText}>Unfollow</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity onPress={handleFollow} style={styles.button}>
-          <Text style={styles.buttonText}>Follow</Text>
-        </TouchableOpacity>
-      )
-    )}
-
-    <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 20 }}>
-      <TouchableOpacity onPress={() => navigation.navigate('OtherUserFollowersPage', { profileId: id })}>
-        <Text style={{ textAlign: 'center' }}>
-          <Text style={{ fontWeight: 'bold' }}>{profile.followers_count}</Text> Followers
-        </Text>
+    {isFollowing ? (
+      <TouchableOpacity onPress={handleUnfollow} style={[styles.button, styles.outlineButton]}>
+        <Text style={styles.buttonText}>Unfollow</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('OtherUserFollowingPage', { profileId: id })}>
-        <Text style={{ textAlign: 'center' }}>
-          <Text style={{ fontWeight: 'bold' }}>{profile.following_count}</Text> Following
-        </Text>
+    ) : (
+      <TouchableOpacity onPress={handleFollow} style={styles.button}>
+        <Text style={styles.buttonText}>Follow</Text>
       </TouchableOpacity>
-    </View>
+    )}
+  </View>
+)}
 
 
-    <View style={{ marginTop: 20, backgroundColor: '#fff', borderRadius: 10, padding: 10 }}>
+
+    <View style={styles.followSection}>
+  <TouchableOpacity onPress={() => navigation.navigate('OtherUserFollowersPage', { profileId: id })} style={styles.followButton}>
+    <Text style={styles.followCount}>{profile.followers_count}</Text>
+    <Text>Followers</Text>
+  </TouchableOpacity>
+  <Text style={styles.separator}></Text>
+  <TouchableOpacity onPress={() => navigation.navigate('OtherUserFollowingPage', { profileId: id })} style={styles.followButton}>
+    <Text style={styles.followCount}>{profile.following_count}</Text>
+    <Text>Following</Text>
+  </TouchableOpacity>
+</View>
+</View>
+
+
+    <View style={{ marginTop: 10, backgroundColor: '#fff', borderRadius: 10, marginBottom: 20 }}>
       <Text style={{ fontWeight: 'bold', fontSize: 18 }}>About Me</Text>
       <Text>{profile.bio}</Text>
     </View>
@@ -324,7 +393,7 @@ function UserProfileDetail() {
             <Picker
   selectedValue={selectedSort}
   onValueChange={(itemValue) => setSelectedSort(itemValue)}
-  style={{ height: 50, width: 150 }}
+  style={{ height: 30, width: 150, marginBottom:20 }}
 >
   <Picker.Item label="New to Old" value="newToOld" />
   <Picker.Item label="Old to New" value="oldToNew" />
@@ -335,65 +404,10 @@ function UserProfileDetail() {
 </Picker>
 
 
-        {sortedProjects.map((project) => (
-              <View key={project.id}>
-                <TouchableOpacity onPress={() => navigation.navigate('ProjectScreen', { id: project.id })}>
-                  <Image
-                    source={{ uri: processImageUrl(project.featured_image) }}
-                    style={{ width: '100%', height: 250 }}
-                  />
-                  <Text style={styles.projectTitle}>{project.title}</Text>
+{sortedProjects.map((project) => (
+  <ProjectComponent key={project.id} project={project} />
+))}
 
-
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => navigation.navigate('UserProfileDetail', { id: profile.id })}>
-
-                {/* <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}> */}
-                    <Image
-                      source={{ uri: processImageUrl(project.owner.profile_image) }}
-                      style={{ width: 30, height: 30, borderRadius: 15, marginRight: 10 }}
-                    />
-                    <Text>By {project.owner.name}</Text>
-                  {/* </View> */}
-                  </TouchableOpacity>
-
-
-                <VotingButtons projectId={project.id} />
-
-                <Text style={{ fontSize: 22, marginTop: 20 }}>RM {project.price}</Text>
-
-                <TouchableOpacity
-                  onPress={() => {
-                    const url = project.deal_link.startsWith("http://") || project.deal_link.startsWith("https://")
-                      ? project.deal_link
-                      : "http://" + project.deal_link;
-                    Linking.openURL(url);
-                  }}
-                  style={styles.button}
-                >
-                  <Text style={styles.buttonText}>Go to deal</Text>
-                </TouchableOpacity>
-
-                {/* Tags */}
-                <View style={{ flexDirection: 'row', marginTop: 10, flexWrap: 'wrap' }}>
-                  {project.tags.map((tag) => (
-                    <TouchableOpacity key={tag.id} onPress={() => navigation.navigate('Categories', { tag_id: tag.id })}
-                      style={[styles.tagButton, { marginRight: 6 }]}
-                    >
-                      <Text style={styles.tagButtonText}>{tag.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <Text style={{ fontSize: 16, marginTop: 10 }}>
-                  <Text style={styles.badge}>{project.brand}</Text>
-                </Text>
-
-                {/* Adapt FavoriteButton component for React Native */}
-                <FavoriteButton projectId={project.id} token={token} />
-              </View>
-            ))}
           </>
         )}
       </View>
@@ -419,6 +433,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
+  
   buttonText: {
     color: 'black',
   },
@@ -431,7 +446,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: 'white',
     borderRadius: 10,
-    padding: 15,
+    // padding: 15,
     marginBottom: 20,
   },
   cardHeader: {
@@ -449,6 +464,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#ffffff',
+
   },
   profileImage: {
     width: 120,
@@ -489,6 +506,109 @@ const styles = StyleSheet.create({
   badgeText: {
     color: 'white', // Text color
     fontSize: 12, // Font size for the badge text
+  },
+  attendimage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+  text: {
+    color: '#000',
+  },
+  header: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  item: {
+    marginVertical: 8,
+    // paddingHorizontal: 10,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  value: {
+    fontSize: 14,
+    color: '#333',
+  },
+  items: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  }, 
+  followSection: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+    marginTop: 10,
+
+  },
+  followButton: {
+    alignItems: 'center', // Center items vertically
+  },
+  followCount: {
+    fontWeight: 'bold', // Optionally make the count bold
+    fontSize: 16,
+
+  },
+  
+  separator: {
+    marginHorizontal: 10, // Adjust spacing between followers and following
+  },
+  profileCard: {
+    backgroundColor: '#ffffff', // White background
+    borderRadius: 10, // Rounded corners
+    shadowColor: '#000', // Black shadow
+    shadowOffset: { width: 0, height: 2 }, // Shadow position
+    shadowOpacity: 0.3, // Shadow opacity
+    shadowRadius: 4, // Shadow blur radius
+    elevation: 5, // Elevation for Android
+    padding: 15, // Inner padding
+    alignItems: 'center', // Center items inside the card
+    marginVertical: 20, // Vertical margin
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+
+  button: {
+    backgroundColor: '#ece2ff', // Blue background
+    borderColor: '#bfbfbf', // Blue border
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginHorizontal: 5, // Added horizontal margin for spacing
+  },
+  sendMessageButton: {
+    backgroundColor: '#d2e6fb', // Blue background
+    borderColor: '#bfbfbf', // Blue border
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginHorizontal: 5, // Added horizontal margin for spacing
+  },
+
+  outlineButton: {
+    backgroundColor: '#0aa0a424',
+    borderColor: '#bfbfbf', // Blue border
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginHorizontal: 5, // Added horizontal margin for spacing
+  },
+
+  // Ensure buttonText style is set to black
+  buttonText: {
+    color: 'black',
   },
 });
 

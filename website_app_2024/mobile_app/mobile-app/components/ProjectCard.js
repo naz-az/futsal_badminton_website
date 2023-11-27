@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Linking, StyleSheet, FlatList } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import AuthContext from '../context/authContext';
 import VotingButtons from './VotingButtons';
+import AttendButton from './AttendButton';
 
 function ProjectCard({ project, auth }) {
     const [isFavorited, setIsFavorited] = useState(false);
@@ -12,6 +13,11 @@ function ProjectCard({ project, auth }) {
     const currentUserId = auth.user?.profile?.id;
     const profileLinkPath = currentUserId === project.owner.id ? 'UserAccount' : `Profile/${project.owner.id}`;
 
+    const [attendees, setAttendees] = useState([]);
+
+    const [token, setToken] = useState(null); // State to store the token
+  
+    const isCurrentUserOwner = auth.user && auth.user.profile.id === project.owner.id;
 
     // URL Modification Logic
     let imageUrl = project.featured_image;
@@ -23,6 +29,17 @@ function ProjectCard({ project, auth }) {
         profileImageUrl = `http://127.0.0.1:8000${profileImageUrl}`;
     }
 
+
+    useEffect(() => {
+        // Fetch and set the token
+        const getToken = async () => {
+          const storedToken = await AsyncStorage.getItem("token");
+          console.log("Token fetched: ", storedToken); // Debugging log
+          setToken(storedToken);
+        };
+    
+        getToken();
+      }, []);
 
     useEffect(() => {
         const checkFavoriteStatus = async () => {
@@ -72,6 +89,38 @@ function ProjectCard({ project, auth }) {
             borderRadius: 10,
           };
 
+          useEffect(() => {
+            const fetchAttendees = async () => {
+                try {
+                    const storedToken = await AsyncStorage.getItem('token');
+                    console.log("Token for request:", storedToken); // Log the token
+        
+                    if (!storedToken) {
+                        console.error("No token available for authorization");
+                        return;
+                    }
+        
+                    const response = await axios.get(`http://127.0.0.1:8000/api/projects/${project.id}/attendees/`, {
+                        headers: { Authorization: `Bearer ${storedToken}` }
+                    });
+        
+                    console.log("Response:", response); // Log the response
+                    setAttendees(response.data);
+                } catch (error) {
+                    console.error('Error fetching attendees:', error);
+                }
+            };
+        
+            fetchAttendees();
+        }, [project.id]);
+        
+        const processImageUrl = (imageUrl) => {
+            if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+              return `http://127.0.0.1:8000${imageUrl}`;
+            }
+            return imageUrl;
+          };  
+
     return (
         <View style={{ margin: 10, padding: 5 }}>
             <TouchableOpacity onPress={() => navigation.navigate('ProjectScreen', { id: project.id })}>
@@ -81,13 +130,57 @@ function ProjectCard({ project, auth }) {
                 <TouchableOpacity onPress={() => navigation.navigate('ProjectScreen', { id: project.id })}>
                     <Text style={{ fontWeight: 'bold' }}>{project.title}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('UserProfileDetail', { id: project.owner.id })}>
+                <TouchableOpacity onPress={() => navigation.navigate(isCurrentUserOwner ? 'UserAccount' : 'UserProfileDetail', { id: project.owner.id })}>
                 <Image source={{ uri: profileImageUrl }} style={{ width: 30, height: 30, borderRadius: 15 }} />
                     <Text>{project.owner.name}</Text>
                 </TouchableOpacity>
                 {/* VotingButtons component */}
                 <VotingButtons projectId={project.id} />
                 <Text style={{ fontSize: 22, marginTop: 20 }}>RM {project.price}</Text>
+
+                <View style={styles.item}>
+        <Text style={styles.label}>Start Date & Time:</Text>
+        <Text style={styles.value}>{project.start_date || 'N/A'}</Text>
+      </View>
+
+      <View style={styles.item}>
+        <Text style={styles.label}>End Date & Time:</Text>
+        <Text style={styles.value}>{project.end_date || 'N/A'}</Text>
+      </View>
+
+      <View style={styles.item}>
+        <Text style={styles.label}>Location:</Text>
+        <Text style={styles.value}>{project.location}</Text>
+      </View>
+
+      <View>
+  <Text>Attendees ({attendees.length})</Text>
+  <FlatList
+    data={attendees}
+    renderItem={({ item }) => (
+<TouchableOpacity onPress={() => navigation.navigate(isCurrentUserOwner ? 'UserAccount' : 'UserProfileDetail', { id: item.attendee.id })}>
+<Image 
+        source={{ uri: processImageUrl(item.attendee.profile_image) }} // Use processImageUrl here
+        style={styles.attendimage}
+      />
+        <Text style={styles.text}>
+        {item.attendee.name} (@{item.attendee.username})
+      </Text></TouchableOpacity>
+
+    )}
+    keyExtractor={item => item.attendee.id.toString()}
+  />
+</View>
+
+      {/* Add the AttendButton component */}
+      {console.log("Rendering AttendButton with token: ", token)} {/* Debugging log */}
+
+      {token && <AttendButton projectId={project.id} token={token} />}
+
+      <TouchableOpacity onPress={isFavorited ? handleRemoveFavorite : handleAddFavorite} style={favoriteButtonStyle}>
+                    <Text style={{ color: isFavorited ? 'red' : 'grey' }}>{isFavorited ? 'Remove Bookmarks' : 'Add Bookmarks'}</Text>
+                </TouchableOpacity>
+                
                 <TouchableOpacity style={styles.dealButton} onPress={() => {
                     const url = project.deal_link.startsWith('http://') || project.deal_link.startsWith('https://') ? project.deal_link : `http://${project.deal_link}`;
                     Linking.openURL(url);
@@ -102,12 +195,15 @@ function ProjectCard({ project, auth }) {
                         </TouchableOpacity>
                     ))}
                 </View>
-                <View style={styles.badge}>
+
+
+
+
+
+                {/* <View style={styles.badge}>
   <Text style={styles.badgeText}>{project.brand}</Text>
-</View>
-                <TouchableOpacity onPress={isFavorited ? handleRemoveFavorite : handleAddFavorite} style={favoriteButtonStyle}>
-                    <Text style={{ color: isFavorited ? 'red' : 'grey' }}>{isFavorited ? 'Remove Favourites' : 'Add Favourites'}</Text>
-                </TouchableOpacity>
+</View> */}
+
             </View>
         </View>
     );
@@ -133,5 +229,23 @@ badge: {
     alignItems: 'center',
     borderRadius: 10, // Rounded corners for buttons
 },
+item: {
+    marginVertical: 8,
+    // paddingHorizontal: 10,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  value: {
+    fontSize: 14,
+    color: '#333',
+  },
+  attendimage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
 });
 export default ProjectCard;

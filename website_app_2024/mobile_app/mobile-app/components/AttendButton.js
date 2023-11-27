@@ -4,6 +4,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+
 const processImageUrl = (imageUrl) => {
   if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
     return `http://127.0.0.1:8000${imageUrl}`;
@@ -54,12 +55,12 @@ function AttendButton({ projectId, token, fontSize = 16 }) { // Default font siz
     <View style={styles.container}>
       {isAttending ? (
         <TouchableOpacity style={[styles.button, styles.attending]} onPress={handleAttendance}>
-          <Icon name="times" size={fontSize} color="#fff" style={styles.icon}/>
-          <Text style={[styles.buttonText, { fontSize }]}>Cancel Attending</Text>
+          <Icon name="check" size={fontSize} color="#fff" style={styles.icon}/>
+          <Text style={[styles.buttonText, { fontSize }]}>Attending</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity style={[styles.button, styles.notAttending]} onPress={handleAttendance}>
-          <Icon name="check" size={fontSize} color="#fff" style={styles.icon}/>
+          {/* <Icon name="check" size={fontSize} color="#fff" style={styles.icon}/> */}
           <Text style={[styles.buttonText, { fontSize }]}>Attend</Text>
         </TouchableOpacity>
       )}
@@ -80,10 +81,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   attending: {
-    backgroundColor: 'blue',
+    backgroundColor: '#105710',
+
   },
   notAttending: {
-    backgroundColor: 'green',
+    backgroundColor: '#3c3d3c',
   },
   buttonText: {
     color: '#fff',

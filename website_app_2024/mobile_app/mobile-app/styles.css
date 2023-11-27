@@ -1,0 +1,9 @@
+/* styles.css */
+.attendingGradient {
+    background: linear-gradient(45deg, #5a193e, #004682);
+  }
+  
+  .notAttendingGradient {
+    background: linear-gradient(45deg, #004682, #5a193e);
+  }
+  

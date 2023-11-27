@@ -471,6 +471,7 @@ def getRandomProjects(request):
     return Response(serializer.data)
 
 
+
 # views.py
 from django.db.models import F  # <-- Add this import at the top of your file
 from django.db.models import Count, Case, When, IntegerField

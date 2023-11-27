@@ -97,34 +97,22 @@ const renderNotificationItem = (notif, authUser) => {
             const profileId = notif.follower.id; // Assuming this is the ID you want to pass
 
     return (
-      <View style={styles.container}>
-      <View style={styles.flexRow}>
-
-
-
+      <View style={styles.card}>
       <View style={styles.leftColumn}>
-
-      <TouchableOpacity onPress={() => navigateToProfile(profileLink, profileId)}>
-            <Image 
-              source={{ uri: processImageUrl(notif.follower.profile_image) }}
-              style={styles.profileImage}
-              />
-          </TouchableOpacity>
-          </View>
-
-
-
-          <View style={styles.middleColumn}>
-            <Text>
-              <Text style={styles.username}>{notif.follower.username}</Text>
-              <Text> started following you.</Text>
-            </Text>
-            <Text style={styles.dateTime}>{dateTime}</Text>
-          </View>
-          </View>
-
-        </View>
-    );
+        <TouchableOpacity onPress={() => navigateToProfile(profileLink, profileId)}>
+          <Image 
+            source={{ uri: processImageUrl(notif.follower.profile_image) }}
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.middleColumn}>
+        <Text style={styles.cardTitle}>{notif.follower.username} started following you.</Text>
+        <Text style={styles.dateTime}>{dateTime}</Text>
+      </View>
+      {/* Add rightColumn if necessary */}
+    </View>
+  );
 
 
   case 'COMMENT':
@@ -132,135 +120,90 @@ const renderNotificationItem = (notif, authUser) => {
     const profileId_comment = notif.comment.user.id; // Assuming this is the ID you want to pass
 
     return (
-      <View style={styles.container}>
-        <View style={styles.flexRow}>
-  
-          {/* Left Column - Profile Image */}
-          <View style={styles.leftColumn}>
-          <TouchableOpacity onPress={() => navigateToProfile(commentProfileLink, profileId_comment)}>
-              <Image 
-                source={{ uri: processImageUrl(notif.comment.user.profile_image) }}
-                style={styles.imageStyle}
-              />
-            </TouchableOpacity>
-          </View>
-  
-          {/* Middle Column - Content */}
-          <View style={styles.middleColumn}>
-            <Text>
-              <Text style={styles.username}>{notif.comment.user.username}</Text>
-              <Text> commented "{notif.comment.content}" on your project: </Text>
-            </Text>
-            <TouchableOpacity onPress={() => navigateToProject(notif.comment.project.id)}>
-              <Text style={styles.projectTitle}>{notif.comment.project.title}</Text>
-            </TouchableOpacity>
-          </View>
-  
-          {/* Right Column - Project Featured Image */}
-          <View style={styles.rightColumn}>
-            <TouchableOpacity onPress={() => navigateToProject(notif.comment.project.id)}>
-              <Image
-                source={{ uri: processImageUrl(notif.comment.project.featured_image) }}
-                style={styles.imageStyle}
-              />
-            </TouchableOpacity>
-          </View>
-  
-        </View>
+      <View key={notif.id} style={styles.card}>
+      <View style={styles.leftColumn}>
+        <TouchableOpacity onPress={() => navigateToProfile(commentProfileLink, profileId_comment)}>
+          <Image 
+            source={{ uri: processImageUrl(notif.comment.user.profile_image) }}
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.middleColumn}>
+        <Text style={styles.cardTitle}>{notif.comment.user.username} commented: "{notif.comment.content}"</Text>
+        <Text>on your project: {notif.comment.project.title}</Text>
         <Text style={styles.dateTime}>{dateTime}</Text>
       </View>
-    );
-
+      <View style={styles.rightColumn}>
+        <TouchableOpacity onPress={() => navigateToProject(notif.comment.project.id)}>
+          <Image
+            source={{ uri: processImageUrl(notif.comment.project.featured_image) }}
+            style={styles.projectImage}
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
     case 'VOTE':
       const voteProfileLink = notif.voting_user.id === authUser.profile.id ? 'UserAccount' : 'UserProfileDetail';
       const profileId_vote= notif.voting_user.user.id; // Assuming this is the ID you want to pass
 
+
       return (
-        <View style={styles.container}>
-          <View style={styles.flexRow}>
-    
-            {/* Left Column - Profile Image */}
-            <View style={styles.leftColumn}>
+        <View key={notif.id} style={styles.card}>
+          <View style={styles.leftColumn}>
             <TouchableOpacity onPress={() => navigateToProfile(voteProfileLink, profileId_vote)}>
-                <Image 
-                  source={{ uri: processImageUrl(notif.voting_user.profile_image) }}
-                  style={styles.imageStyle}
-                />
-              </TouchableOpacity>
-            </View>
-    
-            {/* Middle Column - Content */}
-            <View style={styles.middleColumn}>
-              <Text>
-                <Text style={styles.username}>{notif.voting_user.username}</Text>
-                <Text> has liked your project:</Text>
-              </Text>
-              <TouchableOpacity onPress={() => navigateToProject(notif.project.id)}>
-                <Text style={styles.projectTitle}>{notif.project.title}</Text>
-              </TouchableOpacity>
-            </View>
-    
-            {/* Right Column - Project Featured Image */}
-            <View style={styles.rightColumn}>
-              <TouchableOpacity onPress={() => navigateToProject(notif.project.id)}>
-                <Image
-                  source={{ uri: processImageUrl(notif.project.featured_image) }}
-                  style={styles.imageStyle}
-                />
-              </TouchableOpacity>
-            </View>
-    
+              <Image 
+                source={{ uri: processImageUrl(notif.voting_user.profile_image) }}
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
           </View>
-          <Text style={styles.dateTime}>{dateTime}</Text>
+          <View style={styles.middleColumn}>
+            <Text style={styles.cardTitle}>{notif.voting_user.username} liked your project:</Text>
+            <Text style={styles.projectTitle}>{notif.project.title}</Text>
+            <Text style={styles.dateTime}>{dateTime}</Text>
+          </View>
+          <View style={styles.rightColumn}>
+            <TouchableOpacity onPress={() => navigateToProject(notif.project.id)}>
+              <Image
+                source={{ uri: processImageUrl(notif.project.featured_image) }}
+                style={styles.projectImage}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       );
     
 
       case 'REPLY':
         const replyProfileLink = notif.comment.user.id === authUser.profile.id ? 'UserAccount' : 'UserProfileDetail';
-        const profileId_comments= notif.comment.user.id; // Assuming this is the ID you want to pass
-
+        const profileId_comments = notif.comment.user.id; // Assuming this is the ID you want to pass
+      
         return (
-          <View style={styles.container}>
-            <View style={styles.flexRow}>
-      
-              {/* Left Column - Profile Image */}
-              <View style={styles.leftColumn}>
+          <View key={notif.id} style={styles.card}>
+            <View style={styles.leftColumn}>
               <TouchableOpacity onPress={() => navigateToProfile(replyProfileLink, profileId_comments)}>
-                  <Image 
-                    source={{ uri: processImageUrl(notif.comment.user.profile_image) }}
-                    style={styles.imageStyle}
-                  />
-                </TouchableOpacity>
-              </View>
-      
-              {/* Middle Column - Content */}
-              <View style={styles.middleColumn}>
-                <Text>
-                  <Text style={styles.username}>{notif.comment.user.username}</Text>
-                  <Text> has replied </Text>
-                  <Text style={styles.strongText}>"{notif.comment.content}"</Text>
-                  <Text> on your comment </Text>
-                  <Text style={styles.strongText}>"{notif.replied_comment.content}"</Text>
-                  <Text> on project: </Text>
-                </Text>
-                <TouchableOpacity onPress={() => navigateToProject(notif.comment.project.id)}>
-                  <Text style={styles.projectTitle}>{notif.comment.project.title}</Text>
-                </TouchableOpacity>
-              </View>
-      
-              {/* Right Column - Project Featured Image */}
-              <View style={styles.rightColumn}>
-                <TouchableOpacity onPress={() => navigateToProject(notif.comment.project.id)}>
-                  <Image
-                    source={{ uri: processImageUrl(notif.comment.project.featured_image) }}
-                    style={styles.imageStyle}
-                  />
-                </TouchableOpacity>
-              </View>
-      
+                <Image 
+                  source={{ uri: processImageUrl(notif.comment.user.profile_image) }}
+                  style={styles.profileImage}
+                />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.dateTime}>{dateTime}</Text>
+            <View style={styles.middleColumn}>
+              <Text style={styles.cardTitle}>{notif.comment.user.username} has replied: "{notif.comment.content}"</Text>
+              <Text>on your comment: "{notif.replied_comment.content}"</Text>
+              <Text>on project: {notif.comment.project.title}</Text>
+              <Text style={styles.dateTime}>{dateTime}</Text>
+            </View>
+            <View style={styles.rightColumn}>
+              <TouchableOpacity onPress={() => navigateToProject(notif.comment.project.id)}>
+                <Image
+                  source={{ uri: processImageUrl(notif.comment.project.featured_image) }}
+                  style={styles.projectImage}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         );
       
@@ -279,7 +222,7 @@ const renderNotificationItem = (notif, authUser) => {
 
 
       return (
-        <ScrollView>
+<ScrollView style={{ backgroundColor: '#ffffff', padding: 10 }}>
           <View>
             {/* Followers Section */}
             <Text style={styles.header}>Followers</Text>
@@ -341,11 +284,13 @@ const renderNotificationItem = (notif, authUser) => {
 const styles = StyleSheet.create({
     container: {
       padding: 10,
+
     },
     header: {
         fontSize: 20,
         fontWeight: 'bold',
         marginVertical: 10,
+
       },
     row: {
       flexDirection: 'row',
@@ -426,7 +371,31 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
       },
-
+      card: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+        padding: 10,
+        backgroundColor: '#fcfcff',
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
+      },
+      leftColumn: {
+        flex: 0.5,
+        // Add any additional styling if needed
+      },
+      middleColumn: {
+        flex: 2.5,
+        // Add any additional styling if needed
+      },
+      rightColumn: {
+        flex: 0.5,
+        // Add any additional styling if needed
+      },
   });
 
   export default NotificationsPage;

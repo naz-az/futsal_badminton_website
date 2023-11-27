@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, Button, Modal, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, ScrollView, TouchableOpacity, Modal, Picker, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import AuthContext from '../context/authContext';
-import { Picker } from '@react-native-picker/picker';
 
 function Send() {
     const [formData, setFormData] = useState({
@@ -12,49 +12,90 @@ function Send() {
         recipientId: ''
     });
     const [profiles, setProfiles] = useState([]);
-    const [filteredProfiles, setFilteredProfiles] = useState([]);
+    const [filteredProfiles, setFilteredProfiles] = useState([]); // Added state for filtered profiles
     const [responseMessage, setResponseMessage] = useState(null);
+    const navigation = useNavigation();
+    const route = useRoute();
+    const recipientFromQuery = route.params?.recipient; // Adjusted for React Native
+
     const [showModal, setShowModal] = useState(false);
     const [existingThreadId, setExistingThreadId] = useState(null);
+
     const [blockedByUsers, setBlockedByUsers] = useState([]);
     const [usersBlockingMe, setUsersBlockingMe] = useState([]);
 
+    const getToken = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            return token;
+        } catch (e) {
+            // Handle read error
+        }
+    }
+
+    const authHeaders = async () => {
+        const token = await getToken();
+        return { headers: { Authorization: `Bearer ${token}` } };
+    };
+
+    const checkExistingThread = async (recipientId) => {
+        try {
+            const headers = await authHeaders();
+            const response = await axios.get('http://127.0.0.1:8000/api/threads/', headers);
+            const threads = response.data;
+            const existingThread = threads.find(thread =>
+                thread.participants.some(p => p.id === recipientId));
+            if (existingThread) {
+                setExistingThreadId(existingThread.id);
+                setShowModal(true);
+            }
+        } catch (error) {
+            console.error('Error fetching threads:', error);
+        }
+    };
+
     useEffect(() => {
-        const fetchToken = async () => {
-            const token = await AsyncStorage.getItem("token");
-            const authHeaders = {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            };
+        if (formData.recipientId) {
+            checkExistingThread(formData.recipientId);
+        }
+    }, [formData.recipientId]);
 
-            axios.get('http://127.0.0.1:8000/api/profiles/', authHeaders)
-                .then(response => {
-                    setProfiles(response.data);
-                })
-                .catch(err => console.log(err));
+    useEffect(() => {
+        if (recipientFromQuery) {
+            setFormData(prevState => ({
+                ...prevState,
+                recipientId: recipientFromQuery
+            }));
+        }
+    }, [recipientFromQuery]);
 
-            axios.get('http://127.0.0.1:8000/api/blocking-users/', authHeaders)
-                .then(response => {
-                    setUsersBlockingMe(response.data);
-                })
-                .catch(err => console.log(err));
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const headers = await authHeaders();
 
-            axios.get('http://127.0.0.1:8000/api/blocked-users/', authHeaders)
-                .then(response => {
-                    setBlockedByUsers(response.data);
-                })
-                .catch(err => console.log(err));
+                const profilesResponse = await axios.get('http://127.0.0.1:8000/api/profiles/', headers);
+                setProfiles(profilesResponse.data);
+
+                const blockedUsersResponse = await axios.get('http://127.0.0.1:8000/api/blocked-users/', headers);
+                setBlockedByUsers(blockedUsersResponse.data);
+
+                const blockingUsersResponse = await axios.get('http://127.0.0.1:8000/api/blocking-users/', headers);
+                setUsersBlockingMe(blockingUsersResponse.data);
+            } catch (err) {
+                console.log(err);
+            }
         };
-
-        fetchToken();
+        fetchData();
     }, []);
 
     const auth = useContext(AuthContext);
+    console.log("Auth User:", auth.user);
     const currentUserId = auth.user.profile.id;
+    console.log("currentUserId:", currentUserId);
 
     useEffect(() => {
-        const newFilteredProfiles = profiles.filter(profile => 
+        const newFilteredProfiles = profiles.filter(profile =>
             profile.id !== currentUserId &&
             !blockedByUsers.some(blockedUser => blockedUser.id === profile.id) &&
             !usersBlockingMe.some(blockingUser => blockingUser.id === profile.id)
@@ -62,122 +103,201 @@ function Send() {
         setFilteredProfiles(newFilteredProfiles);
     }, [blockedByUsers, usersBlockingMe, profiles, currentUserId]);
 
-    const handleChange = (name, value) => {
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
 
-    const handleSubmit = async () => {
-        const token = await AsyncStorage.getItem("token");
-        const authHeaders = {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+        // Replaced handleChange for React Native
+        const handleChange = (name, value) => {
+            setFormData(prevState => ({
+                ...prevState,
+                [name]: value
+            }));
         };
+    
+        // Adjusted handleSubmit for React Native
+        const handleSubmit = async () => {
+            try {
+                const headers = await authHeaders();
+                const response = await axios.post('http://127.0.0.1:8000/api/send_message/', formData, headers);
+                setResponseMessage(response.data.message);
+                if (response.data.thread && response.data.thread.id) {
+                    navigation.navigate('Thread', { threadId: response.data.thread.id });
+                } else {
+                    console.error("Thread ID is missing from the response.");
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        };
+    
+        const handleModalClose = () => {
+            setShowModal(false);
+            setExistingThreadId(null);
+            setFormData({ ...formData, recipientId: '' });
+        };
+    
+        const navigateToThread = () => {
+            // Close the modal before navigating
+            setShowModal(false);
+            setExistingThreadId(null);
+            setFormData({ ...formData, recipientId: '' });
+        
+            // Navigate to the thread
+            navigation.navigate('Thread', { threadId: existingThreadId });
+        };
+        
 
-        try {
-            const response = await axios.post('http://127.0.0.1:8000/api/send_message/', formData, authHeaders);
-            setResponseMessage(response.data.message);
-            // Handle navigation to thread if needed
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
-    };
-
-    const handleModalClose = () => {
-        setShowModal(false);
-        setExistingThreadId(null);
-        setFormData({ ...formData, recipientId: '' });
-    };
-
-    const navigateToInbox = () => {
-        navigation.navigate('ThreadMessages'); // Replace 'Inbox' with the actual route name of your Inbox screen
-      };
-
-    return (
-        <ScrollView>
-            <View>
-                <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>Send Message</Text>
-                <Button
-        title="Back to Inbox"
-        onPress={navigateToInbox}
-      />
-                {/* Form for sending a message */}
-                <View style={styles.container}>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Recipient:</Text>
-          <Picker
-            selectedValue={formData.recipientId}
-            onValueChange={(itemValue) => handleChange('recipientId', itemValue)}>
-            <Picker.Item label="Select Recipient" value="" />
-            {filteredProfiles.map(profile => (
-              <Picker.Item key={profile.id} label={profile.name || profile.username} value={profile.id} />
-            ))}
-          </Picker>
-        </View>
-                    <View>
-                        <Text>Body:</Text>
-                        <TextInput
-                            style={{ height: 80, borderColor: 'gray', borderWidth: 1 }}
-                            onChangeText={text => handleChange('body', text)}
-                            value={formData.body}
-                            multiline
-                        />
-                    </View>
-                    <Button title="Submit" onPress={handleSubmit} />
-                </View>
-
-                {/* Display response message */}
-                {responseMessage && (
-                    <View>
-                        <Text>Message Sent</Text>
-                        <Text>{JSON.stringify(responseMessage, null, 2)}</Text>
-                    </View>
-                )}
-
-                {/* Modal for existing thread message */}
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={showModal}
-                    onRequestClose={handleModalClose}
-                >
-                    <View style={{ marginTop: 22 }}>
-                        <View>
-                            <Text>Existing Thread</Text>
-                            <Text>You have already a thread with this participant.</Text>
-
-                            <Button title="Cancel" onPress={handleModalClose} />
-                            {/* <Button title="Go to Thread Message" onPress={navigateToThread} /> */}
+        return (
+            <ScrollView style={styles.container}>
+                <View style={styles.innerContainer}>
+                    <Text style={styles.headerText}>Send Message</Text>
+    
+                    <TouchableOpacity onPress={() => navigation.navigate('ThreadMessages')} style={styles.backButtonStyle}>
+                    <Text style={styles.backButtonText}>Back to Inbox</Text>
+                </TouchableOpacity>
+    
+                    <View style={styles.formContainer}>
+                        {!recipientFromQuery && (
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.labelText}>Recipient:</Text>
+                                <Picker
+                                    selectedValue={formData.recipientId}
+                                    onValueChange={(itemValue, itemIndex) =>
+                                        handleChange('recipientId', itemValue)
+                                    }
+                                    style={styles.picker}>
+                                    <Picker.Item label="Select Recipient" value="" />
+                                    {filteredProfiles.map(profile => (
+                                        <Picker.Item key={profile.id} label={profile.name || profile.username} value={profile.id} />
+                                    ))}
+                                </Picker>
+                            </View>
+                        )}
+    
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.labelText}>Body</Text>
+                            <TextInput
+                                multiline
+                                numberOfLines={4}
+                                onChangeText={(text) => handleChange('body', text)}
+                                value={formData.body}
+                                style={styles.input}
+                            />
                         </View>
+    
+                        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                            <Text style={styles.buttonText}>Submit</Text>
+                        </TouchableOpacity>
                     </View>
-                </Modal>
-            </View>
-        </ScrollView>
-    );
-}
+    
+                    {responseMessage && (
+                        <View style={styles.messageContainer}>
+                            <Text style={styles.messageText}>Message Sent</Text>
+                            <Text>{JSON.stringify(responseMessage, null, 2)}</Text>
+                        </View>
+                    )}
+    
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={showModal}
+                        onRequestClose={handleModalClose}>
+                        <View style={styles.modal}>
+                            <Text style={styles.modalTitle}>Existing Thread</Text>
+                            <Text>You have already a thread with this participant.</Text>
+    
+                            <TouchableOpacity style={styles.button} onPress={navigateToThread}>
+                                <Text style={styles.buttonText}>Go to Thread Message</Text>
+                            </TouchableOpacity>
 
+                            <TouchableOpacity style={styles.button} onPress={handleModalClose}>
+                                <Text style={styles.buttonText}>Cancel</Text>
+                            </TouchableOpacity>
+    
 
+                        </View>
+                    </Modal>
+                </View>
+            </ScrollView>
+        );
+    }
+    
+// Define the styles
 const styles = StyleSheet.create({
     container: {
-        // Your style settings for the container
-        padding: 10,
-        // more styles...
+        flex: 1,
+        backgroundColor: '#f0f0f7',
     },
-    formGroup: {
-        // Style settings for form groups
-        marginBottom: 15,
-        // more styles...
+    innerContainer: {
+        padding: 20,
     },
-    label: {
-        // Styles for your labels
+    headerText: {
+        fontSize: 24,
         fontWeight: 'bold',
-        // more styles...
+        textAlign: 'center',
+        marginBottom: 20,
+        color: '#333',
     },
-    // ... more styles for other components
+    input: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 15,
+        marginBottom: 15,
+        backgroundColor: '#fff',
+    },
+    button: {
+        backgroundColor: '#095059',
+        borderRadius: 8,
+        padding: 15,
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    modal: {
+        marginTop: 50,
+        marginHorizontal: 20,
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    picker: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        marginBottom: 15,
+    },
+    linkText: {
+        color: 'blue',
+        textAlign: 'center',
+        marginBottom: 15,
+    },
+    messageText: {
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: '#28a745', // Success color
+        marginBottom: 15,
+    },
+    backButtonStyle: {
+        backgroundColor: '#f0f0f7', // Different background color
+        padding: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#007bff', // Border color similar to other buttons for consistency
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    backButtonText: {
+        color: '#007bff', // Color to match the border
+        fontWeight: 'bold',
+    },
+
 });
 
 export default Send;

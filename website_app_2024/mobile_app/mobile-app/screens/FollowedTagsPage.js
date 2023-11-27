@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { View, Text, Button, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Button, Modal, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Example for icons
+import CustomButton from '../components/CustomButton';
+
 
 function FollowedTagsPage() {
   const [followedTags, setFollowedTags] = useState([]);
@@ -49,30 +52,64 @@ function FollowedTagsPage() {
   };
 
   const handleTagClick = (tagId) => {
-    navigation.navigate('/categories', { tag_id: tagId });
+    navigation.navigate('Categories', { tag_id: tagId });
   };
 
   return (
-    <ScrollView>
-      <Text style={{ fontSize: 24, textAlign: 'center' }}>Followed Tags</Text>
-      <View style={{ margin: 25 }}>
-        <Button title="View all Tags" onPress={() => navigation.navigate('Categories')} />
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Followed Categories</Text>
+      <View style={styles.buttonContainer}>
+      <CustomButton title="View all Categories" color="#143e4b" onPress={() => navigation.navigate('Categories')} />
       </View>
       <View>
-        {followedTags.map(tag => (
-          <TouchableOpacity key={tag.id} style={{ margin: 10 }} onPress={() => handleTagClick(tag.id)}>
-            <Text style={{ fontSize: 18 }}>{tag.name}</Text>
-            <Button title="Unfollow" color="red" onPress={(e) => { e.stopPropagation(); handleUnfollowClick(tag); }} />
-          </TouchableOpacity>
-        ))}
-      </View>
+      {followedTags.map(tag => (
+        <TouchableOpacity key={tag.id} style={styles.tagItem} onPress={() => handleTagClick(tag.id)}>
+          <Text style={styles.tagText}>{tag.name}</Text>
+          <CustomButton title="Unfollow" color="#ad1f1f" onPress={(e) => { e.stopPropagation(); handleUnfollowClick(tag); }} />
+        </TouchableOpacity>
+      ))}
+    </View>
       <Modal
         visible={showConfirmModal}
-        onRequestClose={() => setShowConfirmModal(false)}>
+        onRequestClose={() => setShowConfirmModal(false)}
+        transparent={true}>
         {/* ... Modal content ... */}
       </Modal>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    fontSize: 24,
+    textAlign: 'center',
+    margin: 20,
+  },
+  buttonContainer: {
+    marginHorizontal: 25,
+    marginBottom: 10,
+  },
+  tagItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    margin: 10,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  tagText: {
+    fontSize: 18,
+    flexGrow: 1, // Allows the text to expand and fill the space
+  },
+});
 
 export default FollowedTagsPage;

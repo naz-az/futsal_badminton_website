@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthContext from '../context/authContext'; // Ensure this path matches where you define AuthContext
 import friibeeLogo from '../assets/images/friibee-logo.png'; // Update with the correct path to your logo
 import axios from 'axios';
+import kickmates from '../assets/images/1kickmates-high-resolution-logo-black.png';
+
 
 function LoginForm({ navigation }) {
   const [username, setUsername] = useState('');
@@ -66,7 +68,7 @@ function LoginForm({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image source={friibeeLogo} style={styles.logo} />
+      <Image source={kickmates} style={styles.logo} />
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -99,17 +101,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5', // Example color
+    backgroundColor: '#ffffff', // Example color
     padding: 20,
   },
   logo: {
-    width: 300,
-    height: 180,
+    width: 400,
+    height: 60,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+
   },
   input: {
     height: 40,
@@ -125,7 +128,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2.22,
   },
   button: {
-    backgroundColor: '#FF6347', // Example color
+    backgroundColor: '#150f0d', // Example color
     borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 15,

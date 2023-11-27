@@ -21,6 +21,13 @@ import Comment from '../components/Comment';
 import PostComment from '../components/PostComment';
 import AttendButton from '../components/AttendButton';
 
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { format, parseISO } from 'date-fns';
+
+import FavoriteButton from '../components/FavoriteButton';
+
+import ProjectComponent from '../components/ProjectComponent';
+
 function ProjectScreen() {
   const [project, setProject] = useState({ project_images: [], attendees: [] });
   const [comments, setComments] = useState([]);
@@ -77,8 +84,8 @@ function ProjectScreen() {
         const { data } = await axios.get(`http://127.0.0.1:8000/api/projects/${id}`);
         setProject({
           ...data.project,
-          start_date: new Date(data.project.start_date).toLocaleString(),
-          end_date: new Date(data.project.end_date).toLocaleString(),
+          start_date: format(parseISO(data.project.start_date), 'EEEE, d MMMM yyyy, HH:mm'),
+          end_date: format(parseISO(data.project.end_date), 'EEEE, d MMMM yyyy, HH:mm'),
         });
         setSelectedImage(data.project.featured_image);
       } catch (error) {
@@ -116,7 +123,7 @@ function ProjectScreen() {
 
   useEffect(() => {
     async function checkFavoriteStatus() {
-      if (auth.isAuthenticated) {
+      if (auth.isAuthenticated && id) { // Ensure id is defined
         const token = await AsyncStorage.getItem("token");
         const response = await axios.get(`http://127.0.0.1:8000/api/favorites/is-favorite/${id}/`, {
           headers: {
@@ -286,7 +293,7 @@ const renderItem = ({ item }) => (
       style={styles.image}
     />
     <Text style={styles.text}>
-      {item.attendee.name} (@{item.attendee.username})
+      {item.attendee.name}
     </Text>
   </TouchableOpacity>
 );
@@ -294,9 +301,13 @@ const renderItem = ({ item }) => (
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.goBackButtonContainer}>
-        <Button title="Go Back" onPress={() => navigation.goBack()} />
-      </View>
+
+<View style={styles.goBackButtonContainer}>
+    <Icon name="arrow-back" size={25} color="#333" onPress={() => navigation.goBack()} />
+    {/* Other components can be added here if needed */}
+    <FavoriteButton projectId={project.id} token={token} />
+</View>
+
 
       <View style={styles.imageContainer}>
         <Image 
@@ -322,46 +333,54 @@ const renderItem = ({ item }) => (
       <View style={styles.listGroup}>
         <Text style={styles.title}>{project.title}</Text>
         
-        <TouchableOpacity 
-          onPress={() => navigation.navigate(currentUserId === project.owner?.id ? 'UserAccount' : 'UserProfileDetail', { id: project.owner?.id })}
-          style={styles.profileLink}>
-          {project.owner?.profile_image && (
-            <Image
-              source={{ uri: processImageUrl(project.owner.profile_image) }}
-              style={styles.profileImage}
-            />
-          )}
-          <Text>{project.owner?.name}</Text>
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.detailsContainer}>
-        <Text style={styles.detailItem}>Price: ${project.price}</Text>
-        <Text style={styles.detailItem}>Description: {project.description}</Text>
-      </View>
-
-      <View style={styles.cardContainer}>
-        <Text style={styles.cardDetail}>Price: <Text style={styles.cardDetailValue}>${project.price}</Text></Text>
-        {/* <Text style={styles.cardDetail}>Brand: <Text style={styles.cardDetailValue}>{project.brand}</Text></Text> */}
-
-        <ScrollView style={styles.container}>
-      <View style={styles.item}>
-        <Text style={styles.label}>Start Date & Time:</Text>
+        <View style={styles.item}>
+        <Icon name="event-available" size={25} color="#333" />
+        <Text style={styles.label}>Start:</Text>
         <Text style={styles.value}>{project.start_date || 'N/A'}</Text>
       </View>
 
+
       <View style={styles.item}>
-        <Text style={styles.label}>End Date & Time:</Text>
+      <Icon name="event-busy" size={25} color="#333" />
+        <Text style={styles.label}>End:</Text>
         <Text style={styles.value}>{project.end_date || 'N/A'}</Text>
       </View>
 
       <View style={styles.item}>
-        <Text style={styles.label}>Location:</Text>
-        <Text style={styles.value}>{project.location}</Text>
-      </View>
+  <Icon name="location-on" size={25} color="#333" />
+  <Text style={styles.value}>{project.location}</Text>
+</View>
 
-      {/* Attendees List and other UI components */}
-    </ScrollView>
+<View style={styles.item}>
+  <Icon name="tag" size={25} color="#333" />
+  <Text style={styles.value}>RM {project.price}</Text>
+</View>
+
+
+<Text style={styles.headerHost}>Hosting</Text>
+<TouchableOpacity 
+  onPress={() => navigation.navigate(currentUserId === project.owner?.id ? 'UserAccount' : 'UserProfileDetail', { id: project.owner?.id })}
+  style={styles.profileLink}>
+  {project.owner?.profile_image && (
+    <Image
+      source={{ uri: processImageUrl(project.owner.profile_image) }}
+      style={styles.profileImage}
+    />
+  )}
+  <Text>{project.owner?.name}</Text>
+</TouchableOpacity>
+
+
+      <Text style={styles.header}>Attendees ({attendees.length})</Text>
+      <FlatList
+        data={attendees}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+      />
+
+
+      </View>
 
         {/* Tags Section */}
         <View style={styles.tagsContainer}>
@@ -375,11 +394,21 @@ const renderItem = ({ item }) => (
           ))}
         </View>
 
+      <View style={styles.detailsContainer}>
+      <Text style={styles.headerDesc}>Description</Text>
+
+        <Text style={styles.detailItem}>{project.description}</Text>
+      </View>
+
+      <View style={styles.cardContainer}>
+
+      {/* Attendees List and other UI components */}
+
       {/* Add the AttendButton component */}
       {console.log("Rendering AttendButton with token: ", token)} {/* Debugging log */}
-
       {token && <AttendButton projectId={project.id} token={token} />}
 
+        {/* Favourites Button */}
 
         {/* Deal Link */}
         <TouchableOpacity
@@ -394,27 +423,19 @@ const renderItem = ({ item }) => (
           <Text style={styles.dealButtonText}>Go to event link</Text>
         </TouchableOpacity>
 
-        {/* Favourites Button */}
-        <TouchableOpacity 
-          style={isFavorited ? styles.removeFavouriteButton : styles.addFavouriteButton} 
-          onPress={isFavorited ? handleRemoveFavorite : handleAddFavorite}>
-          <Text style={styles.favouriteButtonText}>
-            {isFavorited ? 'Remove from Bookmarks' : 'Add to Bookmarks'}
-          </Text>
-        </TouchableOpacity>
+
       </View>
+
+      <View style={styles.votingButton}>
+      <Text style={styles.reviewsTitle}>Reviews</Text>
 
       {/* Voting Buttons Component */}
       <VotingButtons projectId={id} />
+      </View>
 
-      <View style={styles.container}>
-      <Text style={styles.header}>Attendees ({attendees.length})</Text>
-      <FlatList
-        data={attendees}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-      />
-    </View>
+
+
+
 
 
       {/* Comments Section */}
@@ -437,12 +458,24 @@ const renderItem = ({ item }) => (
       </View>
 
       {/* Related Projects Slider */}
-      <RelatedProjectsSlider
+      {/* <RelatedProjectsSlider
         relatedProjects={relatedProjects}
         currentProjectId={id}
+      /> */}
+
+<View style={styles.relatedContainer}>
+  <Text style={styles.related}>Related Events</Text>
+
+  {relatedProjects
+    .filter((relatedProject) => relatedProject.id !== id)
+    .map((relatedProject) => (
+      <ProjectComponent 
+        key={relatedProject.id}
+        project={relatedProject}
+        // Include any other props that ProjectComponent might need
       />
-
-
+  ))}
+</View>
 
 
 
@@ -454,33 +487,51 @@ const renderItem = ({ item }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 10,
+    backgroundColor: '#ffffff',
   },
   goBackButtonContainer: {
-    marginVertical: 10,
-  },
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    // marginVertical: 10,
+},
+
   imageContainer: {
     alignItems: 'center',
     marginVertical: 10,
+    width: '100%', // Ensure container takes full width
+
   },
   mainImage: {
-    width: 300,
+    width: '100%', // Image takes full width of its container
+    // width: 300,
     height: 250,
     resizeMode: 'cover',
+    borderRadius: 10,
+
+  },
+  hostingLabel: {
+    fontWeight: 'bold',
+    marginBottom: 5, // Adjust spacing as needed
+    // Add any other styling you wish
   },
   thumbnailContainer: {
     flexDirection: 'row',
     marginTop: 10,
   },
   thumbnail: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     marginRight: 10,
+    borderRadius: 5,
+
   },
   listGroup: {
     padding: 10,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   profileLink: {
@@ -495,8 +546,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
  detailsContainer: {
-    padding: 10,
-  },
+  paddingHorizontal: 10,
+},
   detailItem: {
     fontSize: 16,
     marginBottom: 5,
@@ -507,6 +558,8 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     marginTop: 10,
+    marginBottom: 20,
+
   },
   cardDetail: {
     fontSize: 16,
@@ -519,16 +572,20 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     marginVertical: 10,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+
+
   },
   tagButton: {
-    backgroundColor: '#007bff',
-    padding: 5,
+    backgroundColor: '#f2ebe0',
+    padding: 8,
     borderRadius: 5,
     marginRight: 6,
     marginBottom: 6,
   },
   tagButtonText: {
-    color: '#fff',
+    color: '#000000',
     fontSize: 12,
   },
   dealButton: {
@@ -536,6 +593,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    marginTop: 10,  // Adjust the value as needed
+
   },
   dealButtonText: {
     color: '#000',
@@ -558,29 +617,55 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   commentsContainer: {
-    marginTop: 50,
+    marginTop: 20,
     paddingHorizontal: 10,
   },
   commentsTitle: {
-    fontSize: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
+    // marginBottom: 5,
+  },
+  reviewsTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
   },
+
   postCommentContainer: {
-    marginBottom: 50,
+    marginBottom: 20,
     paddingHorizontal: 10,
   },
   item: {
-    marginVertical: 8,
-    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    // marginVertical: 8, // Adjust margin as needed for equal spacing
+    marginTop: 8,
+    borderBottomWidth: 1, // Add a bottom border
+    borderBottomColor: '#cccccc', // Set the color of the border
+    paddingBottom: 8, // Add padding below the content, equal to marginVertical for balance
   },
+  
+  separator: {
+    height: 1, // or the thickness you prefer
+    backgroundColor: '#ccc', // grey color
+    marginVertical: 8, // optional, for spacing
+  },
+  
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+    marginLeft: 10,
+
   },
   value: {
     fontSize: 14,
     color: '#333',
+    marginLeft: 10,
+
+  },
+  votingButton: {
+    paddingLeft: 10, // Adjust the value as needed
+    paddingRight: 10, // Adjust the value as needed
   },
   image: {
     width: 30,
@@ -592,9 +677,30 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   header: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    marginTop: 20,
+
+  },
+  headerHost: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
+  headerDesc: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  related: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  relatedContainer: {
+    padding: 10, // Add padding around the entire related projects section
+    // You can add other styling properties as needed
   },
   items: {
     flexDirection: 'row',

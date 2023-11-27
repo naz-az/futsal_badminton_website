@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import AuthContext from '../context/authContext';
 import { useNavigation } from '@react-navigation/native';
+import CustomButton from '../components/CustomButton';
 
 const SettingsPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -63,32 +64,51 @@ const SettingsPage = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>YOUR SETTINGS</Text>
-      <Text style={styles.subTitle}>Manage Your Account</Text>
+      {/* <Text style={styles.subTitle}>Manage Your Account</Text> */}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Edit Account</Text>
-        <Button title="Edit Account" onPress={() => navigation.navigate('EditAccount')} />
-      </View>
+      <Text style={styles.sectionTitle}>Edit Account</Text>
+      <CustomButton 
+        title="Edit Account" 
+        onPress={() => navigation.navigate('EditAccount')} 
+        color="#053c43" // Applied color
+        textColor="white" // Assuming you want white text
+      />
+    </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Privacy Settings</Text>
-        <Button title="Manage Blocked Users" onPress={() => navigation.navigate('BlockedUsersPage')} />
-      </View>
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Privacy Settings</Text>
+      <CustomButton 
+        title="Manage Blocked Users" 
+        onPress={() => navigation.navigate('BlockedUsersPage')} 
+        color="#053c43" // Applied color
+        textColor="white"
+      />
+    </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Notification Settings</Text>
-        <Button title="Notification Settings" onPress={() => navigation.navigate('NotificationSettings')} />
-      </View>
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Notification Settings</Text>
+      <CustomButton 
+        title="Notification Settings" 
+        onPress={() => navigation.navigate('NotificationSettings')} 
+        color="#053c43" // Applied color
+        textColor="white"
+      />
+    </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Change Password</Text>
-        <Button title="Change Password" onPress={() => navigation.navigate('ChangePasswordForm')} />
-      </View>
-
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Change Password</Text>
+      <CustomButton 
+        title="Change Password" 
+        onPress={() => navigation.navigate('ChangePasswordForm')} 
+        color="#053c43" // Applied color
+        textColor="white"
+      />
+    </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Deactivate Account</Text>
-        <Button title="Deactivate Account" color="red" onPress={() => setShowModal(true)} />
+        <CustomButton title="Deactivate Account" color="#a12222" onPress={() => setShowModal(true)} />
       </View>
 
       {/* Modal-like component for confirmation */}
@@ -117,32 +137,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#F4F6F8', // softer background color
   },
   title: {
-    fontSize: 20,
+    fontSize: 24, // larger font size
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#333', // dark color for better contrast
   },
   section: {
-    marginVertical: 10,
+    marginVertical: 15,
+    alignItems: 'center', // Center align items
   },
+  // You may also want to adjust the sectionTitle style if needed
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '500',
+    // ... existing styles ...
+    textAlign: 'center', // Center align text
+  },
+  // Add a new style for button width
+  buttonWidth: {
+    width: 250, // Set a fixed width for buttons
+    maxWidth: '80%', // Optionally set a maximum width relative to screen size
   },
   modal: {
     padding: 20,
     backgroundColor: '#fff',
-    borderRadius: 5,
-    elevation: 5,
+    borderRadius: 10, // rounded corners
+    elevation: 10, // subtle shadow
     alignItems: 'center',
+    width: '90%', // limit width for better aesthetics
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     width: '100%',
-    padding: 10,
-    marginVertical: 10,
+    padding: 15, // increased padding for better touch area
+    borderRadius: 5, // rounded corners
+    marginVertical: 15, // increased margin
   },
 });
 

@@ -7,8 +7,16 @@ import { Card, ButtonGroup } from 'react-native-elements'; // You might need to 
 import VotingButtons from "../components/VotingButtons"; // Adjust the path if necessary
 import AuthContext from '../context/authContext'; // Adjust the path as needed
 import ProjectCard from "../components/ProjectCard";
+import ProjectComponent from "../components/ProjectComponent";
+import Icon from 'react-native-vector-icons/FontAwesome'; // You can choose other icon sets as needed
+import CustomButton from "../components/CustomButton";
 
-
+// CustomButton Component Definition
+// const CustomButton = ({ title, onPress, style }) => (
+//   <TouchableOpacity onPress={onPress} style={[styles.customButton, style]}>
+//     <Text style={styles.buttonText}>{title}</Text>
+//   </TouchableOpacity>
+// );
 
 function Categories({ route }) {
   const [tags, setTags] = useState([]);
@@ -156,58 +164,73 @@ function Categories({ route }) {
   };
 
   return (
-    <ScrollView>
+    <ScrollView style={{ backgroundColor: '#ffffff' }}>
       <View style={styles.container}>
         <Text style={styles.header}>Categories</Text>
 
         {auth.isAuthenticated && (
           <View style={styles.followTagsButton}>
-            <Button title="View Followed Tags" onPress={navigateToFollowedTags} />
+            <CustomButton title="View Followed Tags" color="#2e4457" onPress={navigateToFollowedTags} />
           </View>
         )}
 
-        <View style={styles.tagButtons}>
-          <Button title="←" onPress={handleScrollLeft} />
-          <ScrollView horizontal ref={scrollViewRef}>
-            {tags.map((tag) => (
-              <TouchableOpacity
-                key={tag.id}
-                style={tag.id === activeTagId ? styles.activeTagButton : styles.tagButton}
-                onPress={() => {
-                  fetchProjectsByTag(tag.id);
-                  setActiveTagId(tag.id);
-                }}
-              >
-                <Text>{tag.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-          <Button title="→" onPress={handleScrollRight} />
-        </View>
+<View style={styles.tagButtons}>
+  <TouchableOpacity onPress={handleScrollLeft} style={styles.scrollButtonLeft}>
+    <Icon name="arrow-left" size={20} color="#000" /> {/* Left Icon */}
+  </TouchableOpacity>
+  <ScrollView horizontal ref={scrollViewRef} snapToAlignment="start" decelerationRate="fast" showsHorizontalScrollIndicator={false}>
+    {tags.map((tag) => (
+      <TouchableOpacity
+        key={tag.id}
+        style={tag.id === activeTagId ? styles.activeTagButton : styles.tagButton}
+        onPress={() => {
+          fetchProjectsByTag(tag.id);
+          setActiveTagId(tag.id);
+        }}
+      >
+        <Text>{tag.name}</Text>
+      </TouchableOpacity>
+    ))}
+  </ScrollView>
+  <TouchableOpacity onPress={handleScrollRight} style={styles.scrollButtonRight}>
+    <Icon name="arrow-right" size={20} color="#000" /> {/* Right Icon */}
+  </TouchableOpacity>
+</View>
 
-        <View style={styles.tagDetails}>
-          {activeTagName && (
-            <Text style={styles.activeTagName}>Deals for {activeTagName}</Text>
-          )}
-          {activeTagId && (
-            <Button
-              title={followedTags.has(activeTagId) ? `Unfollow ${activeTagName}` : `Follow ${activeTagName}`}
-              onPress={() => toggleFollowTag(activeTagId)}
-              color={followedTags.has(activeTagId) ? "#FFA500" : "#FFFFFF"} // Warning color for unfollow, light color for follow
-            />
-          )}
-        </View>
+
+
+
+<View style={styles.tagDetails}>
+  {activeTagName && (
+    <Text style={styles.activeTagName}>Events for {activeTagName}</Text>
+  )}
+  {activeTagId && (
+    <CustomButton
+      title={followedTags.has(activeTagId) ? `Unfollow ${activeTagName}` : `Follow ${activeTagName}`}
+      onPress={() => toggleFollowTag(activeTagId)}
+      color={followedTags.has(activeTagId) ? "#ac912f" : "#726d67"} // Color styling
+    />
+  )}
+</View>
+
         {/* Display the projects or other content as needed */}
       </View>
 
         {/* Render projects */}
-        {currentTagProjects.map(project => (
+        {/* {currentTagProjects.map(project => (
           <ProjectCard
             key={project.id}
             project={project}
             auth={auth}
           />
-        ))}
+        ))} */}
+
+{currentTagProjects.map((project) => (
+  <View key={project.id} style={{ marginLeft: 15, marginRight: 15 }}> {/* Apply margin to left and right */}
+    <ProjectComponent project={project} />
+  </View>
+))}
+
 
 
     </ScrollView>
@@ -217,7 +240,8 @@ function Categories({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 15,
+
   },
   header: {
     fontSize: 24,
@@ -226,24 +250,48 @@ const styles = StyleSheet.create({
   },
   followTagsButton: {
     marginBottom: 25,
+    alignSelf: 'flex-start', // Aligns the button to the left
+  },
+  customButton: {
+    backgroundColor: '#75481e', // Example creative color
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#fff',
+  },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
   },
   tagButtons: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  scrollButtonLeft: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10, // Margin on the right side for the left arrow
+  },
+  scrollButtonRight: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10, // Margin on the left side for the right arrow
+  },
   tagButton: {
     marginHorizontal: 5,
-    padding: 10,
+    padding: 8,
     backgroundColor: '#DDDDDD', // Secondary color
   },
   activeTagButton: {
     marginHorizontal: 5,
-    padding: 10,
-    backgroundColor: '#007BFF', // Primary color
+    padding: 8,
+    backgroundColor: '#ffd597', // Primary color
   },
   tagDetails: {
     display: 'flex',
+    flexDirection: 'row', // Align items horizontally
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 20,
   },
   activeTagName: {

@@ -120,7 +120,6 @@ class ProjectSerializer(serializers.ModelSerializer):
     start_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")  # Adjust format as needed
     end_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ")    # Adjust format as needed
 
-
     class Meta:
         model = Project
         fields = '__all__'

@@ -23,6 +23,8 @@ function OtherUserFollowingPage({ route, navigation }) {
         setIsFetching(true);
         try {
             const response = await axios.get(`http://127.0.0.1:8000/api/profiles/${profileId}/following/`);
+            console.log('Following data:', response.data); // Add this line to log the response data
+
             const followingData = response.data;
 
             if (isAuthenticated) {
@@ -84,32 +86,41 @@ function OtherUserFollowingPage({ route, navigation }) {
         }
     };
 
+    
+    const isCurrentUserOwner = (profileId) => {
+        return user && user.profile && user.profile.id === profileId;
+    };
+
     if (isFetching) {
         return <View style={styles.container}><Text>Loading...</Text></View>;
     }
 
+
+
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>Following</Text>
-            <Text style={styles.subtitle}>This user is following {following.length} {following.length === 1 ? 'user' : 'users'}</Text>
+            <Text style={styles.subtitle}>{user.profile.username} is following {following.length} {following.length === 1 ? 'user' : 'users'}</Text>
             {following.map(profile => (
                 <View key={profile.id} style={styles.card}>
-                    <TouchableOpacity onPress={() => navigation.navigate('UserProfile', { profileId: profile.id })}>
-                        <Image source={{ uri: processImageUrl(profile.profile_image) }} style={styles.profileImage} />
-                    </TouchableOpacity>
-                    <View style={styles.cardBody}>
-                        <TouchableOpacity onPress={() => navigation.navigate('UserProfile', { profileId: profile.id })}>
-                            <Text style={styles.cardTitle}>{profile.name}</Text>
+                    <View style={styles.leftColumn}>
+                        <TouchableOpacity onPress={() => navigation.navigate(isCurrentUserOwner(profile.id) ? 'UserAccount' : 'UserProfileDetail', { id: profile.id })}>
+                            <Image source={{ uri: processImageUrl(profile.profile_image) }} style={styles.profileImage} />
                         </TouchableOpacity>
+                    </View>
+                    <View style={styles.middleColumn}>
+                        <Text style={styles.cardTitle}>{profile.name}</Text>
                         <Text style={styles.cardText}>{profile.short_intro?.slice(0, 60) ?? ''}</Text>
                     </View>
-                    {user.profile.id !== profile.id && (
-                        <Button 
-                            title={profile.is_following ? 'Unfollow' : 'Follow'}
-                            onPress={() => handleFollowUnfollow(profile, profile.is_following)}
-                            color={profile.is_following ? "#6c757d" : "#007bff"}
-                        />
-                    )}
+                    <View style={styles.rightColumn}>
+                        {user.profile.id !== profile.id && (
+                            <TouchableOpacity 
+                                onPress={() => handleFollowUnfollow(profile, profile.is_following)}
+                                style={styles.button}
+                            >
+                                <Text style={styles.buttonText}>{profile.is_following ? 'Unfollow' : 'Follow'}</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
             ))}
         </ScrollView>
@@ -120,6 +131,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
+        backgroundColor: '#ffffff',
+
     },
     title: {
         fontSize: 22,
@@ -129,14 +142,33 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 18,
         marginBottom: 20,
+        fontWeight: 'bold',
+
     },
     card: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 10,
         padding: 10,
-        backgroundColor: '#fff',
+        backgroundColor: '#fcfcff',
         borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
+    },
+    leftColumn: {
+        flex: 1,
+        // Add any additional styling if needed
+    },
+    middleColumn: {
+        flex: 2,
+        // Add any additional styling if needed
+    },
+    rightColumn: {
+        flex: 1,
+        // Add any additional styling if needed
     },
     profileImage: {
         width: 60,
@@ -148,12 +180,32 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     cardTitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 'bold',
     },
     cardText: {
-        fontSize: 14,
-    }
+        fontSize: 12,
+    },
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 6,
+        paddingHorizontal: 16,
+        borderRadius: 4,
+        elevation: 3,
+        backgroundColor: '#333361', // Choose a color that fits your app theme
+    },
+    buttonText: {
+        fontSize: 12,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'white',
+    },
+    buttonPressed: {
+        opacity: 0.8, // Slight opacity change on press
+        transform: [{ scale: 0.96 }], // Slight scale down effect
+    },
 });
 
 export default OtherUserFollowingPage;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, FlatList, StyleSheet } from 'react-native';
 import Project from '../components/Project';
 import axios from 'axios';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 function HomeScreen() {
     const [projects, setProjects] = useState([]);
@@ -34,7 +35,7 @@ function HomeScreen() {
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search for deals"
+                    placeholder="Search for events"
                     value={query}
                     onChangeText={setQuery}
                 />
@@ -42,7 +43,7 @@ function HomeScreen() {
                     style={styles.searchButton}
                     onPress={() => handleSubmit(query)}
                 >
-                    <Text>Search</Text>
+                    <Icon name="search" size={20} color="#888" /> {/* Search icon replaces text */}
                 </TouchableOpacity>
             </View>
 
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20, // Increased padding for better spacing
-        backgroundColor: '#F0F0F0', // New background color
+        backgroundColor: '#FFFFFF', // New background color
     },
     header: {
         fontSize: 28, // Increased font size
@@ -74,18 +75,22 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#4e4646',
         padding: 12, // Increased padding
         marginRight: 10,
-        borderRadius: 25, // Rounded corners
-        backgroundColor: 'white', // White background for input
+        borderRadius: 8, // Rounded corners
+        backgroundColor: 'transparent', // Transparent background
+
     },
     searchButton: {
         paddingVertical: 12, // Increased padding
         paddingHorizontal: 15,
-        backgroundColor: '#007bff', // Updated button color
-        borderRadius: 25, // Rounded corners
+        backgroundColor: 'transparent', // Transparent background
+        borderRadius: 8, // Rounded corners
+        borderWidth: 1, // Add border width
+        borderColor: '#4e4646',
     },
+    
 });
 
 export default HomeScreen;

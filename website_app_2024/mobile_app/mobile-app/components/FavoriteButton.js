@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, View, Text, StyleSheet } from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { TouchableOpacity, View, StyleSheet } from "react-native";
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
 
 function FavoriteButton({ projectId, token }) {
     const [isFavorited, setIsFavorited] = useState(false);
-    const navigation = useNavigation(); // Initialize navigation
-
-    // Function to check if user is authenticated
-    const isAuthenticated = async () => {
-        const storedToken = await AsyncStorage.getItem('token');
-        return storedToken != null;
-    };
-
-    // Function to redirect to login if not authenticated
-    const redirectToLogin = () => {
-        navigation.navigate('Login');
-    };
+    const navigation = useNavigation();
 
     useEffect(() => {
-        if (token) {
+        if (token && projectId) {
             axios.get(`http://127.0.0.1:8000/api/favorites/is-favorite/${projectId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
@@ -30,8 +19,8 @@ function FavoriteButton({ projectId, token }) {
     }, [projectId, token]);
 
     const handleFavorite = async () => {
-        if (!await isAuthenticated()) {
-            redirectToLogin();
+        if (!token) {
+            navigation.navigate('Login');
             return;
         }
 
@@ -45,11 +34,13 @@ function FavoriteButton({ projectId, token }) {
 
     return (
         <View style={styles.container}>
-            <Button
-                title={isFavorited ? "Remove Favourite" : "Add Favourite"}
-                onPress={handleFavorite}
-                color={isFavorited ? "#dc3545" : "#6c757d"}
-            />
+            <TouchableOpacity onPress={handleFavorite} style={styles.button}>
+                <Icon
+                    name={isFavorited ? "bookmark" : "bookmark-o"}
+                    size={25}
+                    color={isFavorited ? "#802c2c" : "#cccccc"} // Change color based on isFavorited state
+                />
+            </TouchableOpacity>
         </View>
     );
 }
@@ -58,7 +49,18 @@ const styles = StyleSheet.create({
     container: {
         margin: 10
     },
-    // Add more styles here if needed
-});
+    button: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+        padding: 5,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    buttonText: {
+        color: 'white', // Text color
+        marginLeft: 10, // Space between icon and text
+    },});
 
 export default FavoriteButton;

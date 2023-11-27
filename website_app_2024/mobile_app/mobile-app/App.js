@@ -31,13 +31,14 @@ import NotificationsPage from './screens/NotificationsPage';
 import AddProject from './screens/AddProject';
 import EditProject from './screens/EditProject';
 import EditAccount from './screens/EditAccount';
-import SwipePage from './screens/SwipePage';
+// import SwipePage from './screens/SwipePage';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import OtherUserFollowersPage from './screens/OtherUserFollowersPage';
 import OtherUserFollowingPage from './screens/OtherUserFollowingPage';
 
+import SwipePage from './ReactNative-Swipe-Function/src/Main/SwipePage';
 
 // const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -224,11 +225,11 @@ const App = () => {
         >
           {/* Screens accessible before logging in */}
           <Stack.Screen name="Login" component={LoginForm} />
-          <Stack.Screen name="Register" component={RegistrationForm} />
+          <Stack.Screen name="Register" component={RegistrationForm} /> 
           
-          {/* Main application screens, only accessible after login */}
+          {/* Main application screens, only accessible after login
           {/* <Stack.Screen name="Main" component={MainTabNavigator} options={{ headerShown: false }} /> */}
-          <Stack.Screen name="Main" component={MainDrawerNavigator} options={{ headerShown: false }} />
+          <Stack.Screen name="Main" component={MainDrawerNavigator} options={{ headerShown: false }} /> 
 
         </Stack.Navigator>
       </NavigationContainer>

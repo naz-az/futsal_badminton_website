@@ -43,7 +43,7 @@ const PostComment = ({ projectId, onCommentPosted, navigation }) => {
       <Button
         onPress={handleSubmit}
         title="Post Comment"
-        color="#007bff"
+        color="#292929"
       />
     </View>
   );

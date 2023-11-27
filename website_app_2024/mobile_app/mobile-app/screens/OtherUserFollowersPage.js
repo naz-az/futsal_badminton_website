@@ -104,6 +104,10 @@ function OtherUserFollowersPage() {
     }
   };
 
+  const isCurrentUserOwner = (profileId) => {
+    return user && user.profile && user.profile.id === profileId;
+};
+
   if (isFetching) {
     return <View style={styles.center}><Text>Loading...</Text></View>;
   }
@@ -111,11 +115,11 @@ function OtherUserFollowersPage() {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Followers</Text>
-      <Text style={styles.subHeader}>This user has {followers.length} {followers.length === 1 ? 'follower' : 'followers'}</Text>
+      <Text style={styles.subHeader}>{user.profile.username} has {followers.length} {followers.length === 1 ? 'follower' : 'followers'}</Text>
 
       {followers.map((profile) => (
         <View key={profile.id} style={styles.card}>
-          <TouchableOpacity onPress={() => navigation.navigate('Profile', { profileId: profile.id })}>
+                    <TouchableOpacity onPress={() => navigation.navigate(isCurrentUserOwner(profile.id) ? 'UserAccount' : 'UserProfileDetail', { id: profile.id })}>
             <Image source={{ uri: processImageUrl(profile.profile_image) }} style={styles.profileImage} />
           </TouchableOpacity>
           <View style={styles.cardBody}>
@@ -164,6 +168,11 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#fff',
     borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   profileImage: {
     width: 60,
@@ -179,7 +188,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   followButton: {
-    backgroundColor: 'blue',
+    backgroundColor: '#333361',
     padding: 10,
     borderRadius: 5,
   },

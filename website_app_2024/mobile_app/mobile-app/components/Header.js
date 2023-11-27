@@ -26,7 +26,7 @@ const Header = ({ navigation }) => {
 
   return (
     <View style={styles.headerContainer}>
-      <Text style={styles.title}>Friibee</Text>
+      <Text style={styles.title}>KickMates</Text>
       {user && user.profile ? (
         <View style={styles.userInfoContainer}>
           <TouchableOpacity onPress={() => setShowDropdown(!showDropdown)}>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 15,
-    backgroundColor: '#f3f3f3', // You can change this to any color you want
+    backgroundColor: '#ffffff', // You can change this to any color you want
     borderBottomWidth: 1,
     borderBottomColor: '#ddd', // Gives a subtle bottom border
   },

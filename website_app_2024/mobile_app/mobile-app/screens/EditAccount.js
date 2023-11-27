@@ -6,6 +6,11 @@ import { useNavigation } from '@react-navigation/native';
 import AuthContext from '../context/authContext';
 import { launchImageLibrary } from 'react-native-image-picker';
 
+import { Animated, Easing } from 'react-native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faArrowLeft, faCamera } from '@fortawesome/free-solid-svg-icons';
+
+
 const EditAccount = () => {
     const [profile, setProfile] = useState({
         name: '',
