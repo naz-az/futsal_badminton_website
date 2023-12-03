@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, Button, ScrollView, Image, TouchableOpacity, FlatList, Picker, StyleSheet, Linking } from "react-native";
+import { View, Text, Button, ScrollView, Image, TouchableOpacity, FlatList, Picker, StyleSheet, Linking, Modal } from "react-native";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -11,6 +11,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faYoutube, faFacebook, faInstagram, faTwitter, faSquareJs } from '@fortawesome/free-brands-svg-icons';
 import AttendButton from "../components/AttendButton";
 import ProjectComponent from "../components/ProjectComponent";
+import CustomButton from "../components/CustomButton";
+import SortingComponent from '../components/SortingComponent';
+
 
 function UserProfileDetail() {
   const [profile, setProfile] = useState({});
@@ -23,7 +26,6 @@ function UserProfileDetail() {
 
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [displayedProjects, setDisplayedProjects] = useState(6);
-  const [sortType, setSortType] = useState('newest');
 
   const auth = useContext(AuthContext);
   const currentUserId = auth.user ? auth.user.profile.id : null;
@@ -36,7 +38,18 @@ function UserProfileDetail() {
 
   const [currentProjectId, setCurrentProjectId] = useState(null);
 
-  
+    // State to control the visibility of the profile image modal
+    const [isProfileImageModalVisible, setProfileImageModalVisible] = useState(false);
+
+    const [sortType, setSortType] = useState('newToOld');
+
+    
+    // Function to toggle the profile image modal visibility
+    const toggleProfileImageModal = () => {
+      setProfileImageModalVisible(!isProfileImageModalVisible);
+    };
+
+
   useEffect(() => {
     const fetchToken = async () => {
       const fetchedToken = await AsyncStorage.getItem("token");
@@ -187,10 +200,12 @@ function UserProfileDetail() {
     checkFollowingStatus();
   }, [id]);
   
-  const sortProjects = (selectedSort) => {
+
+  
+  useEffect(() => {
     let sortedProjects = [...projects];
   
-    switch (selectedSort) {
+    switch (sortType) {
       case 'topToLow':
         sortedProjects.sort((a, b) => b.upvotes - a.upvotes);
         break;
@@ -214,13 +229,9 @@ function UserProfileDetail() {
     }
   
     setSortedProjects(sortedProjects);
-  };
-  
+  }, [sortType, projects]); // Depend on sortType and projects
 
-  useEffect(() => {
-    sortProjects(selectedSort);
-  }, [selectedSort, projects]);
-  
+
 
 
   useEffect(() => {
@@ -289,11 +300,40 @@ function UserProfileDetail() {
   return (
     <ScrollView style={{ flex: 1, padding: 20, backgroundColor: '#ffffff' }}>
 
-<View style={styles.profileCard}>
+<Modal
+      animationType="fade"
+      transparent={true}
+      visible={isProfileImageModalVisible}
+      onRequestClose={toggleProfileImageModal}
+    >
+      <TouchableOpacity
+        style={styles.centeredView}
+        activeOpacity={1} // Keep this to 1 to avoid the opacity change on press
+        onPressOut={toggleProfileImageModal} // This will trigger when the user releases the press on the backdrop
+      >
+        <View style={styles.modalView} onStartShouldSetResponder={() => true}> {/* This prevents the press from reaching the backdrop when the modal is pressed */}
+          <Image
+            source={{ uri: processImageUrl(profile.profile_image) }}
+            style={styles.modalImage}
+          />
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={toggleProfileImageModal}
+          >
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+
+    <View style={styles.profileCard}>
+      <TouchableOpacity onPress={toggleProfileImageModal}>
         <Image
           source={{ uri: processImageUrl(profile.profile_image) }}
           style={{ width: 100, height: 100, borderRadius: 50 }}
         />
+      </TouchableOpacity>
+
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{profile.name}</Text>
         <Text>{profile.short_intro}</Text>
         {profile.location && <Text>Based in {profile.location}</Text>}
@@ -387,27 +427,11 @@ function UserProfileDetail() {
           <Text>No deals posted by user</Text>
         ) : (
           <>
-            {/* Sorting functionality (can use Picker or custom dropdown) */}
-            {/* Implement sorting UI and logic */}
+            <SortingComponent sortType={sortType} setSortType={setSortType} />
 
-            <Picker
-  selectedValue={selectedSort}
-  onValueChange={(itemValue) => setSelectedSort(itemValue)}
-  style={{ height: 30, width: 150, marginBottom:20 }}
->
-  <Picker.Item label="New to Old" value="newToOld" />
-  <Picker.Item label="Old to New" value="oldToNew" />
-  <Picker.Item label="Top to Low (Hotness)" value="topToLow" />
-  <Picker.Item label="Low to Top (Hotness)" value="lowToTop" />
-  <Picker.Item label="High to Low (Price)" value="highToLow" />
-  <Picker.Item label="Low to High (Price)" value="lowToHigh" />
-</Picker>
-
-
-{sortedProjects.map((project) => (
-  <ProjectComponent key={project.id} project={project} />
-))}
-
+            {sortedProjects.map((project) => (
+              <ProjectComponent key={project.id} project={project} />
+            ))}
           </>
         )}
       </View>
@@ -610,6 +634,49 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'black',
   },
+
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.8)', // Fully opaque black background
+  },
+  modalView: {
+    backgroundColor: "transparent", // No need for a background color here
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  modalImage: {
+    width: 300, // You can adjust this as needed
+    height: 300, // You can adjust this as needed
+    borderRadius: 150, // This should be half of width/height to make it circular
+  },
+  closeButton: {
+    position: 'absolute',
+    // top: 30, // Adjust as needed
+    right: 20, // Adjust as needed
+    backgroundColor: 'lightgrey',
+    width: 30, // Set a fixed width
+    height: 30, // Ensure height is the same as width to create a circle
+    borderRadius: 15, // Half of width/height will be the borderRadius to make it a circle
+    justifyContent: 'center', // Center the 'X' text horizontally
+    alignItems: 'center', // Center the 'X' text vertically
+    elevation: 2
+  },
+  closeButtonText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 16,
+    // Remove any padding or margin if present
+  },
+
 });
 
 

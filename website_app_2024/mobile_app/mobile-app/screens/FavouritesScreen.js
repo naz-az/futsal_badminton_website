@@ -10,6 +10,9 @@ import AttendButton from '../components/AttendButton'; // Ensure this is adapted
 import { useNavigation } from '@react-navigation/native';
 import ProjectComponent from '../components/ProjectComponent';
 
+import SortingComponent from '../components/SortingComponent';
+
+import ConfirmationModal from '../components/ConfirmationModal';
 
 function FavouritesScreen() {
   const [favorites, setFavorites] = useState([]);
@@ -28,13 +31,13 @@ function FavouritesScreen() {
   const [sortOrder, setSortOrder] = useState('desc');
 
 
-  // Function to handle sort change
-  const handleSortChange = (field, order) => {
-    setSortField(field);
-    setSortOrder(order);
-    fetchFavorites(field, order);
-  };
-  
+  const [sortedFavorites, setSortedFavorites] = useState([]);
+  const [sortType, setSortType] = useState('newToOld');
+
+  const [modalVisible, setModalVisible] = useState(false); // Step 1: Initialize state for modal visibility
+  const [itemToRemove, setItemToRemove] = useState(null); // Step 1: Initialize state for item ID
+
+
   const processImageUrl = (imageUrl) => {
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
       return `http://127.0.0.1:8000${imageUrl}`;
@@ -99,8 +102,50 @@ function FavouritesScreen() {
     }
   };
   
+  const showConfirmationModal = (projectId) => { // Step 2: Function to show modal
+    setItemToRemove(projectId);
+    setModalVisible(true);
+  };
+
+  const handleRemoveConfirmed = () => { // Step 3: Modified remove function
+    if (itemToRemove) {
+      handleRemove(itemToRemove);
+      setItemToRemove(null); // Reset the itemToRemove state
+    }
+  };
+
+  const handleUnbookmark = (projectId) => {
+    setFavorites((currentFavorites) => currentFavorites.filter((fav) => fav.project.id !== projectId));
+  };
   
-  
+  useEffect(() => {
+    let sortedProjects = [...favorites]; // Create a copy of the favorites array for sorting
+
+    switch (sortType) {
+      case 'topToLow':
+        sortedProjects.sort((a, b) => b.project.upvotes - a.project.upvotes);
+        break;
+      case 'lowToTop':
+        sortedProjects.sort((a, b) => a.project.upvotes - b.project.upvotes);
+        break;
+      case 'highToLow':
+        sortedProjects.sort((a, b) => b.project.price - a.project.price);
+        break;
+      case 'lowToHigh':
+        sortedProjects.sort((a, b) => a.project.price - b.project.price);
+        break;
+      case 'newToOld':
+        sortedProjects.sort((a, b) => new Date(b.project.created) - new Date(a.project.created));
+        break;
+      case 'oldToNew':
+        sortedProjects.sort((a, b) => new Date(a.project.created) - new Date(b.project.created));
+        break;
+      default:
+        break;
+    }
+
+    setSortedFavorites(sortedProjects); // Update state with sorted projects
+  }, [sortType, favorites]);
   
 
   if (loading) {
@@ -122,40 +167,52 @@ function FavouritesScreen() {
         <Text style={styles.headerSubtitle}>You have {favorites.length} bookmark item{favorites.length !== 1 ? "s" : ""}</Text>
       </View>
 
-      {/* Sort Options */}
-      <View style={styles.sortContainer}>
-        {/* Picker for Sorting */}
-        <Picker
-          selectedValue={sortField}
-          style={styles.picker}
-          onValueChange={(itemValue) => handleSortChange(itemValue, sortOrder)}
-        >
-          <Picker.Item label="Date" value="created" />
-          <Picker.Item label="Top" value="upvotes" />
-          <Picker.Item label="Price" value="price" />
-        </Picker>
+{/* Sort Options */}
+{/* <View style={styles.sortContainer}> */}
+  {/* Picker for Sorting by Field */}
+  {/* <Picker
+    selectedValue={sortField}
+    style={styles.picker}
+    onValueChange={(itemValue) => handleSortChange(itemValue, sortOrder)}
+  >
+    <Picker.Item label="Date" value="created" />
+    <Picker.Item label="Top" value="upvotes" />
+    <Picker.Item label="Price" value="price" />
+  </Picker> */}
 
-        <Picker
-          selectedValue={sortOrder}
-          style={styles.picker}
-          onValueChange={(itemValue) => handleSortChange(sortField, itemValue)}
-        >
-          <Picker.Item label="Ascending" value="asc" />
-          <Picker.Item label="Descending" value="desc" />
-        </Picker>
-      </View>
+  {/* Picker for Sorting Order */}
+  {/* <Picker
+    selectedValue={sortOrder}
+    style={styles.picker}
+    onValueChange={(itemValue) => handleSortChange(sortField, itemValue)}
+  >
+    <Picker.Item label={sortField === 'price' ? "From Low to Top" : sortField === 'upvotes' ? "From Low to Top" : "From Old to New"} value="asc" />
+    <Picker.Item label={sortField === 'price' ? "From Top to Low" : sortField === 'upvotes' ? "From Top to Low" : "From New to Old"} value="desc" />
+  </Picker> */}
+{/* </View> */}
 
-            {/* Favorites List */}
-            {favorites.map((favorite) => (
+<SortingComponent 
+        sortType={sortType} 
+        setSortType={setSortType}
+      />
+
+      {sortedFavorites.map((favorite) => (
         <ProjectComponent 
           key={favorite.project.id} 
           project={favorite.project} 
-          onRemove={handleRemove} 
-          // pass other necessary props if needed
-        />
+          onRemove={() => showConfirmationModal(favorite.project.id)} 
+          onUnbookmark={() => handleUnbookmark(favorite.project.id)} // Add this line
+
+          />
       ))}
 
-
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        onConfirm={handleRemoveConfirmed} // Step 4: Pass function to modal
+        actionType="remove this event from bookmarks"
+      />
 
           </ScrollView>
   );

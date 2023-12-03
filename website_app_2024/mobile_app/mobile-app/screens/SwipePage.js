@@ -13,6 +13,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Swiper from "react-native-deck-swiper"; // Import Swiper
 
+
 const processImageUrl = (imageUrl) => {
   if (
     imageUrl &&
@@ -29,6 +30,10 @@ function SwipePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+
+
+
+
 
   const isAuthenticated = async () => {
     const token = await AsyncStorage.getItem("token");
@@ -180,6 +185,12 @@ function SwipePage() {
     setShowModal(true);
   };
 
+  const formatMomentDate = (dateString) => {
+    return dateString 
+      ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
+      : "N/A";
+  };
+  
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Swiper

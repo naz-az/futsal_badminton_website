@@ -10,6 +10,9 @@ import FavoriteButton from "../components/FavoriteButton";
 import AuthContext from '../context/authContext';
 import AttendButton from "../components/AttendButton";
 
+import moment from 'moment';
+
+
 function UserProfileDetail() {
   const [profile, setProfile] = useState({});
   const [projects, setProjects] = useState([]); // <-- Add this
@@ -213,6 +216,11 @@ function UserProfileDetail() {
 
   const [showFullText, setShowFullText] = useState(false);
 
+  const formatMomentDate = (dateString) => {
+    return dateString 
+      ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
+      : "N/A";
+  };
 
   return (
     <Container className="my-md">
@@ -480,11 +488,11 @@ function UserProfileDetail() {
 
 
                   <Card.Text>
-  <strong>Start:</strong> {project.start_date ? new Date(project.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+  <strong>Start:</strong> {formatMomentDate(project.start_date)}
 </Card.Text>
 
 <Card.Text>
-  <strong>End:</strong> {project.end_date ? new Date(project.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+  <strong>End:</strong> {formatMomentDate(project.end_date)}
 </Card.Text>
 
         <Card.Text>

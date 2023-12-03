@@ -3,6 +3,8 @@ import { View, Text, Button, Image, Alert, ScrollView, StyleSheet, TouchableOpac
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthContext from '../context/authContext';
+import ConfirmationModal from '../components/ConfirmationModal';
+
 
 function OtherUserFollowingPage({ route, navigation }) {
     const { profileId } = route.params;
@@ -11,6 +13,26 @@ function OtherUserFollowingPage({ route, navigation }) {
     const { user } = useContext(AuthContext);
     const isAuthenticated = user && user.profile && user.profile.id;
 
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedProfile, setSelectedProfile] = useState(null);
+    
+    const handleUnfollowConfirm = async () => {
+        if (selectedProfile) {
+            await handleFollowUnfollow(selectedProfile, true);
+        }
+    };
+    
+    const handleFollowUnfollowPress = (profile) => {
+        if (profile.is_following) {
+            // If the user is currently being followed, show the confirmation modal
+            setSelectedProfile(profile);
+            setModalVisible(true);
+        } else {
+            // If the user is not being followed, immediately follow the user without confirmation
+            handleFollowUnfollow(profile, false);
+        }
+    };
         // Process image URL function
         const processImageUrl = (imageUrl) => {
             if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
@@ -58,21 +80,7 @@ function OtherUserFollowingPage({ route, navigation }) {
             navigation.navigate('Login');
             return;
         }
-        if (isFollowing) {
-            const confirmUnfollow = await new Promise((resolve) => {
-                Alert.alert(
-                    "Unfollow User",
-                    "Are you sure you want to unfollow this user?",
-                    [
-                        { text: "Cancel", style: "cancel", onPress: () => resolve(false) },
-                        { text: "OK", onPress: () => resolve(true) }
-                    ]
-                );
-            });
-            if (!confirmUnfollow) {
-                return;
-            }
-        }
+    
         const token = await AsyncStorage.getItem('token');
         const config = {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -80,12 +88,16 @@ function OtherUserFollowingPage({ route, navigation }) {
         const endpoint = isFollowing ? `http://127.0.0.1:8000/api/profiles/${profile.id}/unfollow/` : `http://127.0.0.1:8000/api/profiles/${profile.id}/follow/`;
         try {
             await axios.post(endpoint, {}, config);
-            await fetchFollowing();
+            setFollowing(
+                following.map(p => 
+                    p.id === profile.id ? { ...p, is_following: !isFollowing } : p
+                )
+            );
         } catch (error) {
             console.error('Error toggling follow state', error);
         }
     };
-
+    
     
     const isCurrentUserOwner = (profileId) => {
         return user && user.profile && user.profile.id === profileId;
@@ -94,6 +106,8 @@ function OtherUserFollowingPage({ route, navigation }) {
     if (isFetching) {
         return <View style={styles.container}><Text>Loading...</Text></View>;
     }
+
+
 
 
 
@@ -114,15 +128,22 @@ function OtherUserFollowingPage({ route, navigation }) {
                     <View style={styles.rightColumn}>
                         {user.profile.id !== profile.id && (
                             <TouchableOpacity 
-                                onPress={() => handleFollowUnfollow(profile, profile.is_following)}
-                                style={styles.button}
-                            >
-                                <Text style={styles.buttonText}>{profile.is_following ? 'Unfollow' : 'Follow'}</Text>
-                            </TouchableOpacity>
+                            onPress={() => handleFollowUnfollowPress(profile)}
+                            style={styles.button}
+                        >
+                            <Text style={styles.buttonText}>{profile.is_following ? 'Unfollow' : 'Follow'}</Text>
+                        </TouchableOpacity>
                         )}
                     </View>
                 </View>
             ))}
+            <ConfirmationModal
+    modalVisible={modalVisible}
+    setModalVisible={setModalVisible}
+    onConfirm={handleUnfollowConfirm}
+    actionType = 'unfollow this user' 
+
+/>
         </ScrollView>
     );
 }

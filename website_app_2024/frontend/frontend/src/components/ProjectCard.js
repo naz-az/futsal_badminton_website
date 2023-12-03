@@ -8,6 +8,8 @@ import VotingButtons from "./VotingButtons";
 import AttendButton from "./AttendButton";
 import FavoriteButton from "./FavoriteButton";
 
+import moment from 'moment';
+
 function ProjectCard({ project, auth, navigate }) {
   const [isFavorited, setIsFavorited] = useState(false);
 
@@ -63,6 +65,13 @@ function ProjectCard({ project, auth, navigate }) {
       .catch((error) => console.error("Error removing from favorites:", error));
   };
 
+  const formatMomentDate = (dateString) => {
+    return dateString 
+      ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
+      : "N/A";
+  };
+  
+
   return (
     <Col key={project.id} sm={12} md={6} lg={4} xl={3}>
       <Card className="mb-4 mt-4" style={{ padding: "5px", width: "105%" }}>
@@ -112,32 +121,12 @@ function ProjectCard({ project, auth, navigate }) {
 
           <Card.Text>
             <strong>Start:</strong>{" "}
-            {project.start_date
-              ? new Date(project.start_date).toLocaleString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                })
-              : "N/A"}
+{formatMomentDate(project.start_date)}
           </Card.Text>
 
           <Card.Text>
             <strong>End:</strong>{" "}
-            {project.end_date
-              ? new Date(project.end_date).toLocaleString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                })
-              : "N/A"}
+            {formatMomentDate(project.end_date)}
           </Card.Text>
 
           <Card.Text>

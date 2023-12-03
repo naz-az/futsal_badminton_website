@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Picker, FlatList, StyleSheet } from 'react-native';
 import Project from '../components/Project';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import ProjectComponent from '../components/ProjectComponent';
+import SortingComponent from '../components/SortingComponent';
 
 function HomeScreen() {
     const [projects, setProjects] = useState([]);
     const [query, setQuery] = useState('');
+
+    const [sortType, setSortType] = useState('newToOld');
+    const [sortedProjects, setSortedProjects] = useState([]);
+
+
+    
 
     const fetchProjects = async (query = '', sortBy = '', sortOrder = 'desc') => {
         try {
@@ -29,6 +37,33 @@ function HomeScreen() {
     // Render project list
     const renderProject = ({ item }) => <Project project={item} />;
 
+    useEffect(() => {
+        let sorted = [...projects];
+        switch (sortType) {
+            case 'topToLow':
+                sorted.sort((a, b) => b.upvotes - a.upvotes);
+                break;
+              case 'lowToTop':
+                sorted.sort((a, b) => a.upvotes - b.upvotes);
+                break;
+              case 'highToLow':
+                sorted.sort((a, b) => b.price - a.price);
+                break;
+              case 'lowToHigh':
+                sorted.sort((a, b) => a.price - b.price);
+                break;
+              case 'newToOld':
+                sorted.sort((a, b) => new Date(b.created) - new Date(a.created));
+                break;
+              case 'oldToNew':
+                sorted.sort((a, b) => new Date(a.created) - new Date(b.created));
+                break;
+              default:
+                break;
+        }
+        setSortedProjects(sorted);
+    }, [projects, sortType]);
+    
     return (
         <View style={styles.container}>
             {/* <Text style={styles.header}>Deals</Text> */}
@@ -46,11 +81,12 @@ function HomeScreen() {
                     <Icon name="search" size={20} color="#888" /> {/* Search icon replaces text */}
                 </TouchableOpacity>
             </View>
+            <SortingComponent sortType={sortType} setSortType={setSortType} /> {/* Use SortingComponent here */}
 
             <FlatList
-                data={projects}
-                renderItem={renderProject}
-                keyExtractor={project => project.id.toString()}
+                data={sortedProjects}
+                renderItem={({ item }) => <ProjectComponent project={item} />}
+                keyExtractor={item => item.id.toString()}
             />
         </View>
     );

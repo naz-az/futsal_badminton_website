@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import FavoriteButton from "./FavoriteButton";
 import AttendButton from "./AttendButton";
 
+import moment from 'moment';
+
 const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
@@ -70,6 +72,13 @@ const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
 
   const [showFullText, setShowFullText] = useState(false);
 
+  const formatMomentDate = (dateString) => {
+    return dateString 
+      ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
+      : "N/A";
+  };
+  
+
   return (
     <Container>
       <h3>Related Events</h3>
@@ -128,32 +137,12 @@ const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
 
                     <Card.Text>
             <strong>Start:</strong>{" "}
-            {relatedProject.start_date
-              ? new Date(relatedProject.start_date).toLocaleString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                })
-              : "N/A"}
+            {formatMomentDate(relatedProject.start_date)}
           </Card.Text>
 
           <Card.Text>
             <strong>End:</strong>{" "}
-            {relatedProject.end_date
-              ? new Date(relatedProject.end_date).toLocaleString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                })
-              : "N/A"}
+            {formatMomentDate(relatedProject.end_date)}
           </Card.Text>
 
           <Card.Text>

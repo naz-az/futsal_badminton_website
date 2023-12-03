@@ -9,6 +9,8 @@ import AuthContext from '../context/authContext';
 import AttendButton from "../components/AttendButton";
 import FavoriteButton from "../components/FavoriteButton";
 
+import moment from 'moment';
+
 
 export default function FavouritesScreen() {
   const [favorites, setFavorites] = useState([]);
@@ -20,7 +22,12 @@ export default function FavouritesScreen() {
 
   const [showFullText, setShowFullText] = useState(false);
 
-
+  const formatMomentDate = (dateString) => {
+    return dateString 
+      ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
+      : "N/A";
+  };
+  
   const fetchFavorites = async (sortOption, order = 'desc') => {
     try {
       let url = `/api/favorites/?sort_by=${sortOption}&order=${order}`;
@@ -174,32 +181,12 @@ export default function FavouritesScreen() {
 
     <Card.Text>
             <strong>Start:</strong>{" "}
-            {favorite.project.start_date
-              ? new Date(favorite.project.start_date).toLocaleString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                })
-              : "N/A"}
+            {formatMomentDate(favorite.project.start_date)}
           </Card.Text>
 
           <Card.Text>
             <strong>End:</strong>{" "}
-            {favorite.project.end_date
-              ? new Date(favorite.project.end_date).toLocaleString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                })
-              : "N/A"}
+{formatMomentDate(favorite.project.end_date)}
           </Card.Text>
 
           <Card.Text>

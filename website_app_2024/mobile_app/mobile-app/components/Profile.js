@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import CustomButton from './CustomButton';
 
 function Profile({ profile, currentUserId }) {
     const [isFollowing, setIsFollowing] = useState(false);
@@ -104,11 +105,11 @@ function Profile({ profile, currentUserId }) {
     // Add a check to determine if the profile belongs to the current user
     const isCurrentUserProfile = profile.id === currentUserId;
 
-    const CustomButton = ({ title, onPress, color }) => (
-        <TouchableOpacity onPress={onPress} style={[styles.customButton, { backgroundColor: color }]}>
-            <Text style={styles.customButtonText}>{title}</Text>
-        </TouchableOpacity>
-    );
+    // const CustomButton = ({ title, onPress, color }) => (
+    //     <TouchableOpacity onPress={onPress} style={[styles.customButton, { backgroundColor: color }]}>
+    //         <Text style={styles.customButtonText}>{title}</Text>
+    //     </TouchableOpacity>
+    // );
 
     return (
 //         <View style={styles.card}>
@@ -161,13 +162,14 @@ function Profile({ profile, currentUserId }) {
         <Text style={styles.cardText}>{profile.short_intro?.slice(0, 60) ?? ''}</Text>
     </View>
     <View style={styles.rightColumn}>
-        {!isCurrentUserProfile && !isUserBlocked && (
-            isFollowing ? (
-                <CustomButton title="Unfollow" onPress={handleUnfollow} color="#82412d" />
-            ) : (
-                <CustomButton title="Follow" onPress={handleFollow} color="#0d204f" />
-            )
-        )}
+    {!isCurrentUserProfile && !isUserBlocked && (
+  isFollowing ? (
+    <CustomButton title="Unfollow" onPress={handleUnfollow} color="#82412d" fontSize={12} />
+  ) : (
+    <CustomButton title="Follow" onPress={handleFollow} color="#0d204f" fontSize={12} />
+  )
+)}
+
     </View>
 </View>
 

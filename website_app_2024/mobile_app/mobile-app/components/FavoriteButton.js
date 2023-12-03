@@ -4,16 +4,21 @@ import { TouchableOpacity, View, StyleSheet } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 
-function FavoriteButton({ projectId, token }) {
+function FavoriteButton({ projectId, token, onUnbookmark }) { // Add onUnbookmark here
     const [isFavorited, setIsFavorited] = useState(false);
     const navigation = useNavigation();
 
     useEffect(() => {
+        console.log(`FavoriteButton: projectId = ${projectId}, isFavorited = ${isFavorited}`);
+
         if (token && projectId) {
             axios.get(`http://127.0.0.1:8000/api/favorites/is-favorite/${projectId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
-            .then(response => setIsFavorited(response.data.isFavorited))
+            .then(response => {
+                console.log('Favorite status check response:', response);
+                setIsFavorited(response.data.isFavorited);
+            })
             .catch(error => console.error("Error checking favorite status:", error));
         }
     }, [projectId, token]);
@@ -28,10 +33,16 @@ function FavoriteButton({ projectId, token }) {
         const method = isFavorited ? 'delete' : 'post';
 
         axios({ method, url, headers: { Authorization: `Bearer ${token}` } })
-        .then(() => setIsFavorited(!isFavorited))
+        .then(() => {
+          setIsFavorited(!isFavorited);
+          if (isFavorited && onUnbookmark) {
+            onUnbookmark(); // Invoke the callback when unbookmarking
+          }
+        })
         .catch(error => console.error(`Error ${isFavorited ? 'removing from' : 'adding to'} favorites:`, error));
     };
 
+    
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={handleFavorite} style={styles.button}>
@@ -44,6 +55,7 @@ function FavoriteButton({ projectId, token }) {
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {

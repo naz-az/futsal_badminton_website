@@ -626,6 +626,9 @@ def editAccount(request):
     
     print("Adjusted Data:", mutable_data)  # Log the adjusted data
     
+        # Log the type of profile_image data received
+    print(f"Type of profile_image: {type(request.data.get('profile_image'))}")
+    
     profile = request.user.profile
     serializer = ProfileSerializer(profile, data=mutable_data, partial=True) # Ensure partial update
     if serializer.is_valid():
@@ -1595,6 +1598,8 @@ def createProject(request):
 @permission_classes([IsAuthenticated])
 def updateProject(request, project_id):
     print("Updating project with ID:", project_id)
+    print("Received Data:", request.data)  # Add this line
+    print("Received Files:", request.FILES)  # Add this line
     
     try:
         project = Project.objects.get(id=project_id, owner=request.user.profile)
@@ -1641,6 +1646,11 @@ def updateProject(request, project_id):
                 print(f"Invalid UUID: {tag_id}")  # Log invalid UUID
 
         if 'featured_image' in request.FILES:
+            featured_image = request.FILES['featured_image']
+            print("Uploaded file name:", featured_image.name)
+            print("Uploaded file size:", featured_image.size)
+            print("Uploaded file content type:", featured_image.content_type)
+
             if project.featured_image and hasattr(project.featured_image, 'url'):
                 print("Deleting old featured image...")
                 project.featured_image.delete(save=False)  # save=False to prevent premature save

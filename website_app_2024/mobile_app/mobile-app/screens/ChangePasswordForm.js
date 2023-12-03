@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 import AuthContext from '../context/authContext';
 
@@ -10,6 +11,7 @@ function ChangePasswordForm() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const { user } = useContext(AuthContext);
+  const navigation = useNavigation(); // Initialize useNavigation
 
   const handleSubmit = async () => {
     if (!oldPassword || !newPassword || !confirmPassword) {
@@ -37,6 +39,8 @@ function ChangePasswordForm() {
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
+
+      navigation.navigate('Home'); // Navigate to Homepage
     } catch (error) {
       Alert.alert('Error', error.response?.data.error || 'An error occurred. Please try again.');
     }

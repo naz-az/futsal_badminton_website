@@ -6,6 +6,7 @@ import AuthContext from "../context/authContext";
 import { useNavigation } from "@react-navigation/native";
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Dimensions } from 'react-native';
 
 function ThreadMessages() {
   const [threads, setThreads] = useState([]);
@@ -15,6 +16,8 @@ function ThreadMessages() {
   const auth = useContext(AuthContext);
 
   const isAllSelected = selectedThreads.length === threads.length;
+
+  const [deleteCandidate, setDeleteCandidate] = useState(null);  // Add this state
 
   useEffect(() => {
     const fetchThreads = async () => {
@@ -49,54 +52,51 @@ function ThreadMessages() {
     return messages[messages.length - 1].body;
   };
 
-  const showDeleteModal = (threadId) => {
-    setSelectedThreads([threadId]);
-    setShowDeleteConfirm(true);
-  };
-
-  const toggleThreadSelection = (threadId) => {
-    setSelectedThreads((prevSelected) => {
-      if (prevSelected.includes(threadId)) {
-        return prevSelected.filter((id) => id !== threadId);
-      } else {
-        return [...prevSelected, threadId];
-      }
-    });
-  };
-
-  const selectAllThreads = () => {
-    if (isAllSelected) {
-      setSelectedThreads([]);
-    } else {
-      setSelectedThreads(threads.map((thread) => thread.id));
-    }
-  };
-
-  const deleteSelectedThreads = async () => {
+  // Simplified function to show delete confirmation modal
+  const showDeleteModal = async (threadId) => {
     const token = await AsyncStorage.getItem("token");
     try {
-      await Promise.all(
-        selectedThreads.map((threadId) =>
-          axios.delete(`http://127.0.0.1:8000/api/threads/${threadId}/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-        )
-      );
-      setThreads(
-        threads.filter((thread) => !selectedThreads.includes(thread.id))
-      );
-      setSelectedThreads([]);
+      await axios.delete(`http://127.0.0.1:8000/api/threads/${threadId}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setThreads(threads.filter((thread) => thread.id !== threadId));
       setShowDeleteConfirm(false);
     } catch (error) {
-      console.error("Error deleting threads:", error);
+      console.error("Error deleting thread:", error);
+    }
+  };
+  
+
+  // Function to actually delete the thread
+  const deleteThread = async () => {
+    console.log("deleteCandidate:",deleteCandidate);
+
+    if (!deleteCandidate) return;  // Check if deleteCandidate is set
+    const token = await AsyncStorage.getItem("token");
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/threads/${deleteCandidate}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setThreads(threads.filter((thread) => thread.id !== deleteCandidate));
+      setShowDeleteConfirm(false);
+      setDeleteCandidate(null);  // Reset the deleteCandidate
+    } catch (error) {
+      console.error("Error deleting thread:", error);
     }
   };
 
+
+
   const getOtherParticipant = (participants) => {
+    if (!auth.user || !auth.user.profile) {
+      console.error("Auth user or profile is undefined");
+      return {};
+    }
     return participants.find(
       (participant) => participant.username !== auth.user.profile.username
     ) || {};
   };
+  
 
   const processImageUrl = (imageUrl) => {
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
@@ -117,6 +117,14 @@ function ThreadMessages() {
     );
   };
 
+  const handleDeleteClick = (threadId) => {
+    console.log("Delete clicked for thread ID:", threadId);
+    setSelectedThreads([threadId]);
+    setShowDeleteConfirm(true);
+  };
+  
+
+      
   const renderItem = ({ item }) => (
     <TouchableOpacity 
       style={styles.item} 
@@ -131,6 +139,12 @@ function ThreadMessages() {
       <View style={styles.messageDateContainer}>
         <Text style={styles.messageDate}>{formatDate(item.latest_message_timestamp)}</Text>
       </View>
+      <Icon 
+          name="more-vert" 
+          size={20} 
+          onPress={() => handleDeleteClick(item.id)} 
+          style={styles.moreIcon} // You need to add this style
+        />
     </TouchableOpacity>
   );
   
@@ -138,6 +152,10 @@ function ThreadMessages() {
     // Perform any logic here if needed
     navigation.navigate('Send'); // Make sure 'SendScreen' is defined in your navigator
   };
+
+
+
+
 
   return (
     <View style={styles.container}>
@@ -161,6 +179,25 @@ function ThreadMessages() {
       />
 
       {/* Add Modal for delete confirmation */}
+      <Modal
+        visible={showDeleteConfirm}
+        onRequestClose={() => setShowDeleteConfirm(false)}
+        transparent={true} // Make the modal transparent so that we can style the background
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContent}>
+            <Text>Are you sure you want to delete this thread?</Text>
+            <Button
+              title="Delete"
+              onPress={() => {
+                setDeleteCandidate(selectedThreads[0]);
+                showDeleteModal(selectedThreads[0]);
+              }}
+            />
+            <Button title="Cancel" onPress={() => setShowDeleteConfirm(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -246,7 +283,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginLeft: 5,
   },
-  
+  moreIcon: {
+    marginLeft: 15, // Adjust as needed
+    // Add any additional styling you need
+  },
+  // Add this style for the modal background
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+  },
+
+  // Update this style for the modal content
+  modalContent: {
+    width: Dimensions.get('window').width - 40, // Adjust as needed
+    backgroundColor: '#ffffff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
 });
 
 export default ThreadMessages;

@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import Comment from "../components/Comment";
 import PostComment from "../components/PostComment";
 
+import moment from 'moment';
 
 function ProjectScreen() {
   const [project, setProject] = useState({ project_images: [], attendees: [] });
@@ -58,14 +59,7 @@ function ProjectScreen() {
       .catch((error) => console.error("Error refreshing comments:", error));
   }, [id]);
 
-  const convertToMalaysianTime = (isoString) => {
-    const date = new Date(isoString);
-    const offset = 8; // Malaysian Time Zone Offset (UTC+8)
-    const localTime = new Date(date.getTime() + offset * 3600 * 1000);
-    return localTime.toISOString().substring(0, 16); // Adjust format as needed
-  };
-  
-  
+
   
   useEffect(() => {
     async function fetchProject() {
@@ -73,8 +67,6 @@ function ProjectScreen() {
         const { data } = await axios.get(`/api/projects/${id}`);
         setProject({
           ...data.project,
-          start_date: convertToMalaysianTime(data.project.start_date),
-          end_date: convertToMalaysianTime(data.project.end_date),
         });
                 setSelectedImage(data.project.featured_image); // Initialize with the featured image
         
@@ -250,7 +242,11 @@ function ProjectScreen() {
     fetchAttendees();
 }, [id]);
 
-
+const formatMomentDate = (dateString) => {
+  return dateString 
+    ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
+    : "N/A";
+};
 
   return (
     <div>
@@ -293,7 +289,7 @@ function ProjectScreen() {
   <Row>
     <Col>Start Date & Time:</Col>
     <Col>
-      <strong>{project.start_date ? new Date(project.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'} </strong> 
+      <strong>{formatMomentDate(project.start_date)} </strong> 
     </Col>
   </Row>
 </ListGroup.Item>
@@ -302,7 +298,7 @@ function ProjectScreen() {
   <Row>
     <Col>End Date & Time:</Col>
     <Col>
-      <strong>  {project.end_date ? new Date(project.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'} </strong> 
+      <strong> {formatMomentDate(project.end_date)} </strong> 
     </Col>
   </Row>
 </ListGroup.Item>

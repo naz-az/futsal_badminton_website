@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
+import CustomButton from './CustomButton';
 
 const processImageUrl = (imageUrl) => {
   if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
@@ -12,7 +12,7 @@ const processImageUrl = (imageUrl) => {
   return imageUrl;
 };
 
-function AttendButton({ projectId, token, fontSize = 16 }) { // Default font size is set to 16
+function AttendButton({ projectId, token, fontSize = 14 }) { // Default font size is set to 16
   const [isAttending, setIsAttending] = useState(false);
 
   // Check if user is authenticated

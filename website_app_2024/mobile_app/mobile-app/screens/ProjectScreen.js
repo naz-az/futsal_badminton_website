@@ -28,6 +28,9 @@ import FavoriteButton from '../components/FavoriteButton';
 
 import ProjectComponent from '../components/ProjectComponent';
 
+import moment from 'moment';
+
+
 function ProjectScreen() {
   const [project, setProject] = useState({ project_images: [], attendees: [] });
   const [comments, setComments] = useState([]);
@@ -84,8 +87,6 @@ function ProjectScreen() {
         const { data } = await axios.get(`http://127.0.0.1:8000/api/projects/${id}`);
         setProject({
           ...data.project,
-          start_date: format(parseISO(data.project.start_date), 'EEEE, d MMMM yyyy, HH:mm'),
-          end_date: format(parseISO(data.project.end_date), 'EEEE, d MMMM yyyy, HH:mm'),
         });
         setSelectedImage(data.project.featured_image);
       } catch (error) {
@@ -298,6 +299,10 @@ const renderItem = ({ item }) => (
   </TouchableOpacity>
 );
 
+// Function to format dates using moment.js
+const formatMomentDate = (dateString) => {
+  return dateString ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A,") + " UTC+8" : "N/A";
+};
 
   return (
     <ScrollView style={styles.container}>
@@ -335,17 +340,16 @@ const renderItem = ({ item }) => (
         
 
         <View style={styles.item}>
-        <Icon name="event-available" size={25} color="#333" />
-        <Text style={styles.label}>Start:</Text>
-        <Text style={styles.value}>{project.start_date || 'N/A'}</Text>
-      </View>
+            <Icon name="event-available" size={25} color="#333" />
+            <Text style={styles.label}>Start:</Text>
+            <Text style={styles.value}>{formatMomentDate(project.start_date)}</Text>
+        </View>
 
-
-      <View style={styles.item}>
-      <Icon name="event-busy" size={25} color="#333" />
-        <Text style={styles.label}>End:</Text>
-        <Text style={styles.value}>{project.end_date || 'N/A'}</Text>
-      </View>
+        <View style={styles.item}>
+            <Icon name="event-busy" size={25} color="#333" />
+            <Text style={styles.label}>End:</Text>
+            <Text style={styles.value}>{formatMomentDate(project.end_date)}</Text>
+        </View>
 
       <View style={styles.item}>
   <Icon name="location-on" size={25} color="#333" />

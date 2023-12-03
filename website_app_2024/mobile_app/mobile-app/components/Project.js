@@ -9,6 +9,8 @@ import VotingButtons from "./VotingButtons";
 import AuthContext from '../context/authContext';
 import AttendButton from "./AttendButton";
 import FavoriteButton from "./FavoriteButton";
+import moment from 'moment';
+
 
 function Project({ project }) {
   const auth = useContext(AuthContext);
@@ -16,11 +18,11 @@ function Project({ project }) {
   const navigation = useNavigation();
   const [token, setToken] = useState(null); // State to store the token
 
-  const isCurrentUserOwner = auth.user && auth.user.profile.id === project.owner.id;
+  const isCurrentUserOwner = auth.user?.profile?.id === project?.owner?.id;
 
   const [attendees, setAttendees] = useState([]);
 
-  const currentUserId = auth.user?.profile.id;
+  const currentUserId = auth.user?.profile?.id;
 
   
   useEffect(() => {
@@ -91,6 +93,10 @@ function Project({ project }) {
     useEffect(() => {
       // Function to fetch attendees
       const fetchAttendees = async () => {
+        if (!project || !project.id) {
+          console.log('Project or project ID is undefined');
+          return;
+        }
         try {
           const token = await AsyncStorage.getItem("token");
           console.log("Token used for fetchAttendees:", token); // Log the token
@@ -201,6 +207,20 @@ const attendButtonStyle = {
     return location.split(' ').slice(0, 4).join(' ') + '...';
   };
 
+  // const formatMomentDate = (dateString) => {
+  //   return dateString ? moment.utc(dateString).format("DD/MM/YY (ddd) hh:mm A") : "N/A";
+  // };
+
+  const formatMomentDate = (dateString) => {
+    return dateString ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A,") + " UTC+8" : "N/A";
+};
+
+
+//   const formatMomentDate = (dateString) => {
+//     return dateString ? moment.utc(dateString).local().format("DD/MM/YY (ddd) hh:mm A") : "N/A";
+// };
+
+
   return (
     <ScrollView style={styles.container}>
 
@@ -231,12 +251,12 @@ const attendButtonStyle = {
 </View>
     {/* New Row for Start and End Dates */}
     <View style={styles.dateRow}>
-      <Text style={styles.dateText}>
-        <Text style={styles.boldText}>Start:</Text> {project.start_date || 'N/A'}
-        <Text style={styles.marginText}> | </Text>
-        <Text style={styles.boldText}>End:</Text> {project.end_date || 'N/A'}
-      </Text>
-    </View>
+            <Text style={styles.dateText}>
+                <Text style={styles.boldText}>Start:</Text> {formatMomentDate(project.start_date)}
+                <Text style={styles.marginText}> | </Text>
+                <Text style={styles.boldText}>End:</Text> {formatMomentDate(project.end_date)}
+            </Text>
+        </View>
       </TouchableOpacity>
 
 

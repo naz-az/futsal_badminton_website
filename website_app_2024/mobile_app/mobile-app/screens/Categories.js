@@ -10,6 +10,7 @@ import ProjectCard from "../components/ProjectCard";
 import ProjectComponent from "../components/ProjectComponent";
 import Icon from 'react-native-vector-icons/FontAwesome'; // You can choose other icon sets as needed
 import CustomButton from "../components/CustomButton";
+import SortingComponent from '../components/SortingComponent';
 
 // CustomButton Component Definition
 // const CustomButton = ({ title, onPress, style }) => (
@@ -35,6 +36,24 @@ function Categories({ route }) {
 
   const [followedTags, setFollowedTags] = useState(new Set());
 
+  const [sortType, setSortType] = useState('newToOld');
+  const [sortedProjects, setSortedProjects] = useState([]);
+
+  // useEffect(() => {
+  //   const fetchTags = async () => {
+  //     const { data } = await axios.get("http://127.0.0.1:8000/api/tags/");
+  //     setTags(data);
+  //     if (initialTagId) {
+  //       setActiveTagId(initialTagId);
+  //       fetchProjectsByTag(initialTagId);
+  //     } else if (data.length) {
+  //       setActiveTagId(data[0].id);
+  //       fetchProjectsByTag(data[0].id);
+  //     }
+  //   };
+  //   fetchTags();
+  // }, [initialTagId]);
+  
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -50,7 +69,7 @@ function Categories({ route }) {
     };
     fetchTags();
   }, [initialTagId]);
-  
+
   const tagButtonWidth = 80; // Adjust this value based on your actual UI
 
   const scrollToActiveTag = () => {
@@ -74,12 +93,19 @@ function Categories({ route }) {
     }
   }, [activeTagId, tags]);
 
+  // const fetchProjectsByTag = async (tagId) => {
+  //   const { data } = await axios.get(`http://127.0.0.1:8000/api/projects/?tag_id=${tagId}`);
+  //   setCurrentTagProjects(data.map(project => ({
+  //     ...project,
+  //     imageUrl: processImageUrl(project.imageUrl),
+  //   })));
+  // };
+
+ // Define fetchProjectsByTag outside of useEffect
   const fetchProjectsByTag = async (tagId) => {
     const { data } = await axios.get(`http://127.0.0.1:8000/api/projects/?tag_id=${tagId}`);
-    setCurrentTagProjects(data.map(project => ({
-      ...project,
-      imageUrl: processImageUrl(project.imageUrl),
-    })));
+    setCurrentTagProjects(data);
+    setSortType('newToOld'); // Reset sorting to default when new data is fetched
   };
 
   const processImageUrl = (imageUrl) => {
@@ -163,6 +189,36 @@ function Categories({ route }) {
     navigation.navigate('FollowedTagsPage'); // Replace 'FollowedTags' with your followed tags screen route name
   };
 
+
+      // Sorting logic
+      useEffect(() => {
+        let sorted = [...currentTagProjects];
+        switch (sortType) {
+          case 'topToLow':
+            sorted.sort((a, b) => b.upvotes - a.upvotes);
+            break;
+          case 'lowToTop':
+            sorted.sort((a, b) => a.upvotes - b.upvotes);
+            break;
+          case 'highToLow':
+            sorted.sort((a, b) => b.price - a.price);
+            break;
+          case 'lowToHigh':
+            sorted.sort((a, b) => a.price - b.price);
+            break;
+          case 'newToOld':
+            sorted.sort((a, b) => new Date(b.created) - new Date(a.created));
+            break;
+          case 'oldToNew':
+            sorted.sort((a, b) => new Date(a.created) - new Date(b.created));
+            break;
+            default:
+                break;
+        }
+        setSortedProjects(sorted);
+    }, [currentTagProjects, sortType]);
+
+
   return (
     <ScrollView style={{ backgroundColor: '#ffffff' }}>
       <View style={styles.container}>
@@ -170,7 +226,7 @@ function Categories({ route }) {
 
         {auth.isAuthenticated && (
           <View style={styles.followTagsButton}>
-            <CustomButton title="View Followed Tags" color="#2e4457" onPress={navigateToFollowedTags} />
+            <CustomButton title="View Followed Tags" color="#2e4457" fontSize={12} onPress={navigateToFollowedTags} />
           </View>
         )}
 
@@ -208,6 +264,7 @@ function Categories({ route }) {
     <CustomButton
       title={followedTags.has(activeTagId) ? `Unfollow ${activeTagName}` : `Follow ${activeTagName}`}
       onPress={() => toggleFollowTag(activeTagId)}
+      fontSize={12}
       color={followedTags.has(activeTagId) ? "#ac912f" : "#726d67"} // Color styling
     />
   )}
@@ -225,12 +282,19 @@ function Categories({ route }) {
           />
         ))} */}
 
-{currentTagProjects.map((project) => (
-  <View key={project.id} style={{ marginLeft: 15, marginRight: 15 }}> {/* Apply margin to left and right */}
-    <ProjectComponent project={project} />
-  </View>
-))}
+<View style={styles.paddedSection}>
+        <SortingComponent sortType={sortType} setSortType={setSortType} />
+      </View>
 
+{sortedProjects.length > 0 ? (
+          sortedProjects.map((project) => (
+            <View key={project.id} style={{ marginLeft: 15, marginRight: 15 }}>
+              <ProjectComponent project={project} />
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noEventsText}>No events yet for {activeTagName}</Text>
+        )}
 
 
     </ScrollView>
@@ -298,7 +362,21 @@ const styles = StyleSheet.create({
     marginRight: 20,
     fontSize: 18,
   },
-  // Other styles...
+
+noEventsText: {
+  textAlign: 'center',
+  fontSize: 16,
+  color: 'grey',
+  marginTop: 20,
+  marginRight: 15, // Right margin
+  marginBottom: 20, // Bottom margin
+  marginLeft: 15,  // Left margin
+},
+  paddedSection: {
+    paddingLeft: 15,
+    paddingRight: 15,
+    // ... other styles you might need ...
+  },
 });
 
 export default Categories;

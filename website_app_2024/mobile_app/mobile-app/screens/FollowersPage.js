@@ -4,13 +4,18 @@ import { View, Text, Image, TouchableOpacity, ScrollView, Modal, StyleSheet } fr
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import CustomButton from '../components/CustomButton';
+import ConfirmationModal from '../components/ConfirmationModal';
+
 
 function FollowersPage() {
     const [followers, setFollowers] = useState([]);
     const [followersCount, setFollowersCount] = useState(0);
-    const [showModal, setShowModal] = useState(false);
-    const [profileToRemove, setProfileToRemove] = useState(null);
     const navigation = useNavigation();
+
+    const [modalVisible, setModalVisible] = useState(false);
+const [selectedProfileId, setSelectedProfileId] = useState(null);
+
 
     useEffect(() => {
         const fetchFollowers = async () => {
@@ -41,27 +46,12 @@ function FollowersPage() {
             setFollowersCount(followersCount - 1);
         } catch (error) {
             console.error("Error removing follower", error);
-            // Handle error (show error message to user, etc.)
         }
     };
 
-    const handleRemoveClick = (profileId) => {
-        setProfileToRemove(profileId);
-        setShowModal(true);
-    };
-
-    const confirmRemoveFollower = async () => {
-        if (profileToRemove) {
-            await removeFollower(profileToRemove);
-            setShowModal(false);
-            setProfileToRemove(null);
-        }
-    };
-
-    // The following function should be adapted to the navigation logic of React Native
-    const handleSendMessage = (profileId) => {
-        // Use your navigation logic here
-    };
+    // const handleRemoveClick = async (profileId) => {
+    //     await removeFollower(profileId);
+    // };
 
     const processImageUrl = (profile) => {
         let profileImageUrl = profile.profile_image;
@@ -70,6 +60,19 @@ function FollowersPage() {
         }
         return profileImageUrl;
     };
+
+    const handleRemoveClick = (profileId) => {
+        setSelectedProfileId(profileId);
+        setModalVisible(true);
+    };
+
+    const handleUnfollowConfirm = async () => {
+        if (selectedProfileId !== null) {
+            await removeFollower(selectedProfileId);
+        }
+    };
+    
+
 
     return (
         <ScrollView style={styles.container}>
@@ -86,24 +89,24 @@ function FollowersPage() {
                         <Text style={styles.cardText}>{profile.short_intro?.slice(0, 60) ?? ''}</Text>
                     </View>
                     <View style={styles.rightColumn}>
-                        <TouchableOpacity onPress={() => handleRemoveClick(profile.id)} style={styles.button}>
-                            <Text style={styles.buttonText}>Remove</Text>
-                        </TouchableOpacity>
+                    <CustomButton
+                            title="Remove"
+                            onPress={() => handleRemoveClick(profile.id)}
+                            color="#a42339" // Set the color as needed
+                            textColor="white" // Set the text color as needed
+                            fontSize={12} // Set the font size as needed
+                        />
                     </View>
                 </View>
             ))}
 
-            {/* Modal component needs to be implemented using a third-party library or custom implementation */}
-            {showModal && (
-                <Alert
-                    title="Confirm Removal"
-                    message="Are you sure you want to remove this follower?"
-                    buttons={[
-                        { text: 'Cancel', onPress: () => setShowModal(false) },
-                        { text: 'Confirm', onPress: confirmRemoveFollower }
-                    ]}
-                />
-            )}
+<ConfirmationModal
+    modalVisible={modalVisible}
+    setModalVisible={setModalVisible}
+    onConfirm={handleUnfollowConfirm}
+    actionType="remove this follower"
+/>
+
         </ScrollView>
     );
 }

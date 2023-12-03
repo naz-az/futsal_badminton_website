@@ -146,8 +146,10 @@ const renderNotificationItem = (notif, authUser) => {
   );
     case 'VOTE':
       const voteProfileLink = notif.voting_user.id === authUser.profile.id ? 'UserAccount' : 'UserProfileDetail';
-      const profileId_vote= notif.voting_user.user.id; // Assuming this is the ID you want to pass
-
+      const profileId_vote= notif.voting_user.id; // Assuming this is the ID you want to pass
+      // Add console logs here
+      console.log("voteProfileLink:", voteProfileLink);
+      console.log("profileId_vote:", profileId_vote);
 
       return (
         <View key={notif.id} style={styles.card}>

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { View, Text, Button, Modal, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Example for icons
 import CustomButton from '../components/CustomButton';
-
+import ConfirmationModal from '../components/ConfirmationModal'; // Import the ConfirmationModal
 
 function FollowedTagsPage() {
   const [followedTags, setFollowedTags] = useState([]);
@@ -36,7 +35,9 @@ function FollowedTagsPage() {
     setShowConfirmModal(true);
   };
 
-  const confirmUnfollow = async () => {
+  const handleUnfollowConfirm = async () => {
+    if (!selectedTag) return;
+    
     try {
       const token = await AsyncStorage.getItem('token');
       await axios.post(`http://127.0.0.1:8000/api/unfollow-tag/${selectedTag.id}/`, {}, {
@@ -45,7 +46,7 @@ function FollowedTagsPage() {
         },
       });
       setShowConfirmModal(false);
-      fetchFollowedTags();
+      fetchFollowedTags(); // Refresh the tags list
     } catch (error) {
       console.error('Error unfollowing tag', error);
     }
@@ -58,23 +59,26 @@ function FollowedTagsPage() {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Followed Categories</Text>
+      <Text style={styles.categoryCount}>
+        You're following {followedTags.length} categories
+      </Text>
       <View style={styles.buttonContainer}>
-      <CustomButton title="View all Categories" color="#143e4b" onPress={() => navigation.navigate('Categories')} />
+        <CustomButton title="View all Categories" color="#143e4b" fontSize={12} onPress={() => navigation.navigate('Categories')} />
       </View>
       <View>
-      {followedTags.map(tag => (
-        <TouchableOpacity key={tag.id} style={styles.tagItem} onPress={() => handleTagClick(tag.id)}>
-          <Text style={styles.tagText}>{tag.name}</Text>
-          <CustomButton title="Unfollow" color="#ad1f1f" onPress={(e) => { e.stopPropagation(); handleUnfollowClick(tag); }} />
-        </TouchableOpacity>
-      ))}
-    </View>
-      <Modal
-        visible={showConfirmModal}
-        onRequestClose={() => setShowConfirmModal(false)}
-        transparent={true}>
-        {/* ... Modal content ... */}
-      </Modal>
+        {followedTags.map(tag => (
+          <TouchableOpacity key={tag.id} style={styles.tagItem} onPress={() => handleTagClick(tag.id)}>
+            <Text style={styles.tagText}>{tag.name}</Text>
+            <CustomButton title="Unfollow" color="#ad1f1f" fontSize={12} onPress={(e) => { e.stopPropagation(); handleUnfollowClick(tag); }} />
+          </TouchableOpacity>
+        ))}
+      </View>
+      <ConfirmationModal
+        modalVisible={showConfirmModal}
+        setModalVisible={setShowConfirmModal}
+        onConfirm={handleUnfollowConfirm}
+        actionType="unfollow this category"
+      />
     </ScrollView>
   );
 }
@@ -98,7 +102,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     margin: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#fff',
     borderRadius: 10,
     shadowColor: '#000',
@@ -107,8 +111,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   tagText: {
-    fontSize: 18,
+    fontSize: 16,
     flexGrow: 1, // Allows the text to expand and fill the space
+  },
+  categoryCount: {
+    textAlign: 'center',
+    fontSize: 16,
+    // marginVertical: 10,
+    marginBottom: 10,
+    color: '#333', // You can choose a suitable color
   },
 });
 

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, Image, ScrollView, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 
 const EditProject = () => {
   const [projectData, setProjectData] = useState({
@@ -16,6 +18,10 @@ const EditProject = () => {
     price: "",
     tags: [],
     newTag: "",
+    location: "",
+    start_date: "",
+    end_date: "",
+    
   });
 
   const [imagePreviews, setImagePreviews] = useState({
@@ -34,6 +40,10 @@ const EditProject = () => {
 
   const [visibleTagCount, setVisibleTagCount] = useState(10);
 
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+
+
   const processImageUrl = (imageUrl) => {
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
       return `http://127.0.0.1:8000${imageUrl}`;
@@ -41,34 +51,83 @@ const EditProject = () => {
     return imageUrl;
   };
 
-  useEffect(() => {
-    const fetchProjectDetails = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/`, config);
-        
-        if (response.data) {
-          const project = response.data.project;
-          setProjectData(project);
-          setSelectedTags(project.tags.map(tag => tag.id));
-          setImagePreviews(prevState => ({
-            ...prevState,
-            featured_image: processImageUrl(project.featured_image),
-            project_images: project.project_images.map(img => processImageUrl(img.image)),
-          }));
-        }
-      } catch (error) {
-        console.error("Error fetching project details", error);
-      }
-    };
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    // Create a new Date object using the date string
+    const date = new Date(dateString);
+    // Convert to local time string and remove seconds and milliseconds
+    let localDateTime = date.toISOString().slice(0, 16);
+    return localDateTime;
+  };
+
   
-    fetchProjectDetails();
-  }, [projectId]);
+  const onStartDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || projectData.start_date;
+    setShowStartDatePicker(Platform.OS === 'android');
+    setProjectData({ ...projectData, start_date: currentDate.toISOString() });
+  };
+  
+  const onEndDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || projectData.end_date;
+    setShowEndDatePicker(Platform.OS === 'android');
+    setProjectData({ ...projectData, end_date: currentDate.toISOString() });
+  };
+  
+  
+useEffect(() => {
+  const fetchProjectDetails = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/`, config);
+      
+      if (response.data) {
+        const project = response.data.project;
+        console.log("Fetched project data:", project);
+
+        // Format start_date and end_date to YYYY-MM-DD format
+// Inside fetchProjectDetails function
+const formattedStartDate = project.start_date ? new Date(project.start_date).toISOString() : '';
+const formattedEndDate = project.end_date ? new Date(project.end_date).toISOString() : '';
+
+      // Format start_date and end_date based on the platform
+      const formatDateTime = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (Platform.OS === 'web') {
+          // Format for web input type="date"
+          return date.toISOString().split('T')[0];
+        } else {
+          // Full date-time format for native platforms
+          return date.toISOString();
+        }
+      };
+
+      setProjectData({
+        ...project,
+        start_date: formatDateForInput(project.start_date),
+        end_date: formatDateForInput(project.end_date),
+      });
+
+        setSelectedTags(project.tags.map(tag => tag.id));
+        setImagePreviews(prevState => ({
+          ...prevState,
+          featured_image: processImageUrl(project.featured_image),
+          project_images: project.project_images.map(img => processImageUrl(img.image)),
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching project details", error);
+    }
+  };
+
+  fetchProjectDetails();
+}, [projectId]);
+
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -83,9 +142,16 @@ const EditProject = () => {
     fetchTags();
   }, []);
 
-  const handleChangeText = (name, value) => {
+// Update handleChangeText function to handle price input
+const handleChangeText = (name, value) => {
+  if (name === 'price') {
+    // Remove non-numeric characters before setting the price
+    const numericValue = value.replace(/[^0-9.]/g, '');
+    setProjectData(prevState => ({ ...prevState, [name]: numericValue }));
+  } else {
     setProjectData(prevState => ({ ...prevState, [name]: value }));
-  };
+  }
+};
   
   const handleSelectImage = (name) => {
     launchImageLibrary({ mediaType: 'photo' }, (response) => {
@@ -94,9 +160,12 @@ const EditProject = () => {
       } else if (response.error) {
         console.log('ImagePicker Error: ', response.error);
       } else if (response.assets && response.assets.length > 0) {
-        const source = { uri: response.assets[0].uri };
-        console.log('Selected image: ', source);
+        // const source = { uri: response.assets[0].uri };
+        // console.log('Selected image: ', source);
   
+        const source = response.assets[0];  // store the entire asset
+        console.log('Selected image details:', source);
+
         if (name === "featured_image") {
           setProjectData(prevState => ({ ...prevState, featured_image: source }));
           setImagePreviews(prevState => ({ ...prevState, featured_image_new: source.uri }));
@@ -169,52 +238,47 @@ const EditProject = () => {
   
   const handleSubmit = async () => {
     let formData = new FormData();
-    for (let key in projectData) {
-      if (key === "project_images") {
-        projectData.project_images.forEach((image, index) => {
-          if (image) {
-            formData.append(`additional_image_${index}`, {
-              uri: image.uri,
-              type: 'image/jpeg', // or the correct type
-              name: `image_${index}.jpg`
-            });
-          }
-        });
-      } else if (key === "featured_image") {
-        if (projectData.featured_image) {
-          formData.append('featured_image', {
-            uri: projectData.featured_image.uri,
-            type: 'image/jpeg', // or the correct type
-            name: 'featured_image.jpg'
-          });
-        }
-      } else if (key !== "tags") {
+  
+    // Append non-image and non-tag data
+    Object.keys(projectData).forEach(key => {
+      if (!['project_images', 'featured_image', 'tags'].includes(key)) {
         formData.append(key, projectData[key]);
       }
-    }
-  
-    selectedTags.forEach(tagId => {
-      formData.append("tags", tagId);
     });
   
+    // Append tags
+    selectedTags.forEach(tagId => formData.append("tags", tagId));
+  
+    // Process and append images
     try {
+      if (projectData.featured_image && projectData.featured_image.uri) {
+        const featuredImageBlob = await fetch(projectData.featured_image.uri).then(r => r.blob());
+        formData.append('featured_image', featuredImageBlob, projectData.featured_image.fileName || 'featured_image.jpg');
+      }
+  
+      await Promise.all(projectData.project_images.map(async (image, index) => {
+        if (image && image.uri) {
+          const imageBlob = await fetch(image.uri).then(r => r.blob());
+          formData.append(`additional_image_${index}`, imageBlob, image.fileName || `image_${index}.jpg`);
+        }
+      }));
+  
       const token = await AsyncStorage.getItem("token");
-      const response = await axios.put(`http://127.0.0.1:8000/api/update-project/${projectId}/`, formData, {
+      await axios.put(`http://127.0.0.1:8000/api/update-project/${projectId}/`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data);
-      navigation.navigate("Home"); // Adjust this navigation to your app's flow
+  
+      navigation.navigate("Home");
     } catch (error) {
-      if (error.response && error.response.data) {
-        setServerError(Object.values(error.response.data).join(" "));
-      } else {
-        setServerError("An unexpected error occurred.");
-      }
+      console.error('Error:', error);
+      setServerError(error.message || "An unexpected error occurred.");
     }
   };
+  
+  
+  
 
   const clearImage = (imageType, index = null) => {
     if (imageType === 'featured_image') {
@@ -237,13 +301,32 @@ const EditProject = () => {
     }
   };
 
+
+    // Update the tag button styles to match AddProject
+    const tagButtonStyle = {
+      padding: 10,
+      margin: 5,
+      borderWidth: 1,
+      borderColor: 'gray', // Default color
+    };
+  
+    const tagButtonSelectedStyle = {
+      ...tagButtonStyle,
+      borderColor: 'blue', // Color for selected tags
+    };
+
+    const tagButtonDeselectedStyle = {
+      ...tagButtonStyle,
+      borderColor: 'red', // Color for deselected tags
+    };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.formGroup}>
         <Text style={styles.label}>Title</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter deal title"
+          placeholder="Enter event title"
           value={projectData.title}
           onChangeText={(text) => handleChangeText('title', text)}
         />
@@ -311,7 +394,7 @@ const EditProject = () => {
 
     ))}
 
-   {/* Brand */}
+   {/* Brand
    <View style={styles.formGroup}>
       <Text style={styles.label}>Brand</Text>
       <TextInput
@@ -320,14 +403,80 @@ const EditProject = () => {
         value={projectData.brand}
         onChangeText={(text) => handleChangeText('brand', text)}
       />
-    </View>
+    </View> */}
+
+
+
+  {/* Location Input */}
+  <View style={styles.formGroup}>
+        <Text style={styles.label}>Location</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter location"
+          value={projectData.location}
+          onChangeText={(text) => handleChangeText('location', text)}
+        />
+      </View>
+
+{/* Start Date Picker */}
+<Text style={styles.label}>Start Date & Time</Text>
+{Platform.OS === 'web' ? (
+  <input
+    type="datetime-local"
+    value={projectData.start_date}
+    onChange={(e) => setProjectData({ ...projectData, start_date: e.target.value })}
+  />
+) : (
+  <View>
+    <Button onPress={() => setShowStartDatePicker(true)} title="Select Start Date" />
+    {showStartDatePicker && (
+      <DateTimePicker
+        value={new Date(projectData.start_date) || new Date()}
+        mode="datetime"
+        display="default"
+        onChange={onStartDateChange}
+      />
+    )}
+  </View>
+)}
+
+{/* End Date Picker */}
+<Text style={styles.label}>End Date & Time</Text>
+{Platform.OS === 'web' ? (
+  <input
+    type="datetime-local"
+    value={projectData.end_date}  // Convert to local time format
+    onChange={(e) => setProjectData({ ...projectData, end_date: e.target.value})}  // Add 'Z' back when setting state
+  />
+) : (
+  <View>
+    <Button onPress={() => setShowEndDatePicker(true)} title="Select End Date" />
+    {showEndDatePicker && (
+      <DateTimePicker
+        value={new Date(projectData.end_date) || new Date()}
+        mode="datetime"
+        display="default"
+        onChange={onEndDateChange}
+      />
+    )}
+  </View>
+)}
+
+
+
+
+
+
+
+
+
 
     {/* Deal Link */}
     <View style={styles.formGroup}>
-      <Text style={styles.label}>Deal Link</Text>
+      <Text style={styles.label}>Event Link</Text>
       <TextInput
         style={styles.input}
-        placeholder="http://example.com/deal"
+        placeholder="http://example.com/event"
         value={projectData.deal_link}
         onChangeText={(text) => handleChangeText('deal_link', text)}
       />
@@ -337,69 +486,79 @@ const EditProject = () => {
     <View style={styles.formGroup}>
       <Text style={styles.label}>Price</Text>
       <TextInput
-        style={styles.input}
-        placeholder="Price in USD"
-        keyboardType="numeric"
-        value={projectData.price.toString()}
-        onChangeText={(text) => handleChangeText('price', text)}
-      />
+  style={styles.input}
+  placeholder="Price in RM"
+  keyboardType="numeric"
+  value={`RM ${projectData.price.toString()}`}
+  onChangeText={(text) => handleChangeText('price', text.replace(/^RM\s*/, ''))}
+/>
+
     </View>
 
-    {/* Tags Section */}
-    <View style={styles.formGroup}>
-      <Text style={styles.label}>Available Tags</Text>
-      <View style={styles.tagContainer}>
-        {tags.slice(0, visibleTagCount).map(tag => (
-          <TouchableOpacity
-            key={tag.id}
-            onPress={() => handleToggleTagToProject(tag.id)}
-            style={selectedTags.includes(tag.id) ? styles.tagButtonSelected : styles.tagButton}
-          >
-            <Text>{tag.name} {selectedTags.includes(tag.id) ? '-' : '+'}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      
-      {/* Load More / Load Less Buttons */}
-      <View style={styles.loadButtons}>
-        <Button title="Load More" onPress={loadMoreTags} disabled={visibleTagCount >= tags.length} />
-        <Button title="Load Less" onPress={loadLessTags} disabled={visibleTagCount <= 10} />
-      </View>
-    </View>
-
-    {/* Selected Tags Display */}
-    <View style={styles.formGroup}>
-      <Text style={styles.label}>Selected Tags</Text>
-      <View style={styles.tagContainer}>
-        {selectedTags.map(tagId => {
-          const tag = tags.find(t => t.id === tagId);
-          return tag ? (
-            <TouchableOpacity
-              key={tag.id}
-              onPress={() => handleToggleTagToProject(tag.id)}
-              style={styles.tagButtonDeselected}
-            >
-              <Text>{tag.name}</Text>
+    {/* Available Categories Section */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Available Categories</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {tags.slice(0, visibleTagCount).map(tag => (
+            <TouchableOpacity 
+              key={tag.id} 
+              onPress={() => handleToggleTagToProject(tag.id)} 
+              style={selectedTags.includes(tag.id) ? tagButtonSelectedStyle : tagButtonStyle}>
+              <Text>{tag.name} {selectedTags.includes(tag.id) ? "-" : "+"}</Text>
             </TouchableOpacity>
-          ) : null;
-        })}
+          ))}
+        </View>
+        {/* Load More / Load Less Buttons */}
+        <View style={{ flexDirection: 'row', marginTop: 10 }}>
+          <Button 
+            onPress={loadMoreTags} 
+            disabled={visibleTagCount >= tags.length}
+            title="More Categories"
+          />
+          <Button 
+            onPress={loadLessTags} 
+            disabled={visibleTagCount <= 10}
+            title="Less Categories"
+          />
+        </View>
       </View>
-    </View>
 
-    {/* Add New Tag */}
-    <View style={styles.formGroup}>
-      <Text style={styles.label}>Add New Tag</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter tag name"
-        value={projectData.newTag}
-        onChangeText={(text) => setProjectData({ ...projectData, newTag: text })}
-      />
-      <Button title="Add Tag" onPress={handleAddTag} />
-    </View>
+      {/* Selected Categories Display */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Selected Categories</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {selectedTags.map(tagId => {
+            const tag = tags.find(t => t.id === tagId);
+            return tag ? (
+              <TouchableOpacity 
+                key={tag.id} 
+                onPress={() => handleToggleTagToProject(tag.id)} 
+                style={tagButtonDeselectedStyle}>
+                <Text>{tag.name} -</Text>
+              </TouchableOpacity>
+            ) : null;
+          })}
+        </View>
+      </View>
+
+    {/* Add New Category */}
+      <Text style={styles.label}>Add New Category</Text>
+
+      <View style={[styles.formGroup, styles.categoryFormGroup]}>
+  <TextInput
+    style={[styles.input, styles.categoryInput]}
+    placeholder="Enter category name"
+    value={projectData.newTag}
+    onChangeText={(text) => setProjectData({ ...projectData, newTag: text })}
+  />
+  <View style={styles.categoryButtonContainer}>
+    <Button title="Add" onPress={handleAddTag} />
+  </View>
+</View>
+
 
     {/* Submit Button */}
-    <Button title="Edit Project" onPress={handleSubmit} />
+    <Button title="Edit Event" onPress={handleSubmit} />
 
 
     </ScrollView>
@@ -420,10 +579,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   input: {
+    backgroundColor: '#FFF',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#DDD',
+    borderRadius: 5,
     padding: 10,
-    borderRadius: 4,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 2,
+    fontSize: 14,
+    width: '100%',
   },
   textArea: {
     height: 100,
@@ -450,6 +618,23 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     marginBottom: 10,
   },
+    // Additional styles for category form group
+    categoryFormGroup: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    categoryInput: {
+      width: '80%',
+      marginRight: '1%', // Optional, for spacing between input and button
+      marginBottom: 0, // Remove default margin-bottom
+    },
+    categoryButtonContainer: {
+      width: '19%', // Adjust as needed
+      // Reset any default padding or margin if necessary
+      margin: 0,
+      padding: 0,
+    },
 });
 
 export default EditProject;

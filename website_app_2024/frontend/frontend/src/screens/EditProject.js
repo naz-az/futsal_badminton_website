@@ -44,16 +44,6 @@ const EditProject = () => {
 
   const [visibleTagCount, setVisibleTagCount] = useState(10); // For managing visible tags
 
-  const convertDateTimeFormat = (isoString) => {
-    const date = new Date(isoString);
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -67,19 +57,21 @@ const EditProject = () => {
         
         if (response.data) {
           const project = response.data.project;
+          const formattedStartDate = project.start_date ? new Date(project.start_date).toISOString().slice(0, 16) : "";
+          const formattedEndDate = project.end_date ? new Date(project.end_date).toISOString().slice(0, 16) : "";
+  
           setProjectData({
             ...project,
-            location: project.location || "", 
-  start_date: convertDateTimeFormat(project.start_date),
-  end_date: convertDateTimeFormat(project.end_date),
-            // ... other fields ...
+            start_date: formattedStartDate,
+            end_date: formattedEndDate,
           });
           setSelectedTags(project.tags.map(tag => tag.id)); // Assuming each tag has an id
           // Console logs for debugging
           console.log("Featured Image:", project.featured_image);
           console.log("Additional Images:", project.project_images);
           console.log("Taggies:", project.tags.map(tag => tag.id));
-
+          console.log("Start Date:", formattedStartDate);
+          console.log("End Date:", formattedEndDate);
           // Set image previews for existing images
 // Set image previews for existing images
 // Set image previews for existing images

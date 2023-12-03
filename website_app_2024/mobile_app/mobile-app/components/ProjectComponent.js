@@ -18,16 +18,17 @@ import VotingButtons from "./VotingButtons";
 import AuthContext from "../context/authContext";
 import AttendButton from "./AttendButton";
 import FavoriteButton from "./FavoriteButton";
+import CustomButton from "./CustomButton";
+import moment from 'moment';
 
-function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, onRemove  }) {
+function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, onRemove, onUnbookmark }) {
   const auth = useContext(AuthContext);
   const [isFavorited, setIsFavorited] = useState(false);
   const navigation = useNavigation();
   const [token, setToken] = useState(null);
   const [attendees, setAttendees] = useState([]);
   const [showFullLocation, setShowFullLocation] = useState(false);
-  const isCurrentUserOwner =
-    auth.user && auth.user.profile.id === project.owner.id;
+  const isCurrentUserOwner = auth.user?.profile?.id === project?.owner?.id;
 
   useEffect(() => {
     const getToken = async () => {
@@ -190,6 +191,11 @@ function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, on
         }
       };
 
+      const formatMomentDate = (dateString) => {
+        return dateString ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A,") + " UTC+8" : "N/A";
+    };
+    
+
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity
@@ -223,14 +229,13 @@ function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, on
         </View>
         {/* New Row for Start and End Dates */}
         <View style={styles.dateRow}>
-          <Text style={styles.dateText}>
-            <Text style={styles.boldText}>Start:</Text>{" "}
-            {project.start_date || "N/A"}
-            <Text style={styles.marginText}> | </Text>
-            <Text style={styles.boldText}>End:</Text>{" "}
-            {project.end_date || "N/A"}
-          </Text>
-        </View>
+                <Text style={styles.dateText}>
+                    <Text style={styles.boldText}>Start:</Text> {formatMomentDate(project.start_date)}
+                    <Text style={styles.marginText}> | </Text>
+                    <Text style={styles.boldText}>End:</Text> {formatMomentDate(project.end_date)}
+                </Text>
+            </View>
+
       </TouchableOpacity>
 
       <View style={styles.cardBody}>
@@ -262,11 +267,14 @@ function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, on
             <AttendButton
               projectId={project.id}
               token={token}
-              style={commonButtonStyle}
             />
           )}
 
-          <FavoriteButton projectId={project.id} token={token} />
+<FavoriteButton 
+  projectId={project.id} 
+  token={token} 
+  onUnbookmark={onUnbookmark} // Add this line
+/>
         </View>
 
         {/* Right Column */}
@@ -291,25 +299,28 @@ function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, on
 
         {showEditDeleteButtons && (
   <View style={styles.actionButtons}>
-    <Button
+    <CustomButton
       title="Edit"
       onPress={() => onEdit(project.id)}
-      buttonStyle={styles.editButton}
+      color = 'blue'
+      fontSize={12}
     />
-    <Button
+    <CustomButton
       title="Delete"
       onPress={() => onDelete(project.id)}
-      buttonStyle={styles.deleteButton}
+      color = 'red'
+      fontSize={12}
     />
   </View>
 )}
 
       {/* Include the Remove button */}
       {onRemove && (
-        <Button 
+        <CustomButton 
           title="Remove" 
           onPress={() => onRemove(project.id)} 
           color="#9c1d33" 
+          fontSize={14} 
         />
       )}
 
@@ -494,6 +505,7 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: "row",
     marginTop: 10,
+
   },
   editButton: {
     backgroundColor: "#007bff", // Primary color for buttons

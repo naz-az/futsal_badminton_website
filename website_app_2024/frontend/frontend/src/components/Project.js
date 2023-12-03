@@ -9,6 +9,8 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom v6
 import AttendButton from "./AttendButton";
 
+import moment from 'moment';
+
 
 function Project({ project }) {
   const auth = useContext(AuthContext);
@@ -53,7 +55,11 @@ function Project({ project }) {
       .catch(error => console.error("Error removing from favorites:", error));
   };
   
-
+  const formatMomentDate = (dateString) => {
+    return dateString 
+      ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
+      : "N/A";
+  };
   return (
 <Card className="mb-4" style={{ padding: "5px" }}>
       <Link to={`/project/${project.id}`}>
@@ -103,11 +109,11 @@ function Project({ project }) {
         <Card.Text style={{ fontSize: "22px", marginTop: "20px" }}>RM {project.price}</Card.Text>
 
         <Card.Text>
-  <strong>Start:</strong> {project.start_date ? new Date(project.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+  <strong>Start:</strong> {formatMomentDate(project.start_date)}
 </Card.Text>
 
 <Card.Text>
-  <strong>End:</strong> {project.end_date ? new Date(project.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+  <strong>End:</strong> {formatMomentDate(project.end_date)}
 </Card.Text>
 
         <Card.Text>

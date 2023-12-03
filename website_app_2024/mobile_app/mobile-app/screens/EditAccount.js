@@ -84,13 +84,8 @@ const EditAccount = () => {
     const handleSubmit = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const config = {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${token}`
-                }
-            };
     
+            // Create a new FormData object
             let formData = new FormData();
             Object.keys(profile).forEach(key => {
                 if (Array.isArray(profile[key])) {
@@ -101,25 +96,43 @@ const EditAccount = () => {
                     formData.append(key, profile[key]);
                 }
             });
-
+    
             if (selectedFile) {
-                formData.append("profile_image", {
-                    uri: selectedFile.uri,
-                    type: selectedFile.type,
-                    name: selectedFile.name,
-                });
+                // Fetch the image as blob if necessary
+                const imageBlob = await fetch(selectedFile.uri).then(r => r.blob());
+    
+                // Append the image file
+                formData.append('profile_image', imageBlob, selectedFile.fileName || 'profile.jpg');
             }
     
-            const response = await axios.post('http://127.0.0.1:8000/api/user/edit-account/', formData, config);
-            if (response.data.success) {
+            // Log formData to inspect the structure (optional)
+            console.log("FormData to be sent:", formData);
+    
+            // Use the native fetch API to make the request
+            const response = await fetch('http://127.0.0.1:8000/api/user/edit-account/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    // Do not set Content-Type for FormData; it's set automatically
+                },
+                body: formData
+            });
+    
+            const responseData = await response.json();
+    
+            // Handle response
+            if (responseData.success) {
                 alert("User account updated successfully!");
-                auth.updateUser(response.data["success data"]);
+                // Update user context and navigate
+                auth.updateUser(responseData["success data"]);
                 navigation.navigate('UserAccount'); // Replace with your actual route name
             }
         } catch (error) {
             console.error("Error editing profile", error);
         }
     };
+    
+    
 
     const handleBackClick = () => {
         navigation.goBack(); // This is the React Native way to navigate back
@@ -140,11 +153,13 @@ const EditAccount = () => {
             } else if (response.errorCode) {
                 console.log('ImagePicker Error: ', response.errorMessage);
             } else {
-                const source = { uri: response.assets[0].uri };
+                // Assuming response.assets[0] contains the image data
+                const source = response.assets[0];
                 setSelectedFile(source);
                 setImagePreview(source.uri);
             }
         });
+        
     };
     
 

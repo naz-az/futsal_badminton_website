@@ -8,17 +8,19 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import VotingButtons from "../components/VotingButtons";
 import AttendButton from '../components/AttendButton';
 import ProjectComponent from "../components/ProjectComponent";
+import SortingComponent from '../components/SortingComponent';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 import { faYoutube, faFacebook, faInstagram, faTwitter, faSquareJs } from '@fortawesome/free-brands-svg-icons';
 
+import CustomButton from "../components/CustomButton";
 
 function UserAccount() {
   const [accountData, setAccountData] = useState({ profile: {}, projects: [] });
   const [projects, setProjects] = useState([]);
   const [displayedProjects, setDisplayedProjects] = useState(6);
-  const [sortType, setSortType] = useState('newest');
+
   
   const navigation = useNavigation();
 
@@ -30,26 +32,24 @@ function UserAccount() {
 
   const [token, setToken] = useState(null); // State to store the token
 
+  const [isProfileImageModalVisible, setProfileImageModalVisible] = useState(false);
 
-  useEffect(() => {
-    // Fetch and set the token
-    const getToken = async () => {
-      const storedToken = await AsyncStorage.getItem("token");
-      console.log("Token fetched: ", storedToken); // Debugging log
-      setToken(storedToken);
-    };
+  const [sortType, setSortType] = useState('newToOld');
 
-    getToken();
-  }, []);
+  const [sortedProjects, setSortedProjects] = useState([]);
+
+
+
+  const toggleProfileImageModal = () => {
+    setProfileImageModalVisible(!isProfileImageModalVisible);
+  };
+  
   
   const toggleSortModal = () => {
     setSortModalVisible(!isSortModalVisible);
   };
 
-  const applySort = () => {
-    sortProjects(selectedSortType, selectedSortOrder);
-    toggleSortModal();
-  };
+
 
   const processImageUrl = (imageUrl) => {
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
@@ -57,7 +57,17 @@ function UserAccount() {
     }
     return imageUrl;
   };
+  // Fetch and set the token
+  useEffect(() => {
+    const getToken = async () => {
+      const storedToken = await AsyncStorage.getItem("token");
+      setToken(storedToken);
+    };
 
+    getToken();
+  }, []);
+
+  // Fetch user account data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,19 +78,28 @@ function UserAccount() {
           },
         });
         setAccountData(response.data);
-        sortProjects('newest');
       } catch (error) {
         console.error("Error fetching user account data", error);
       }
     };
 
+    fetchData();
+  }, []);
+
+  // Fetch projects based on the profile ID
+  useEffect(() => {
     const fetchProjects = async () => {
+      if (!accountData.profile || !accountData.profile.id) {
+        console.log("Profile data or ID is not available");
+        return;
+      }
       const id = accountData.profile.id;
     
       try {
         const response = await axios.get(`http://127.0.0.1:8000/api/profiles/${id}/projects/`);
         setProjects(response.data);
-    
+        setSortedProjects(response.data); // Also set sortedProjects initially
+
         // Fetch attendees for each project
         response.data.forEach(project => {
           fetchAttendees(project.id);
@@ -90,12 +109,10 @@ function UserAccount() {
       }
     };
     
-  
-    fetchData();
     if (accountData.profile.id) {
       fetchProjects();
     }
-  }, [accountData.profile.id]);
+  }, [accountData.profile]);
 
   const editProject = (projectId) => {
     navigation.navigate('EditProject', { projectId });
@@ -132,26 +149,58 @@ function UserAccount() {
   // Add more UI components and styles as per mobile design needs
 
 
-  const sortProjects = (type, order) => {
-    setSortType(type);
+  // const sortProjects = (type, order) => {
+  //   setSortType(type);
   
-    setAccountData(prevState => {
-      let sortedProjects = [...prevState.projects];
-      if (type === 'top') {
-        sortedProjects.sort((a, b) => (order === 'topToLow' ? b.upvotes - a.upvotes : a.upvotes - b.upvotes));
-      } else if (type === 'price') {
-        sortedProjects.sort((a, b) => (order === 'highToLow' ? b.price - a.price : a.price - b.price));
-      } else { // 'date' or any other type
-        sortedProjects.sort((a, b) => {
-          return order === 'newToOld'
-            ? new Date(b.created) - new Date(a.created)
-            : new Date(a.created) - new Date(b.created);
-        });
-      }
-      return { ...prevState, projects: sortedProjects };
-    });
-  };
+  //   setAccountData(prevState => {
+  //     let sortedProjects = [...prevState.projects];
+  //     if (type === 'top') {
+  //       sortedProjects.sort((a, b) => (order === 'topToLow' ? b.upvotes - a.upvotes : a.upvotes - b.upvotes));
+  //     } else if (type === 'price') {
+  //       sortedProjects.sort((a, b) => (order === 'highToLow' ? b.price - a.price : a.price - b.price));
+  //     } else { // 'date' or any other type
+  //       sortedProjects.sort((a, b) => {
+  //         return order === 'newToOld'
+  //           ? new Date(b.created) - new Date(a.created)
+  //           : new Date(a.created) - new Date(b.created);
+  //       });
+  //     }
+  //     return { ...prevState, projects: sortedProjects };
+  //   });
+  // };
 
+
+  useEffect(() => {
+    if (projects.length === 0) return;
+  
+    let newSortedProjects = [...projects];
+  
+    switch (sortType) {
+      case 'topToLow':
+        newSortedProjects.sort((a, b) => b.upvotes - a.upvotes);
+        break;
+      case 'lowToTop':
+        newSortedProjects.sort((a, b) => a.upvotes - b.upvotes);
+        break;
+      case 'highToLow':
+        newSortedProjects.sort((a, b) => b.price - a.price);
+        break;
+      case 'lowToHigh':
+        newSortedProjects.sort((a, b) => a.price - b.price);
+        break;
+      case 'newToOld':
+        newSortedProjects.sort((a, b) => new Date(b.created) - new Date(a.created));
+        break;
+      case 'oldToNew':
+        newSortedProjects.sort((a, b) => new Date(a.created) - new Date(b.created));
+        break;
+      default:
+        break;
+    }
+  
+    setSortedProjects(newSortedProjects);
+  }, [sortType]); // Remove projects from dependency array
+  
 
   const renderSocialLinks = (profile) => {
     const socialPlatforms = [
@@ -362,7 +411,7 @@ function UserAccount() {
     onPress={navigateToFollowedTags}
     style={styles.followedTagsButton}
   >
-    <Text style={{ color: '#fff' }}>View Followed Tags</Text>
+    <Text style={{ color: '#fff' }}>View Followed Categories</Text>
   </TouchableOpacity>
 
   <View style={{ flexDirection: 'row' }}>
@@ -388,41 +437,70 @@ function UserAccount() {
 {/* <View style={{ alignItems: 'center', marginBottom: 20 }}> */}
 <View style={styles.profileCard}>
 
-        <Image
-          source={{ uri: processImageUrl(accountData.profile.profile_image) }}
-          style={{ width: 100, height: 100, borderRadius: 50 }}
-        />
+<Modal
+  animationType="fade"
+  transparent={true}
+  visible={isProfileImageModalVisible}
+  onRequestClose={toggleProfileImageModal}
+>
+  <TouchableOpacity
+    style={styles.centeredView}
+    activeOpacity={1}
+    onPressOut={toggleProfileImageModal}
+  >
+    <View style={styles.modalView} onStartShouldSetResponder={() => true}>
+      <Image
+        source={{ uri: processImageUrl(accountData.profile.profile_image) }}
+        style={styles.modalImage}
+      />
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={toggleProfileImageModal}
+      >
+        <Text style={styles.closeButtonText}>X</Text>
+      </TouchableOpacity>
+    </View>
+  </TouchableOpacity>
+</Modal>
+
+<TouchableOpacity onPress={toggleProfileImageModal}>
+  <Image
+    source={{ uri: processImageUrl(accountData.profile.profile_image) }}
+    style={{ width: 100, height: 100, borderRadius: 50 }}
+  />
+</TouchableOpacity>
+
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{accountData.profile.name}</Text>
         <Text>{accountData.profile.short_intro}</Text>
         {accountData.profile.location && <Text>Based in {accountData.profile.location}</Text>}
   
         <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20, marginBottom: 10 }}>
   {accountData.profile.social_facebook && (
-    <TouchableOpacity onPress={() => Linking.openURL(profile.social_facebook)}>
+    <TouchableOpacity onPress={() => Linking.openURL(accountData.profile.social_facebook)}>
       <FontAwesomeIcon icon={faFacebook} size={24} color="blue" style={{ marginHorizontal: 10 }} />
     </TouchableOpacity>
   )}
 
   {accountData.profile.social_twitter && (
-    <TouchableOpacity onPress={() => Linking.openURL(profile.social_twitter)}>
+    <TouchableOpacity onPress={() => Linking.openURL(accountData.profile.social_twitter)}>
       <FontAwesomeIcon icon={faTwitter} size={24} color="#1DA1F2" style={{ marginHorizontal: 10 }} />
     </TouchableOpacity>
   )}
 
   {accountData.profile.social_instagram && (
-    <TouchableOpacity onPress={() => Linking.openURL(profile.social_instagram)}>
+    <TouchableOpacity onPress={() => Linking.openURL(accountData.profile.social_instagram)}>
       <FontAwesomeIcon icon={faInstagram} size={24} color="#C13584" style={{ marginHorizontal: 10 }} />
     </TouchableOpacity>
   )}
 
   {accountData.profile.social_youtube && (
-    <TouchableOpacity onPress={() => Linking.openURL(profile.social_youtube)}>
+    <TouchableOpacity onPress={() => Linking.openURL(accountData.profile.social_youtube)}>
       <FontAwesomeIcon icon={faYoutube} size={24} color="red" style={{ marginHorizontal: 10 }} />
     </TouchableOpacity>
   )}
 
   {accountData.profile.social_website && (
-    <TouchableOpacity onPress={() => Linking.openURL(profile.social_website)}>
+    <TouchableOpacity onPress={() => Linking.openURL(accountData.profile.social_website)}>
       <FontAwesomeIcon icon={faSquareJs} size={24} color="black" style={{ marginHorizontal: 10 }} />
     </TouchableOpacity>
   )}
@@ -458,7 +536,7 @@ function UserAccount() {
               {/* Button Container */}
       <View style={styles.buttonContainer}>
 
-      <Button
+      {/* <Button
           onPress={toggleSortModal}
           buttonStyle={styles.filterButton}
           icon={
@@ -468,28 +546,29 @@ function UserAccount() {
               color="white" // Adjust icon color as needed
             />
           }
-        />
+        /> */}
 {/* Add Event Button */}
-<Button
-          title="Add Event"
-          onPress={navigateToAddProject}
-          buttonStyle={styles.addButton}
-          icon={
-            <Icon
-              name="plus"
-              size={14} // Adjust icon size as needed
-              color="white" // Adjust icon color as needed
-              style={{ marginRight: 5 }} // Add space between icon and text
-            />
-          }
-          iconRight={false} // Set to true if you want the icon after the text
-        />
+<CustomButton
+        title="Add Event"
+        onPress={navigateToAddProject}
+        color="#ffc107"
+        fontSize={12}
+        icon={ // Add an icon prop with the plus icon
+          <Icon
+            name="plus"
+            size={14} // Adjust icon size as needed
+            color="white" // Adjust icon color as needed
+            style={{ marginRight: 5 }} // Add space between icon and text
+          />
+        }
+        iconRight={false} // Set to true if you want the icon after the text
+      />
 
 
 
       </View>
 
-      {/* Sort Modal */}
+      {/* Sort Modal
       <Modal
         animationType="slide"
         transparent={true}
@@ -524,14 +603,18 @@ function UserAccount() {
             buttonStyle={styles.applyButton}
           />
         </View>
-      </Modal>
+      </Modal> */}
       
       </View>
       
+            {/* SortingComponent Implementation */}
+            <SortingComponent sortType={sortType} setSortType={setSortType} />
+
+
             {/* Projects Section */}
             <View style={styles.projectsSection}>
         {/* ... Existing projects section code */}
-        {accountData.projects.map((project) => (
+        {sortedProjects.map((project) => (
   <ProjectComponent
     key={project.id}
     project={project}
@@ -792,7 +875,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
     // paddingHorizontal: 10, // Adjust padding as needed
   },
   sortButtonText: {
@@ -806,6 +889,49 @@ const styles = StyleSheet.create({
     padding: 10, // Example padding
     backgroundColor: "#4b555d",
   },
+
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.8)', // Fully opaque black background
+  },
+  modalView: {
+    backgroundColor: "transparent", // No need for a background color here
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  modalImage: {
+    width: 300, // You can adjust this as needed
+    height: 300, // You can adjust this as needed
+    borderRadius: 150, // This should be half of width/height to make it circular
+  },
+  closeButton: {
+    position: 'absolute',
+    // top: 30, // Adjust as needed
+    right: 20, // Adjust as needed
+    backgroundColor: 'lightgrey',
+    width: 30, // Set a fixed width
+    height: 30, // Ensure height is the same as width to create a circle
+    borderRadius: 15, // Half of width/height will be the borderRadius to make it a circle
+    justifyContent: 'center', // Center the 'X' text horizontally
+    alignItems: 'center', // Center the 'X' text vertically
+    elevation: 2
+  },
+  closeButtonText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 16,
+    // Remove any padding or margin if present
+  },
+  
 });
 
 export default UserAccount;

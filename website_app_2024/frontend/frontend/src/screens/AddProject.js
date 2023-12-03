@@ -98,10 +98,7 @@ const AddProject = () => {
                 setProjectData({ ...projectData, additional_images: updatedImages });
                 setImagePreviews({ ...imagePreviews, additional_images: updatedImagePreviews });
             }
-        } else if (name === 'start_date' || name === 'end_date') {
-            // Convert date-time to Malaysian time before setting the state
-            const formattedDate = convertToMalaysianTime(value);
-            setProjectData({ ...projectData, [name]: formattedDate });
+
         } else {
             setProjectData({ ...projectData, [name]: value });
         }

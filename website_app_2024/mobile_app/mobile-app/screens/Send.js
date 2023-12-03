@@ -24,6 +24,8 @@ function Send() {
     const [blockedByUsers, setBlockedByUsers] = useState([]);
     const [usersBlockingMe, setUsersBlockingMe] = useState([]);
 
+    const [errorMessage, setErrorMessage] = useState('');
+
     const getToken = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -114,6 +116,17 @@ function Send() {
     
         // Adjusted handleSubmit for React Native
         const handleSubmit = async () => {
+
+        // Check if recipient is selected
+        if (!formData.recipientId) {
+            setErrorMessage('Error: Please select a recipient before sending the message!');
+            return;
+        }
+
+        // Reset error message if all validations pass
+        setErrorMessage('');
+
+
             try {
                 const headers = await authHeaders();
                 const response = await axios.post('http://127.0.0.1:8000/api/send_message/', formData, headers);
@@ -147,6 +160,11 @@ function Send() {
 
         return (
             <ScrollView style={styles.container}>
+                            {/* Display error message */}
+            {errorMessage && (
+                <Text style={styles.errorMessage}>{errorMessage}</Text>
+            )}
+
                 <View style={styles.innerContainer}>
                     <Text style={styles.headerText}>Send Message</Text>
     
@@ -297,7 +315,11 @@ const styles = StyleSheet.create({
         color: '#007bff', // Color to match the border
         fontWeight: 'bold',
     },
-
+    errorMessage: {
+        color: 'red', // Change as needed for your design
+        textAlign: 'center',
+        marginBottom: 10,
+    },
 });
 
 export default Send;

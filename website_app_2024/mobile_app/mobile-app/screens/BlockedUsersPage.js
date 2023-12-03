@@ -4,7 +4,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthContext from '../context/authContext'; // Import AuthContext
 import { useNavigation } from '@react-navigation/native';
-
+import CustomButton from '../components/CustomButton';
 
 const processImageUrl = (imageUrl) => {
     if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
@@ -146,10 +146,11 @@ const BlockedUsersPage = () => {
                 />
                 <Text style={{ marginLeft: 10, flex: 1 }}>{item.username}</Text>
             </TouchableOpacity>
-            <Button 
+            <CustomButton 
                 title="Unblock"
-                color="red"
+                color="#d95c34"
                 onPress={() => handleUnblock(item.id)}
+                fontSize={12}
             />
         </View>
     )}
@@ -157,9 +158,12 @@ const BlockedUsersPage = () => {
 
 
                 <View style={{ alignItems: 'center', marginVertical: 20 }}>
-                    <Button 
+                    <CustomButton 
                         title={showProfiles ? 'Hide Users' : 'Block new user'}
                         onPress={() => setShowProfiles(!showProfiles)}
+                        fontSize={12}
+                        color="#3b3b3b"
+
                     />
                 </View>
 
@@ -179,14 +183,16 @@ const BlockedUsersPage = () => {
                         />
                         <Text style={{ flex: 1 }}>{item.username}</Text>
                     </TouchableOpacity>
-                    <Button 
-                        title={isUserBlocked(item.id) ? 'Unblock' : 'Block'}
-                        color={isUserBlocked(item.id) ? 'green' : 'orange'}
-                        onPress={() => {
-                            console.log(`Button pressed for user: ${item.id}`);
-                            toggleUserBlockStatus(item.id);
-                        }}
-                    />
+                    <CustomButton 
+    title={isUserBlocked(item.id) ? 'Unblock' : 'Block'}
+    color={isUserBlocked(item.id) ? '#d95c34' : 'orange'}
+    fontSize={12}
+    onPress={() => {
+        console.log(`Button pressed for user: ${item.id}`);
+        toggleUserBlockStatus(item.id);
+    }}
+/>
+
                 </View>
             )}
         />

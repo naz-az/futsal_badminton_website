@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AuthContext from '../context/authContext';
+import CustomButton from '../components/CustomButton';
+
 
 const Thread = () => {
   const [thread, setThread] = useState(null);
@@ -83,9 +85,15 @@ const Thread = () => {
                   <Text>{message.body}</Text>
                   <Text style={{ fontSize: 12, color: 'grey' }}>{new Date(message.timestamp).toLocaleString()}</Text>
                 </View>
-                <TouchableOpacity onPress={() => handleReplyClick(message.id)} style={styles.replyButton}>
-                  <Text style={{ color: 'white' }}>Reply</Text>
-                </TouchableOpacity>
+                <CustomButton 
+  title="Reply" 
+  onPress={() => handleReplyClick(message.id)} 
+  color="#000000" // Use the color that suits your design
+  textColor="#ffffff" // Set text color as needed
+  fontSize={12} // Set the font size to 12
+
+/>
+
               </View>
   
               {isReplying === message.id && (
@@ -111,9 +119,15 @@ const Thread = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Thread</Text>
-      <TouchableOpacity onPress={() => navigation.navigate('Inbox')} style={styles.backButton}>
-        <Text style={styles.buttonText}>Back to Inbox</Text>
-      </TouchableOpacity>
+      <CustomButton 
+  title="Back to Inbox" 
+  onPress={() => navigation.navigate('Inbox')} 
+  color="#000000" // Set the color as needed
+  textColor="#ffffff" // Set text color as needed
+  fontSize={12}
+
+/>
+
 
       {thread && thread.messages ? (
         renderMessages(thread.messages, thread, auth, handleReplyClick, isReplying, individualReply, setIndividualReply, sendReply)
@@ -129,9 +143,14 @@ const Thread = () => {
           onChangeText={setMainReply}
           placeholder="Reply to the main thread..."
         />
-        <TouchableOpacity onPress={() => sendReply(null, thread.participants[1].id)} style={styles.sendButton}>
-          <Text style={styles.buttonText}>Send</Text>
-        </TouchableOpacity>
+<CustomButton 
+  title="Send" 
+  onPress={() => sendReply(null, thread.participants[1].id)} 
+  color="#355271" // Set the color as needed
+  textColor="#ffffff" // Set text color as needed
+  fontSize={12}
+/>
+
       </View>
     </View>
   );

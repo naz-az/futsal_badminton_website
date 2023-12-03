@@ -5,6 +5,8 @@ import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 import VotingButtons from "../components/VotingButtons"; // The path to your VotingButtons component
 import AttendButton from "../components/AttendButton";
 
+import moment from 'moment';
+
 function SwipePage() {
   const [projects, setProjects] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,6 +21,12 @@ function SwipePage() {
 
   const [dragStyle, setDragStyle] = useState({});
   const navigate = useNavigate(); // Initialize navigate
+
+  const formatMomentDate = (dateString) => {
+    return dateString 
+      ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
+      : "N/A";
+  };
 
     // Check if user is authenticated
     const isAuthenticated = () => {
@@ -357,11 +365,11 @@ function SwipePage() {
 
   
                     <Card.Text>
-  <strong>Start:</strong> {currentProject.start_date ? new Date(currentProject.start_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+  <strong>Start:</strong> {formatMomentDate(currentProject.start_date)}
 </Card.Text>
 
 <Card.Text>
-  <strong>End:</strong> {currentProject.end_date ? new Date(currentProject.end_date).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : 'N/A'}
+  <strong>End:</strong> {formatMomentDate(currentProject.end_date)}
 </Card.Text>
 
 <Card.Text>

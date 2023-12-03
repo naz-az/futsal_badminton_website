@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import CustomButton from '../components/CustomButton';
+import ConfirmationModal from '../components/ConfirmationModal';
+
 
 function FollowingPage() {
     const [followingProfiles, setFollowingProfiles] = useState([]);
@@ -28,19 +31,18 @@ function FollowingPage() {
         setShowConfirmation(true);
     };
 
-    const confirmUnfollow = async () => {
+    const handleUnfollowConfirm = async () => {
         if (selectedProfile) {
             const token = await AsyncStorage.getItem('token');
             const config = {
                 headers: { 'Authorization': `Bearer ${token}` }
             };
             await axios.post(`http://127.0.0.1:8000/api/profiles/${selectedProfile.id}/unfollow/`, null, config);
-            fetchFollowingProfiles(); // Refetch the following list
+            fetchFollowingProfiles();
+            setSelectedProfile(null);
             setShowConfirmation(false);
         }
     };
-
-
 
     const processImageUrl = (profile) => {
         let profileImageUrl = profile.profile_image;
@@ -49,7 +51,7 @@ function FollowingPage() {
         }
         return profileImageUrl;
     };
-    
+
     return (
         <ScrollView style={styles.container}>
             <Text style={styles.subtitle}>You're following {followingProfiles.length} people</Text>
@@ -65,12 +67,23 @@ function FollowingPage() {
                         <Text style={styles.cardText}>{profile.short_intro.slice(0, 60)}</Text>
                     </View>
                     <View style={styles.rightColumn}>
-                        <TouchableOpacity onPress={() => handleUnfollowClick(profile)} style={styles.button}>
-                            <Text style={styles.buttonText}>Unfollow</Text>
-                        </TouchableOpacity>
+                        <CustomButton
+                            title="Unfollow"
+                            onPress={() => handleUnfollowClick(profile)}
+                            color="#333361"
+                            textColor="white"
+                            fontSize={12}
+                        />
                     </View>
                 </View>
             ))}
+
+            <ConfirmationModal
+                modalVisible={showConfirmation}
+                setModalVisible={setShowConfirmation}
+                onConfirm={handleUnfollowConfirm}
+                actionType="unfollow this user"
+            />
 
                     {/* <TouchableOpacity 
     onPress={() => navigation.navigate('Send', { recipient: profile.id })}
@@ -80,25 +93,7 @@ function FollowingPage() {
     <Text style={styles.buttonText}>Send Message</Text>
 </TouchableOpacity> */}
 
-            {/* Confirmation Modal */}
-            {showConfirmation && (
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={showConfirmation}
-                    onRequestClose={() => setShowConfirmation(false)}
-                >
-                    <View style={styles.modalView}>
-                        <Text>Are you sure you want to unfollow {selectedProfile?.name}?</Text>
-                        <TouchableOpacity onPress={() => setShowConfirmation(false)} style={styles.button}>
-                            <Text>Close</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={confirmUnfollow} style={styles.button}>
-                            <Text>Yes, Unfollow</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Modal>
-            )}
+
         </ScrollView>
     );
 }
