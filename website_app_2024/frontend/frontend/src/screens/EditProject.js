@@ -473,10 +473,10 @@ setImagePreviews(prevState => ({
 
             {/* Deal Link */}
             <Form.Group controlId="deal_link">
-              <Form.Label>Deal Link</Form.Label>
+              <Form.Label>Event Link</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="http://example.com/deal"
+                placeholder="http://example.com/event"
                 name="deal_link"
                 value={projectData.deal_link}
                 onChange={handleChange}
@@ -489,7 +489,7 @@ setImagePreviews(prevState => ({
               <Form.Control
                 type="number"
                 step="0.01"
-                placeholder="Price in USD"
+                placeholder="Price in Ringgit (RM)"
                 name="price"
                 value={projectData.price}
                 onChange={handleChange}
@@ -555,18 +555,18 @@ setImagePreviews(prevState => ({
 
 {/* Add New Tag */}
 <Form.Group controlId="newTag">
-    <Form.Label>Add New Tag</Form.Label>
+    <Form.Label>Add New Category</Form.Label>
     <Row>
         <Col>
             <Form.Control
                 type="text"
-                placeholder="Enter tag name"
+                placeholder="Enter category name"
                 value={projectData.newTag}
                 onChange={(e) => setProjectData({ ...projectData, newTag: e.target.value })}
             />
         </Col>
         <Col>
-            <Button variant="primary" onClick={handleAddTag}>Add Tag</Button>
+            <Button variant="primary" onClick={handleAddTag}>Add Category</Button>
         </Col>
     </Row>
 </Form.Group>

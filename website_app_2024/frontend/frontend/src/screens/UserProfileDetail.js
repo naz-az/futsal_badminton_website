@@ -407,7 +407,7 @@ function UserProfileDetail() {
                     </Card> */}
 
 <Card>
-  <Card.Header>Deals</Card.Header>
+  <Card.Header>Events</Card.Header>
   <Card.Body>
     {projects && projects.length === 0 ? (
       <p>No events posted by user</p>

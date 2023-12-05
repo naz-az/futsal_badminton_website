@@ -38,34 +38,44 @@ const VotingButtons = ({ projectId }) => {
     const token = localStorage.getItem("token");
     if (!token) {
       window.location.href = "/login";
+      return;
+    }
+  
+    // User is toggling their existing vote
+    if (voteType === vote) {
+      setVote(null);
+      axios
+        .delete(`/api/remove-vote/${projectId}/${voteType}/`, config)
+        .then(() => {
+          // Adjust the vote count based on the vote being removed
+          setVoteCount(prevCount => voteType === "UP" ? prevCount - 1 : prevCount + 1);
+        })
+        .catch((error) => {
+          console.error("Error removing vote:", error);
+        });
     } else {
-      if (voteType === vote) {
-        setVote(null);
-        axios
-          .delete(`/api/remove-vote/${projectId}/${voteType}/`, config)
-          .then(() => {
-            setVoteCount((prevCount) =>
-              voteType === "UP" ? prevCount - 1 : prevCount + 1
-            );
-          })
-          .catch((error) => {
-            console.error("Error removing vote:", error);
+      // User is casting a new vote or changing their vote
+      axios
+        .post(`/api/vote/${projectId}/${voteType}/`, {}, config)
+        .then(() => {
+          setVote(voteType);
+          // Adjust the vote count correctly based on the new vote and previous vote if any
+          setVoteCount(prevCount => {
+            if (vote === null) {
+              // No previous vote, simply add/subtract based on the new vote
+              return voteType === "UP" ? prevCount + 1 : prevCount - 1;
+            } else {
+              // User is changing their vote, so double the increment/decrement
+              return voteType === "UP" ? prevCount + 2 : prevCount - 2;
+            }
           });
-      } else {
-        axios
-          .post(`/api/vote/${projectId}/${voteType}/`, {}, config)
-          .then(() => {
-            setVote(voteType);
-            setVoteCount((prevCount) =>
-              voteType === "UP" ? prevCount + 1 : prevCount - 1
-            );
-          })
-          .catch((error) => {
-            console.error("Error submitting vote:", error);
-          });
-      }
+        })
+        .catch((error) => {
+          console.error("Error submitting vote:", error);
+        });
     }
   };
+  
 
   // useEffect(() => {
   //   axios

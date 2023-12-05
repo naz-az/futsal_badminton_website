@@ -433,11 +433,12 @@ const formatMomentDate = (dateString) => {
       </Row>
 
 
-      <Row style={{ marginTop: '1.5rem'}}>
+      <Row style={{ marginTop: '2.0rem'}}>
       <Col md={9}>
           <ListGroup variant="flush">
 
 
+          <h4>Host</h4>
             <Link to={currentUserId === project.owner?.id ? '/user/account' : `/profiles/${project.owner?.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
   <ListGroup.Item className="mb-2 d-flex align-items-center">
     {project.owner?.profile_image && (
@@ -455,11 +456,12 @@ const formatMomentDate = (dateString) => {
 
 
 
-            <ListGroup.Item>Price: RM{project.price}</ListGroup.Item>
-            <ListGroup.Item>Description: {project.description}</ListGroup.Item>
+<h4 style={{ marginTop: '2rem'}}>Description</h4>
+
+            <ListGroup.Item>{project.description}</ListGroup.Item>
           </ListGroup>
 
-          <ListGroup.Item style={{ marginTop: '1.5rem'}}>
+          <ListGroup.Item style={{ marginTop: '2rem'}}>
   <h4>Attendees ({attendees.length})</h4>
   <ListGroup>
       {attendees.map((attendance, index) => (

@@ -1,21 +1,19 @@
-import React, { useState, useEffect,useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Row, Col, Button } from 'react-bootstrap';
 import Profile from '../components/Profile';
 import axios from 'axios';
 import Pagination from '../components/Pagination';
 import AuthContext from '../context/authContext';
 
-
 function ProfileScreen() {
     const [profiles, setProfiles] = useState([]);
     const [query, setQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const profilesPerPage = 8; // Limit profiles to 4 per page
+    const profilesPerPage = 8; // Limit profiles to 8 per page
 
     const auth = useContext(AuthContext);
     const currentUserId = auth.user?.profile.id; // Ensure this is the correct path to the user ID
-    console.log("userz id",currentUserId)
-
+    console.log("user's id", currentUserId);
 
     const fetchProfiles = async (query = '') => {
         const { data } = await axios.get(`/api/profiles/?search_query=${query}`);
@@ -31,10 +29,13 @@ function ProfileScreen() {
         fetchProfiles(query);
     };
 
+    // Filter out the current user's profile
+    const filteredProfiles = profiles.filter(profile => profile.id !== currentUserId);
+
     // Get current profiles to display based on current page
     const indexOfLastProfile = currentPage * profilesPerPage;
     const indexOfFirstProfile = indexOfLastProfile - profilesPerPage;
-    const currentProfiles = profiles.slice(indexOfFirstProfile, indexOfLastProfile);
+    const currentProfiles = filteredProfiles.slice(indexOfFirstProfile, indexOfLastProfile);
 
     return (
         <div>
@@ -45,7 +46,7 @@ function ProfileScreen() {
                 <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                         type="text"
-                        placeholder="Search for profiles"
+                        placeholder="Search for members"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         className="form-control"
@@ -61,7 +62,7 @@ function ProfileScreen() {
                         <Profile 
                             profile={profile} 
                             currentUserId={currentUserId} 
-                            isCurrentUser={profile.id === currentUserId}  // Pass isCurrentUser prop
+                            isCurrentUser={false}  // Always false since the current user's profile is filtered out
                         />
                     </Col>
                 ))}
@@ -70,8 +71,8 @@ function ProfileScreen() {
             {/* Pagination buttons */}
             <Pagination 
                 currentPage={currentPage} 
-                projectsLength={profiles.length}  // rename this prop to something more generic, e.g., itemsLength
-                projectsPerPage={profilesPerPage}  // rename this prop as well, e.g., itemsPerPage
+                projectsLength={filteredProfiles.length}  // Adjusted to filteredProfiles
+                projectsPerPage={profilesPerPage}
                 setCurrentPage={setCurrentPage} 
             />
         </div>

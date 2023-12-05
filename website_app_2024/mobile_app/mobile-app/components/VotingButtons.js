@@ -45,38 +45,50 @@ const VotingButtons = ({ projectId }) => {
   }, [projectId]);
 
   const handleVote = async (voteType) => {
-    const token = await getToken();
+    const token = await AsyncStorage.getItem("token");
     if (!token) {
-      // Redirect to login; In React Native, use navigation instead
-    } else {
-      const authConfig = await config();
-      if (voteType === vote) {
-        setVote(null);
-        axios
-          .delete(`http://127.0.0.1:8000/api/remove-vote/${projectId}/${voteType}/`, authConfig)
-          .then(() => {
-            setVoteCount((prevCount) =>
-              voteType === "UP" ? prevCount - 1 : prevCount + 1
-            );
-          })
-          .catch((error) => {
-            console.error("Error removing vote:", error);
-          });
-      } else {
-        axios
-          .post(`http://127.0.0.1:8000/api/vote/${projectId}/${voteType}/`, {}, authConfig)
-          .then(() => {
-            setVote(voteType);
-            setVoteCount((prevCount) =>
-              voteType === "UP" ? prevCount + 1 : prevCount - 1
-            );
-          })
-          .catch((error) => {
-            console.error("Error submitting vote:", error);
-          });
+      // Navigate to login screen
+      // Note: Use navigation from React Navigation or similar library
+      return;
+    }
+  
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
+    };
+  
+    // User is toggling their existing vote
+    if (voteType === vote) {
+      setVote(null);
+      axios
+        .delete(`http://127.0.0.1:8000/api/remove-vote/${projectId}/${voteType}/`, config)
+        .then(() => {
+          setVoteCount(prevCount => voteType === "UP" ? prevCount - 1 : prevCount + 1);
+        })
+        .catch((error) => {
+          console.error("Error removing vote:", error);
+        });
+    } else {
+      // User is casting a new vote or changing their vote
+      axios
+        .post(`http://127.0.0.1:8000/api/vote/${projectId}/${voteType}/`, {}, config)
+        .then(() => {
+          setVote(voteType);
+          setVoteCount(prevCount => {
+            if (vote === null) {
+              return voteType === "UP" ? prevCount + 1 : prevCount - 1;
+            } else {
+              return voteType === "UP" ? prevCount + 2 : prevCount - 2;
+            }
+          });
+        })
+        .catch((error) => {
+          console.error("Error submitting vote:", error);
+        });
     }
   };
+  
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>

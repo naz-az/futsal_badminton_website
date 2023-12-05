@@ -264,6 +264,17 @@ function SwipePage() {
 // Remember to remove the 'mousemove' event listener in `handleDragEnd` as well
 // document.removeEventListener('mousemove', handleMouseMove);
 
+const handleReturn = () => {
+  setCurrentIndex((prevIndex) => {
+    if (prevIndex - 1 < 0) {
+      return projects.length - 1; // Go to the last project if at the beginning
+    } else {
+      return prevIndex - 1;
+    }
+  });
+};
+
+
   return (
     <Container>
       <h2>Swipe Page</h2>
@@ -277,7 +288,9 @@ function SwipePage() {
           marginTop: "20px",
         }}
       >
-        {/* Dislike Button */}
+
+
+{/* Dislike Button */}
         <div
           style={{
             display: "flex",
@@ -316,7 +329,19 @@ function SwipePage() {
             </Button>
           )} */}
   
-  <AttendButton projectId={currentProject.id} token={localStorage.getItem("token")} fontSize="22px" />
+        {/* Return Button */}
+        <div
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    marginRight: "50px", // Adjust as needed
+  }}
+>
+  <Button variant="warning" onClick={handleReturn} style={{ fontSize: '30px', padding: '10px 20px' }}>
+    <i className="fa-solid fa-rotate-left"></i> {/* Choose an appropriate icon */}
+  </Button>
+</div>
 
   <Card
   style={{ ...dragStyle, width: '450px', height: '900px',cursor: isDragging ? 'grabbing' : 'grab', marginTop:"30px" }} // Apply dynamic styles for dragging
@@ -436,6 +461,8 @@ function SwipePage() {
           <Button variant="secondary" onClick={handleDislike}>
             Keep Picking
           </Button>
+          <AttendButton projectId={currentProject.id} token={localStorage.getItem("token")} fontSize="22px" />
+
           {isFavorited ? (
             <Button variant="danger" onClick={confirmRemoveFavorite}>
               Remove from Favourites

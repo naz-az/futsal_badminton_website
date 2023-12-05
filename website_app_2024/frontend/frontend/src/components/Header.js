@@ -251,11 +251,11 @@ const clearMessageNotifications = async () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
             <LinkContainer to="/">
-              <Nav.Link>Meets</Nav.Link>
+              <Nav.Link>Events</Nav.Link>
             </LinkContainer>
 
             <LinkContainer to="/profiles">
-              <Nav.Link>Users</Nav.Link>
+              <Nav.Link>Members</Nav.Link>
             </LinkContainer>
 
             <LinkContainer to="/swipe-page">

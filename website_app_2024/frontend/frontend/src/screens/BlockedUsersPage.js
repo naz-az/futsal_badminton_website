@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { Button, ListGroup, Container, Row, Col, Card, Image } from 'react-bootstrap';
-import AuthContext from '../context/authContext'; // Import AuthContext
+import { Link } from 'react-router-dom';
+import { Button, ListGroup, Container, Image } from 'react-bootstrap';
+import AuthContext from '../context/authContext';
 
 const BlockedUsersPage = () => {
     const [blockedUsers, setBlockedUsers] = useState([]);
@@ -31,7 +32,6 @@ const BlockedUsersPage = () => {
     const fetchProfiles = () => {
         axios.get('/api/profiles/', authHeaders)
             .then(res => {
-                // Filter out the current user's profile
                 const filteredProfiles = res.data.filter(profile => profile.id !== currentUserId);
                 setProfiles(filteredProfiles);
             })
@@ -50,9 +50,7 @@ const BlockedUsersPage = () => {
     const handleBlock = userId => {
         if (window.confirm('Are you sure you want to block this user?')) {
             axios.post(`/api/block-user/${userId}/`, {}, authHeaders)
-                .then(() => {
-                    fetchBlockedUsers(); // Refresh the list of blocked users
-                })
+                .then(() => fetchBlockedUsers())
                 .catch(err => console.log(err));
         }
     };
@@ -60,9 +58,7 @@ const BlockedUsersPage = () => {
     const handleUnblock = userId => {
         if (window.confirm('Are you sure you want to unblock this user?')) {
             axios.post(`/api/unblock-user/${userId}/`, {}, authHeaders)
-                .then(() => {
-                    fetchBlockedUsers(); // Refresh the list of blocked users
-                })
+                .then(() => fetchBlockedUsers())
                 .catch(err => console.log(err));
         }
     };
@@ -71,58 +67,51 @@ const BlockedUsersPage = () => {
         <Container>
             <h1 className="text-center my-4">Blocked Users</h1>
             <ListGroup>
-    {blockedUsers.map(user => (
-        <ListGroup.Item key={user.id} className="d-flex align-items-center">
-            <div style={{ flex: '1', display: 'flex', alignItems: 'center' }}>
-                <Image 
-                    src={user.profile_image} 
-                    alt={`${user.username}'s profile`} 
-                    roundedCircle 
-                    style={{ width: '30px', height: '30px', marginRight: '10px' }}
-                />
-                {user.username}
-            </div>
-            <Button variant="outline-danger" onClick={() => handleUnblock(user.id)}>Unblock</Button>
-        </ListGroup.Item>
-    ))}
-</ListGroup>
+                {blockedUsers.map(user => (
+                    <ListGroup.Item key={user.id} className="d-flex align-items-center">
+                        <div style={{ flex: '1', display: 'flex', alignItems: 'center' }}>
+                            <Link to={`/profiles/${user.id}`} style={{ color: 'black', textDecoration: 'none' }}>
+                                <Image 
+                                    src={user.profile_image} 
+                                    alt={`${user.username}'s profile`} 
+                                    roundedCircle 
+                                    style={{ width: '30px', height: '30px', marginRight: '10px' }}
+                                />
+                                {user.username}
+                            </Link>
+                        </div>
+                        <Button variant="outline-danger" onClick={() => handleUnblock(user.id)}>Unblock</Button>
+                    </ListGroup.Item>
+                ))}
+            </ListGroup>
 
-
-          <Row className="my-4">
-                <Col className="text-center">
-                    <Button variant="primary" onClick={() => setShowProfiles(!showProfiles)}>
-                        {showProfiles ? 'Hide Users' : 'Block new user'}
-                    </Button>
-                </Col>
-            </Row>
+            <Button variant="primary" onClick={() => setShowProfiles(!showProfiles)} className="my-4">
+                {showProfiles ? 'Hide Users' : 'Block new user'}
+            </Button>
 
             {showProfiles && (
-                <Card className="my-4">
-                    <Card.Body>
-                        <Card.Title>Select a User to Block or Unblock</Card.Title>
-                        <ListGroup>
-    {profiles.map(profile => (
-        <ListGroup.Item key={profile.id} className="d-flex align-items-center">
-            <div style={{ flex: '1', display: 'flex', alignItems: 'center' }}>
-                <Image 
-                    src={profile.profile_image} 
-                    alt={`${profile.username}'s profile`} 
-                    roundedCircle 
-                    style={{ width: '30px', height: '30px', marginRight: '10px' }}
-                />
-                {profile.username}
-            </div>
-            <Button 
-                variant={isUserBlocked(profile.id) ? "outline-success" : "outline-warning"} 
-                onClick={() => toggleUserBlockStatus(profile.id)}>
-                {isUserBlocked(profile.id) ? 'Unblock' : 'Block'}
-            </Button>
-        </ListGroup.Item>
-    ))}
-</ListGroup>
-
-                    </Card.Body>
-                </Card>
+                <ListGroup>
+                    {profiles.map(profile => (
+                        <ListGroup.Item key={profile.id} className="d-flex align-items-center">
+                            <div style={{ flex: '1', display: 'flex', alignItems: 'center' }}>
+                                <Link to={`/profiles/${profile.id}`} style={{ color: 'black', textDecoration: 'none' }}>
+                                    <Image 
+                                        src={profile.profile_image} 
+                                        alt={`${profile.username}'s profile`} 
+                                        roundedCircle 
+                                        style={{ width: '30px', height: '30px', marginRight: '10px' }}
+                                    />
+                                    {profile.username}
+                                </Link>
+                            </div>
+                            <Button 
+                                variant={isUserBlocked(profile.id) ? "outline-success" : "outline-warning"} 
+                                onClick={() => toggleUserBlockStatus(profile.id)}>
+                                {isUserBlocked(profile.id) ? 'Unblock' : 'Block'}
+                            </Button>
+                        </ListGroup.Item>
+                    ))}
+                </ListGroup>
             )}
         </Container>
     );
