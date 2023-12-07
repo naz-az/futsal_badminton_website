@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { Card, Badge, ButtonGroup, Button } from "react-bootstrap";
+import { Card, Badge, ButtonGroup, Button, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from 'axios';
 import SearchBox from "./SearchBox";
@@ -21,6 +21,12 @@ function Project({ project }) {
 
   const [showFullText, setShowFullText] = useState(false);
 
+      // New state for the bookmark modal
+      const [showBookmarkModal, setShowBookmarkModal] = useState(false);
+      const [bookmarkModalMessage, setBookmarkModalMessage] = useState('');
+      const [showViewAllBookmarks, setShowViewAllBookmarks] = useState(false);
+
+      
   useEffect(() => {
     // Implement logic to check if the project is already favorited
     // This typically involves an API call to your backend
@@ -35,33 +41,119 @@ function Project({ project }) {
   
   const handleAddFavorite = () => {
     if (!auth.isAuthenticated) {
-      navigate('/login'); // Redirect to login page
+        navigate('/login'); // Redirect to login page if not authenticated
     } else {
-      // Logic to add to favorites
-      axios.post(`/api/favorites/add/${project.id}/`, {}, { // Added slash at the end
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      })
-        .then(() => setIsFavorited(true))
-        .catch(error => console.error("Error adding to favorites:", error));
+        // Logic to add the event to favorites
+        axios.post(`/api/favorites/add/${project.id}/`, {}, { 
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        })
+        .then(() => {
+            setIsFavorited(true); // Update state to indicate the event is favorited
+            setBookmarkModalMessage("You've bookmarked this event."); // Set modal message
+            setShowViewAllBookmarks(true); // Show the 'View All Bookmarks' button in the modal
+            setShowBookmarkModal(true); // Show the modal
+            setTimeout(() => setShowBookmarkModal(false), 3000); // Automatically hide modal after 3 seconds
+        })
+        .catch(error => {
+            console.error("Error adding to favorites:", error);
+            // Optionally handle errors, e.g., show a different message in the modal
+        });
     }
-  };
+};
+
   
-  const handleRemoveFavorite = () => {
-    // Logic to remove from favorites
-    axios.delete(`/api/favorites/remove/${project.id}/`, { // Added slash at the end
+const handleRemoveFavorite = () => {
+  // Logic to remove the event from favorites
+  axios.delete(`/api/favorites/remove/${project.id}/`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    })
-      .then(() => setIsFavorited(false))
-      .catch(error => console.error("Error removing from favorites:", error));
-  };
+  })
+  .then(() => {
+      setIsFavorited(false); // Update state to indicate the event is no longer favorited
+      setBookmarkModalMessage("You removed this event from bookmarks."); // Set modal message
+      setShowViewAllBookmarks(false); // Don't show the 'View All Bookmarks' button in this modal
+      setShowBookmarkModal(true); // Show the modal
+      setTimeout(() => setShowBookmarkModal(false), 3000); // Automatically hide modal after 3 seconds
+  })
+  .catch(error => {
+      console.error("Error removing from favorites:", error);
+      // Optionally handle errors, e.g., show a different message in the modal
+  });
+};
+
   
   const formatMomentDate = (dateString) => {
     return dateString 
       ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A") + " UTC+8" 
       : "N/A";
   };
+
+
+  const timeUntilStart = (startDate) => {
+    const now = moment();
+    const start = moment.utc(startDate);
+  
+    if (now.isBefore(start)) {
+      // Calculate difference from now to start date
+      const duration = moment.duration(start.diff(now));
+      return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+    } 
+    return "Event has started";
+  };
+
+  const timeUntilEnd = (endDate) => {
+    const now = moment();
+    const end = moment.utc(endDate);
+  
+    if (now.isBefore(end)) {
+      // Calculate difference from now to end date
+      const duration = moment.duration(end.diff(now));
+      return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+    }
+    return "Event ended";
+  };
+  
+
+  // Modal state
+  const [showAttendModal, setShowAttendModal] = useState(false);
+  const [attendModalMessage, setAttendModalMessage] = useState('');
+  const [showAttendButton, setShowAttendButton] = useState(false);
+
+  // Method to update modal state
+  const handleModalChange = (show, message, showButton) => {
+    setShowAttendModal(show);
+    setAttendModalMessage(message);
+    setShowAttendButton(showButton);
+  };
+
   return (
+
+
+
+
 <Card className="mb-4" style={{ padding: "5px" }}>
+
+            {/* Modal component */}
+            <Modal show={showAttendModal} onHide={() => setShowAttendModal(false)}>
+          <Modal.Body>{attendModalMessage}</Modal.Body>
+          {showAttendButton && (
+            <Modal.Footer>
+              <Button variant="primary" onClick={() => navigate('/attending')}>
+                View All Attending Events
+              </Button>
+            </Modal.Footer>
+          )}
+        </Modal>
+
+            <Modal show={showBookmarkModal} onHide={() => setShowBookmarkModal(false)}>
+                <Modal.Body>{bookmarkModalMessage}</Modal.Body>
+                {showViewAllBookmarks && (
+                    <Modal.Footer>
+                        <Button variant="primary" onClick={() => navigate('/favourites')}>
+                            View All Bookmarks
+                        </Button>
+                    </Modal.Footer>
+                )}
+            </Modal>
       <Link to={`/project/${project.id}`}>
         <Card.Img
           variant="top"
@@ -108,12 +200,20 @@ function Project({ project }) {
 
         <Card.Text style={{ fontSize: "22px", marginTop: "20px" }}>RM {project.price}</Card.Text>
 
-        <Card.Text>
-  <strong>Start:</strong> {formatMomentDate(project.start_date)}
+<Card.Text>
+  <strong>Start:</strong>{" "}
+  {formatMomentDate(project.start_date)}
+  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
+    (<strong>Event starts in:</strong> {timeUntilStart(project.start_date)})
+  </span>
 </Card.Text>
 
 <Card.Text>
-  <strong>End:</strong> {formatMomentDate(project.end_date)}
+  <strong>End:</strong>{" "}
+  {formatMomentDate(project.end_date)}
+  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
+    (<strong>Event ends in:</strong> {timeUntilEnd(project.end_date)})
+  </span>
 </Card.Text>
 
         <Card.Text>
@@ -148,7 +248,7 @@ function Project({ project }) {
 
 
 
-        <AttendButton projectId={project.id} token={localStorage.getItem("token")} />
+        <AttendButton projectId={project.id} token={localStorage.getItem("token")} onModalChange={handleModalChange} />
 
 
 

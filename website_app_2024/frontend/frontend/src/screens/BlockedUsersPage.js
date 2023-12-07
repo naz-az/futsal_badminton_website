@@ -12,6 +12,8 @@ const BlockedUsersPage = () => {
     const auth = useContext(AuthContext);
     const currentUserId = auth.user ? auth.user.profile.id : null;
 
+    const [searchTerm, setSearchTerm] = useState('');
+
     const authHeaders = {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -63,6 +65,14 @@ const BlockedUsersPage = () => {
         }
     };
 
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredProfiles = profiles.filter(profile => 
+        profile.username.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <Container>
             <h1 className="text-center my-4">Blocked Users</h1>
@@ -90,29 +100,39 @@ const BlockedUsersPage = () => {
             </Button>
 
             {showProfiles && (
-                <ListGroup>
-                    {profiles.map(profile => (
-                        <ListGroup.Item key={profile.id} className="d-flex align-items-center">
-                            <div style={{ flex: '1', display: 'flex', alignItems: 'center' }}>
-                                <Link to={`/profiles/${profile.id}`} style={{ color: 'black', textDecoration: 'none' }}>
-                                    <Image 
-                                        src={profile.profile_image} 
-                                        alt={`${profile.username}'s profile`} 
-                                        roundedCircle 
-                                        style={{ width: '30px', height: '30px', marginRight: '10px' }}
-                                    />
-                                    {profile.username}
-                                </Link>
-                            </div>
-                            <Button 
-                                variant={isUserBlocked(profile.id) ? "outline-success" : "outline-warning"} 
-                                onClick={() => toggleUserBlockStatus(profile.id)}>
-                                {isUserBlocked(profile.id) ? 'Unblock' : 'Block'}
-                            </Button>
-                        </ListGroup.Item>
-                    ))}
-                </ListGroup>
-            )}
+    <>
+    <input 
+        type="text" 
+        placeholder="Search users..." 
+        value={searchTerm}
+        onChange={handleSearchChange}
+        className="mb-3 form-control"
+    />
+
+    <ListGroup>
+        {filteredProfiles.map(profile => (  // Use filteredProfiles here
+            <ListGroup.Item key={profile.id} className="d-flex align-items-center">
+                <div style={{ flex: '1', display: 'flex', alignItems: 'center' }}>
+                    <Link to={`/profiles/${profile.id}`} style={{ color: 'black', textDecoration: 'none' }}>
+                        <Image 
+                            src={profile.profile_image} 
+                            alt={`${profile.username}'s profile`} 
+                            roundedCircle 
+                            style={{ width: '30px', height: '30px', marginRight: '10px' }}
+                        />
+                        {profile.username}
+                    </Link>
+                </div>
+                <Button 
+                    variant={isUserBlocked(profile.id) ? "outline-success" : "outline-warning"} 
+                    onClick={() => toggleUserBlockStatus(profile.id)}>
+                    {isUserBlocked(profile.id) ? 'Unblock' : 'Block'}
+                </Button>
+            </ListGroup.Item>
+        ))}
+    </ListGroup>
+    </>
+)}
         </Container>
     );
 };

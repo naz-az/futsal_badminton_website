@@ -63,7 +63,7 @@ const SettingsPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>YOUR SETTINGS</Text>
+      <Text style={styles.title}>Settings</Text>
       {/* <Text style={styles.subTitle}>Manage Your Account</Text> */}
 
       <View style={styles.section}>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24, // larger font size
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 30,
     color: '#333', // dark color for better contrast
   },
   section: {

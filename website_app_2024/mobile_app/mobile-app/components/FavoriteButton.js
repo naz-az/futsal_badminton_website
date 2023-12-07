@@ -3,6 +3,8 @@ import axios from "axios";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import BookmarkModal from "./BookmarkModal";
+
 
 function FavoriteButton({ projectId, token, onUnbookmark }) { // Add onUnbookmark here
     const [isFavorited, setIsFavorited] = useState(false);
@@ -28,23 +30,46 @@ function FavoriteButton({ projectId, token, onUnbookmark }) { // Add onUnbookmar
             navigation.navigate('Login');
             return;
         }
-
+    
         const url = `http://127.0.0.1:8000/api/favorites/${isFavorited ? 'remove' : 'add'}/${projectId}/`;
         const method = isFavorited ? 'delete' : 'post';
-
-        axios({ method, url, headers: { Authorization: `Bearer ${token}` } })
-        .then(() => {
-          setIsFavorited(!isFavorited);
-          if (isFavorited && onUnbookmark) {
-            onUnbookmark(); // Invoke the callback when unbookmarking
-          }
-        })
-        .catch(error => console.error(`Error ${isFavorited ? 'removing from' : 'adding to'} favorites:`, error));
-    };
-
     
+        try {
+            await axios({ method, url, headers: { Authorization: `Bearer ${token}` } });
+            setIsFavorited(!isFavorited);
+    
+            // Show modal with appropriate message
+            setShowModal(true);
+            setModalMessage(isFavorited ? 'You removed this event from bookmarks' : "You've bookmarked this event");
+            setShowViewAllButton(!isFavorited);
+    
+            // Hide the modal after 3 seconds
+            setTimeout(() => setShowModal(false), 3000);
+    
+            // If unbookmarking, call the onUnbookmark callback
+            if (isFavorited && onUnbookmark) {
+                onUnbookmark();
+            }
+        } catch (error) {
+            console.error(`Error ${isFavorited ? 'removing from' : 'adding to'} favorites:`, error);
+        }
+    };
+    
+
+    const [showModal, setShowModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [showViewAllButton, setShowViewAllButton] = useState(false);
+  
     return (
         <View style={styles.container}>
+
+<BookmarkModal 
+        visible={showModal} 
+        message={modalMessage} 
+        onDismiss={() => setShowModal(false)}
+        showButton={showViewAllButton}
+      />
+
             <TouchableOpacity onPress={handleFavorite} style={styles.button}>
                 <Icon
                     name={isFavorited ? "bookmark" : "bookmark-o"}

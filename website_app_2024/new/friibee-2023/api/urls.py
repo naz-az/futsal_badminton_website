@@ -101,6 +101,7 @@ urlpatterns = [
     path('attendance/remove/<str:project_id>/', views.removeAttendance, name='remove-attendance'),
     path('attendance/is-attending/<str:project_id>/', views.checkAttendance, name='check-attendance'),
     path('projects/<str:project_id>/attendees/', views.get_attendees, name='project-attendees'),
+    path('user/attending-projects/', views.get_attending_projects, name='attending-projects'),
 
 # '/api/followed-tags'
 # `/api/follow-tag/${tagId}`

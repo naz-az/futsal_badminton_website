@@ -30,6 +30,8 @@ margin:0.1rem;
 .scroll-container {
   display: flex;
   align-items: center; /* To ensure vertical alignment */
+  justify-content: space-between; /* Distributes space between and around content items */
+
 }
 
 .tab-wrapper {
@@ -52,6 +54,8 @@ Button {
   color: white;
   padding: 10px;
   height: fit-content;
+  margin: 0 10px; /* Add some margin for spacing */
+
 }
 
 Button.active {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Button, Dropdown } from 'react-bootstrap';
+import { Row, Col, Button, Dropdown, Modal } from 'react-bootstrap';
 import Project from '../components/Project';
 import axios from 'axios';
 import api from '../services/api';
@@ -7,6 +7,8 @@ import api from '../services/api';
 import Pagination from '../components/Pagination';
 
 import HorizontalProject from '../components/HorizontalProject'; // Import the new component
+
+import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom v6
 
 function HomeScreen() {
     const [projects, setProjects] = useState([]);
@@ -18,6 +20,8 @@ function HomeScreen() {
     const [topSortOrder, setTopSortOrder] = useState('desc'); // starts with 'desc' for descending
     const [newSortOrder, setNewSortOrder] = useState('desc'); // starts with 'desc' for newest first
     
+    const navigate = useNavigate();
+
     // const fetchProjects = async (query = '', sortBy = '') => {
     //     try {
     //       const { data } = await api.get(`projects/?search_query=${query}&sort_by=${sortBy}`, {
@@ -111,10 +115,15 @@ function HomeScreen() {
                 return '';
         }
     };
+
+
+
+
+      
     return (
         <div>
-            <h1>Events</h1>
-            <div className="d-flex justify-content-center align-items-center mb-3">
+            {/* <h1>Events</h1> */}
+            <div className="d-flex justify-content-center align-items-center mb-5 mt-5">
                 <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                         type="text"
@@ -127,6 +136,8 @@ function HomeScreen() {
                     <Button variant="outline-secondary" type="submit">Search</Button>
                 </form>
             </div>
+
+
 
             <div className="mb-3 d-flex justify-content-center">
                 <Dropdown>
@@ -177,21 +188,24 @@ function HomeScreen() {
 
 
             {/* Layout selection buttons */}
-            <div className="mb-3 d-flex ">
-    <Button 
-        onClick={handleVerticalLayout} 
-        variant={layout === 'vertical' ? "primary" : "secondary"}
-        className="me-2"  // Right margin (margin-end) of 2 units
-    >
-        <i className="fa-solid fa-grip-vertical"></i>
-    </Button>
+{/* Layout selection buttons */}
+<div className="mb-3 d-flex ">
     <Button 
         onClick={handleHorizontalLayout} 
         variant={layout === 'horizontal' ? "primary" : "secondary"}
+        className="me-2"  // Right margin (margin-end) of 2 units
+    >
+                <i className="fa-solid fa-grip-vertical"></i>
+
+    </Button>
+    <Button 
+        onClick={handleVerticalLayout} 
+        variant={layout === 'vertical' ? "primary" : "secondary"}
     >
         <i className="fa-solid fa-grip"></i>
     </Button>
 </div>
+
 
 
             <Row>

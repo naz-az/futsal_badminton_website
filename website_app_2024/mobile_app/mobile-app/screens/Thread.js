@@ -118,7 +118,6 @@ const Thread = () => {
   
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Thread</Text>
       <CustomButton 
   title="Back to Inbox" 
   onPress={() => navigation.navigate('Inbox')} 

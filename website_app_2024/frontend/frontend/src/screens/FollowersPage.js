@@ -60,7 +60,8 @@ function FollowersPage() {
 
     return (
         <Container className="my-md">
-            <h2>You have {followersCount} followers</h2>
+                              <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>({followersCount}) Followers</h2>
+
             {followers.map(profile => (
                 <Card key={profile.id} className="mb-3 d-flex flex-row align-items-center">
                     <div style={{ width: '10%', marginRight: '20px' }}>

@@ -1,0 +1,10 @@
+.footer-container {
+    position: absolute;
+    bottom: 90px;
+    width: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: -1;
+  }
+  

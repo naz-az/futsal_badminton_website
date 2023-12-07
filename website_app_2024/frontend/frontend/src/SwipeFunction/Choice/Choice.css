@@ -1,0 +1,16 @@
+.container {
+    border-width: 7px;
+    padding: 15px;
+    border-radius: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    /* Add other CSS properties as needed for layout and positioning */
+  }
+  
+  .text {
+    font-size: 48px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    /* Add other CSS properties as needed */
+  }
+  

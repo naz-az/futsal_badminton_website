@@ -113,6 +113,8 @@ function OtherUserFollowingPage({ route, navigation }) {
 
     return (
         <ScrollView style={styles.container}>
+                  <Text style={styles.header}>Following</Text>
+
             <Text style={styles.subtitle}>{user.profile.username} is following {following.length} {following.length === 1 ? 'user' : 'users'}</Text>
             {following.map(profile => (
                 <View key={profile.id} style={styles.card}>
@@ -163,7 +165,9 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 18,
         marginBottom: 20,
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
+        textAlign: 'center',
+
 
     },
     card: {
@@ -227,6 +231,12 @@ const styles = StyleSheet.create({
         opacity: 0.8, // Slight opacity change on press
         transform: [{ scale: 0.96 }], // Slight scale down effect
     },
+    header: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginVertical: 10,
+      },
 });
 
 export default OtherUserFollowingPage;

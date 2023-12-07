@@ -2321,3 +2321,54 @@ def get_attendees(request, project_id):
     attendees = Attendance.objects.filter(project__id=project_id)
     serializer = AttendanceSerializer(attendees, many=True)
     return Response(serializer.data)
+
+
+from django.db.models import Count, Case, When, IntegerField
+from django.db.models import ExpressionWrapper, F
+import traceback
+
+from django.db.models import Count, Q
+
+from django.db.models import Count, Case, When, IntegerField, F
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_attending_projects(request):
+    try:
+        user = request.user
+        print(f"Request received from user: {user.username}")
+
+        # Get sorting parameters from request
+        sort_by = request.GET.get('sort_by', '')
+        sort_order = request.GET.get('sort_order', 'desc')
+
+        attending = Attendance.objects.filter(attendee=user.profile)
+        print(f"Attendance QuerySet: {attending}")
+
+        # Extract projects from attending and convert to a queryset
+        project_ids = [attendance.project_id for attendance in attending]
+        projects = Project.objects.filter(id__in=project_ids)
+
+        # Handle sorting
+        order_prefix = '' if sort_order == 'asc' else '-'
+        if sort_by == 'upvotes':
+            projects = projects.annotate(
+                upvotes=Count(Case(When(vote__vote_type=Vote.UP, then=1)), output_field=IntegerField()),
+                downvotes=Count(Case(When(vote__vote_type=Vote.DOWN, then=1)), output_field=IntegerField())
+            ).annotate(
+                net_votes=F('upvotes') - F('downvotes')
+            ).order_by(f'{order_prefix}net_votes')
+        elif sort_by == 'created':
+            projects = projects.order_by(f'{order_prefix}created')
+        elif sort_by == 'price':
+            projects = projects.order_by(f'{order_prefix}price')
+
+        print(f"Projects List: {projects}")
+        if not projects:
+            print("No projects found for the user.")
+
+        serializer = ProjectSerializer(projects, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        print(f"Error in get_attending_projects: {e}")
+        return Response({'error': str(e)}, status=500)

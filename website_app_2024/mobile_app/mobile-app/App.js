@@ -39,6 +39,7 @@ import OtherUserFollowersPage from './screens/OtherUserFollowersPage';
 import OtherUserFollowingPage from './screens/OtherUserFollowingPage';
 
 import SwipePage from './ReactNative-Swipe-Function/src/Main/SwipePage';
+import AttendingProjects from './screens/AttendingProjects';
 
 // const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -78,6 +79,8 @@ function HomeStackNavigator() {
 
       <HomeStack.Screen name="OtherUserFollowersPage" component={OtherUserFollowersPage} />
       <HomeStack.Screen name="OtherUserFollowingPage" component={OtherUserFollowingPage} />
+
+      <HomeStack.Screen name="AttendingProjects" component={AttendingProjects} />
 
 
     </HomeStack.Navigator>
@@ -205,6 +208,8 @@ function MainDrawerNavigator() {
       <Drawer.Screen name="Categories" component={Categories} />
       <Drawer.Screen name="FollowersPage" component={FollowersPage} />
       <Drawer.Screen name="FollowingPage" component={FollowingPage} />
+
+      <Drawer.Screen name="AttendingProjects" component={AttendingProjects} />
 
 
       {/* Add other drawer items here as needed */}

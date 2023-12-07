@@ -39,10 +39,10 @@ function ProfileScreen() {
 
     return (
         <div>
-            <h1>Profiles</h1>
+            {/* <h1>Profiles</h1> */}
             
             {/* Search Bar */}
-            <div className="d-flex justify-content-center align-items-center mb-3">
+            <div className="d-flex justify-content-center align-items-center mb-5 mt-5">
                 <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
                     <input
                         type="text"

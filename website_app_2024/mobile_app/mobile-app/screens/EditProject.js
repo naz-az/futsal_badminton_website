@@ -322,6 +322,8 @@ const handleChangeText = (name, value) => {
 
   return (
     <ScrollView style={styles.container}>
+                      <Text style={styles.title}>Edit Event</Text>
+
       <View style={styles.formGroup}>
         <Text style={styles.label}>Title</Text>
         <TextInput
@@ -569,7 +571,10 @@ const handleChangeText = (name, value) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 0,         // No padding at the top
+    paddingBottom: 20,     // 20 pixels padding for the bottom
+    paddingLeft: 20,       // 20 pixels padding for the left
+    paddingRight: 20,      // 20 pixels padding for the right
   },
   formGroup: {
     marginBottom: 15,
@@ -634,6 +639,13 @@ const styles = StyleSheet.create({
       // Reset any default padding or margin if necessary
       margin: 0,
       padding: 0,
+    },
+    title: {
+      fontWeight: 'bold',
+      fontSize: 24,
+      textAlign: 'center',
+      margin: 20,    
+      color: '#333333', // Darker color for better readability
     },
 });
 

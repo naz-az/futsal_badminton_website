@@ -82,7 +82,7 @@ function OtherUserFollowingPage() {
         <div className="my-md">
             <h1>Following</h1>
 
-            <h2>This user is following {following.length} {following.length === 1 ? 'user' : 'users'}</h2>
+            <h2>Following ({following.length}) {following.length === 1 ? 'user' : 'users'}</h2>
 
             {following.map(profile => (
   <Card key={profile.id} className="mb-3 d-flex flex-row align-items-center">

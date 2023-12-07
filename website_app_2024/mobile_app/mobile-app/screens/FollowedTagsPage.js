@@ -91,7 +91,11 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     textAlign: 'center',
-    margin: 20,
+    margin: 10,
+    fontWeight: 'bold',
+    marginTop: 20,
+
+
   },
   buttonContainer: {
     marginHorizontal: 25,
@@ -118,7 +122,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     // marginVertical: 10,
-    marginBottom: 10,
+    marginBottom: 20,
     color: '#333', // You can choose a suitable color
   },
 });

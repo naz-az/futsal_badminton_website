@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import AuthContext from "../context/authContext";
-import { Button, Row, Col, Card, Badge, ButtonGroup } from "react-bootstrap";
+import { Button, Row, Col, Card, Badge, ButtonGroup, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import VotingButtons from "./VotingButtons";
 import AttendButton from "./AttendButton";
@@ -71,9 +71,104 @@ function ProjectCard({ project, auth, navigate }) {
       : "N/A";
   };
   
+  // const calculateTimeRemaining = (startDate, endDate) => {
+  //   const now = moment();
+  //   const start = moment.utc(startDate);
+  //   const end = moment.utc(endDate);
+  
+  //   if (now.isBefore(start)) {
+  //     // Calculate difference from now to start date
+  //     const duration = moment.duration(start.diff(now));
+  //     return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+  //   } else if (now.isBetween(start, end)) {
+  //     // Calculate difference from now to end date
+  //     const duration = moment.duration(end.diff(now));
+  //     return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+  //   } else {
+  //     return "Event ended";
+  //   }
+  // };
+  
+  const timeUntilStart = (startDate) => {
+    const now = moment();
+    const start = moment.utc(startDate);
+  
+    if (now.isBefore(start)) {
+      // Calculate difference from now to start date
+      const duration = moment.duration(start.diff(now));
+      return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+    } 
+    return "Event has started";
+  };
+
+  const timeUntilEnd = (endDate) => {
+    const now = moment();
+    const end = moment.utc(endDate);
+  
+    if (now.isBefore(end)) {
+      // Calculate difference from now to end date
+      const duration = moment.duration(end.diff(now));
+      return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+    }
+    return "Event ended";
+  };
+  
+        // Modal state
+        const [showAttendModal, setShowAttendModal] = useState(false);
+        const [attendModalMessage, setAttendModalMessage] = useState('');
+        const [showAttendButton, setShowAttendButton] = useState(false);
+      
+        // Method to update modal state
+        const handleModalChange = (show, message, showButton) => {
+          setShowAttendModal(show);
+          setAttendModalMessage(message);
+          setShowAttendButton(showButton);
+        };
+
+
+            // State for the favorite modal
+            const [showFavoriteModal, setShowFavoriteModal] = useState(false);
+            const [favoriteModalMessage, setFavoriteModalMessage] = useState('');
+            const [showFavoriteButton, setShowFavoriteButton] = useState(false); // New state for button visibility
+            
+            
+    // Function to handle favorite modal
+    const handleFavoriteModal = (isAdded) => {
+      const message = isAdded ? "You've bookmarked this event" : "You removed this event from bookmarks";
+      setFavoriteModalMessage(message);
+      setShowFavoriteModal(true);
+      setShowFavoriteButton(isAdded); // Show button only if bookmark is added
+      setTimeout(() => setShowFavoriteModal(false), 3000); // Hide modal after 3 seconds
+    };
+
 
   return (
     <Col key={project.id} sm={12} md={6} lg={4} xl={3}>
+
+                              {/* Modal component */}
+                              <Modal show={showAttendModal} onHide={() => setShowAttendModal(false)}>
+          <Modal.Body>{attendModalMessage}</Modal.Body>
+          {showAttendButton && (
+            <Modal.Footer>
+              <Button variant="primary" onClick={() => navigate('/attending')}>
+                View All Attending Events
+              </Button>
+            </Modal.Footer>
+          )}
+        </Modal>
+
+  {/* Favorite Modal */}
+  <Modal show={showFavoriteModal} onHide={() => setShowFavoriteModal(false)}>
+      <Modal.Body>{favoriteModalMessage}</Modal.Body>
+      {showFavoriteButton && (
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => navigate('/favourites')}>
+            View All Bookmarks
+          </Button>
+        </Modal.Footer>
+      )}
+  </Modal>
+
       <Card className="mb-4 mt-4" style={{ padding: "5px", width: "105%" }}>
         <Link to={`/project/${project.id}`} style={{ textDecoration: "none" }}>
           <Card.Img
@@ -119,15 +214,27 @@ function ProjectCard({ project, auth, navigate }) {
             RM {project.price}
           </Card.Text>
 
-          <Card.Text>
-            <strong>Start:</strong>{" "}
-{formatMomentDate(project.start_date)}
-          </Card.Text>
+          {/* <Card.Text>
+  <strong>Event starts in:</strong> {calculateTimeRemaining(project.start_date, project.end_date)}
+</Card.Text> */}
 
-          <Card.Text>
-            <strong>End:</strong>{" "}
-            {formatMomentDate(project.end_date)}
-          </Card.Text>
+
+<Card.Text>
+  <strong>Start:</strong>{" "}
+  {formatMomentDate(project.start_date)}
+  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
+    (<strong>Event starts in:</strong> {timeUntilStart(project.start_date)})
+  </span>
+</Card.Text>
+
+<Card.Text>
+  <strong>End:</strong>{" "}
+  {formatMomentDate(project.end_date)}
+  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
+    (<strong>Event ends in:</strong> {timeUntilEnd(project.end_date)})
+  </span>
+</Card.Text>
+
 
           <Card.Text>
             <strong>Location:</strong>{" "}
@@ -145,6 +252,7 @@ function ProjectCard({ project, auth, navigate }) {
           <AttendButton
             projectId={project.id}
             token={localStorage.getItem("token")}
+            onModalChange={handleModalChange}
           />
 
           <div style={{ marginBottom: "10px" }}>
@@ -160,7 +268,7 @@ function ProjectCard({ project, auth, navigate }) {
               <Badge bg="dark">{project.brand}</Badge>
             </Card.Text> */}
           <div style={{ marginTop: "15px" }}>
-          <FavoriteButton projectId={project.id} token={localStorage.getItem("token")} />
+          <FavoriteButton projectId={project.id} token={localStorage.getItem("token")} onFavoriteChange={handleFavoriteModal}/>
 
           </div>
 

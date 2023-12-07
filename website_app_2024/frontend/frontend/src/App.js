@@ -63,6 +63,11 @@ import OtherUserFollowingPage from './screens/OtherUserFollowingPage';
 
 import ForgotPasswordForm from './screens/ForgotPasswordForm';
 
+import Main from './SwipeFunction/Main/Main';
+
+import AttendingProjects from './screens/AttendingProjects';
+
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
@@ -177,6 +182,10 @@ function App() {
               <Route path='/profiles/:profileId/following' element={<OtherUserFollowingPage />} />
 
               <Route path='/forgot-password' element={<ForgotPasswordForm />} />
+
+              <Route path='/main' element={<Main />} />
+
+              <Route path='/attending' element={<AttendingProjects />} />
 
 
             </Routes>

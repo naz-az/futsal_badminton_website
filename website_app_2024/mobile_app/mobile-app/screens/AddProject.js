@@ -338,7 +338,10 @@ await Promise.all(projectData.additional_images.map(async (image, index) => {
 
 return (
     <ScrollView style={{ backgroundColor: '#ffffff' }}>
+                <Text style={styles.title}>Add Event</Text>
+
         <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+
             {/* Success Modal */}
             <Modal
                 animationType="slide"
@@ -653,7 +656,13 @@ const styles = StyleSheet.create({
         margin: 0,
         padding: 0,
     },
-
+    title: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        textAlign: 'center',
+        margin: 20,    
+        color: '#333333', // Darker color for better readability
+      },
 });
 
 export default AddProject;

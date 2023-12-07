@@ -113,7 +113,10 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 18,
         marginBottom: 20,
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
+        textAlign: 'center',
+        padding: 20,
+
 
     },
     card: {

@@ -205,14 +205,15 @@ function ThreadMessages() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 20,
+    // marginTop: 20,
     paddingHorizontal: 10,
     backgroundColor: '#FFFFFF', // Adding a light background for overall page
   },
   title: {
-    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 15,
+    fontSize: 24,
+    textAlign: 'center',
+    margin: 20,    
     color: '#333333', // Darker color for better readability
   },
   messageSection: {
@@ -275,13 +276,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 5,
-    alignSelf: 'flex-start', // Aligns button to the start of the container
+    alignSelf: 'center', // Changed from 'flex-start' to 'center' to center the button
     margin: 5, // Optional, adjust as needed
   },
   
   createButtonText: {
     color: '#fff',
     marginLeft: 5,
+
   },
   moreIcon: {
     marginLeft: 15, // Adjust as needed

@@ -250,7 +250,7 @@ const handleRemoveTagFromProject = (tagId) => {
         <Container>
             <Row className="justify-content-md-center">
                 <Col md={6}>
-
+                <h2>Add Event</h2>
             {/* Success Modal */}
             <Modal show={showSuccessModal} onHide={() => setShowSuccessModal(false)} centered>
                 <Modal.Header>

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-function AttendButton({ projectId, token, fontSize = '16px' }) { // Default font size is set to 16px
+function AttendButton({ projectId, token, onAttendChange, onModalChange, fontSize = '16px' }) {
   const [isAttending, setIsAttending] = useState(false);
   const navigate = useNavigate();
 
@@ -37,7 +37,16 @@ function AttendButton({ projectId, token, fontSize = '16px' }) { // Default font
     const method = isAttending ? 'delete' : 'post';
 
     axios({ method, url, headers: { Authorization: `Bearer ${token}` } })
-    .then(() => setIsAttending(!isAttending))
+    .then(() => {
+      setIsAttending(!isAttending);
+      onAttendChange && onAttendChange(); // Invoke callback
+
+      // Handle modal display and message
+      const message = isAttending ? "You cancelled on attending this event" : "You're attending this event";
+      onModalChange(true, message, !isAttending);
+      setTimeout(() => onModalChange(false, '', false), 3000); // Hide modal after 3 seconds
+      
+    })
     .catch(error => console.error(`Error ${isAttending ? 'cancelling attendance' : 'attending'}:`, error));
   };
 

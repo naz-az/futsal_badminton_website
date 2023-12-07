@@ -106,7 +106,7 @@ const handleFollowToggle = async (followerProfileId, isFollowing) => {
 
 <h1>Followers</h1>
 
-  <h2>This user has {followers.length} {followers.length === 1 ? 'follower' : 'followers'}</h2>
+  <h2>({followers.length}) {followers.length === 1 ? 'follower' : 'followers'}</h2>
 
   {followers.map(profile => (
   <Card key={profile.id} className="mb-3 d-flex flex-row align-items-center">

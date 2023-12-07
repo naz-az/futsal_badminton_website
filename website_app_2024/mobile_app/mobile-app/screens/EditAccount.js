@@ -167,6 +167,8 @@ const EditAccount = () => {
 
     return (
         <ScrollView style={styles.container}>
+                                  <Text style={styles.title}>Edit Account</Text>
+
             <View style={styles.formContainer}>
                 {/* Go Back Button */}
                 <TouchableOpacity onPress={handleBackClick} style={styles.backButton}>
@@ -338,8 +340,11 @@ const EditAccount = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 10,
-    },
+        paddingTop: 0,         // No padding at the top
+        paddingBottom: 20,     // 20 pixels padding for the bottom
+        paddingLeft: 20,       // 20 pixels padding for the left
+        paddingRight: 20,      // 20 pixels padding for the right
+      },
     formContainer: {
         marginTop: 20,
     },
@@ -397,7 +402,13 @@ const styles = StyleSheet.create({
         color: 'white',
         textAlign: 'center',
     },
-    
+    title: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        textAlign: 'center',
+        margin: 20,    
+        color: '#333333', // Darker color for better readability
+      },
     });
 
 export default EditAccount;

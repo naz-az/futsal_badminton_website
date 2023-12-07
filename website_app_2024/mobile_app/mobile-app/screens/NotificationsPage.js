@@ -226,6 +226,9 @@ const renderNotificationItem = (notif, authUser) => {
       return (
 <ScrollView style={{ backgroundColor: '#ffffff', padding: 10 }}>
           <View>
+          <Text style={styles.title}>Notifications</Text>
+
+
             {/* Followers Section */}
             <Text style={styles.header}>Followers</Text>
             {followerNotifications.length > 0 ? (
@@ -293,6 +296,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginVertical: 10,
 
+      },
+      title: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        textAlign: 'center',
+        margin: 20,    
+        color: '#333333', // Darker color for better readability
       },
     row: {
       flexDirection: 'row',

@@ -33,7 +33,7 @@ function ProfileScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Profiles</Text>
+            <Text style={styles.title}>Members</Text>
             
             <View style={styles.searchContainer}>
                 <TextInput
@@ -69,7 +69,10 @@ function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        paddingTop: 20,         // No padding at the top
+        paddingBottom: 20,     // 20 pixels padding for the bottom
+        paddingLeft: 20,       // 20 pixels padding for the left
+        paddingRight: 20,      // 20 pixels padding for the right
         backgroundColor: '#ffffff', // Example background color
     },
     header: {
@@ -104,6 +107,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#4e4646',
     },
+    title: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        textAlign: 'center',
+        marginBottom: 30,
+        color: '#333333', // Darker color for better readability
+      },
 });
 
 export default ProfileScreen;

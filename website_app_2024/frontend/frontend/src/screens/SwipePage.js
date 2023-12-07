@@ -274,10 +274,58 @@ const handleReturn = () => {
   });
 };
 
+const timeUntilStart = (startDate) => {
+  const now = moment();
+  const start = moment.utc(startDate);
+
+  if (now.isBefore(start)) {
+    // Calculate difference from now to start date
+    const duration = moment.duration(start.diff(now));
+    return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+  } 
+  return "Event has started";
+};
+
+const timeUntilEnd = (endDate) => {
+  const now = moment();
+  const end = moment.utc(endDate);
+
+  if (now.isBefore(end)) {
+    // Calculate difference from now to end date
+    const duration = moment.duration(end.diff(now));
+    return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+  }
+  return "Event ended";
+};
+
+
+      // Modal state
+      const [showAttendModal, setShowAttendModal] = useState(false);
+      const [attendModalMessage, setAttendModalMessage] = useState('');
+      const [showAttendButton, setShowAttendButton] = useState(false);
+    
+      const handleModalChange = (show, message, showButton) => {
+        console.log("Modal state changing to:", show, message, showButton);
+        setShowAttendModal(show);
+        setAttendModalMessage(message);
+        setShowAttendButton(showButton);
+      };
 
   return (
     <Container>
-      <h2>Swipe Page</h2>
+      {/* <h2>Swipe Page</h2> */}
+                              {/* Modal component */}
+                              <Modal show={showAttendModal} onHide={() => setShowAttendModal(false)}>
+          <Modal.Body>{attendModalMessage}</Modal.Body>
+          {showAttendButton && (
+            <Modal.Footer>
+              <Button variant="primary" onClick={() => navigate('/attending')}>
+                View All Attending Events
+              </Button>
+            </Modal.Footer>
+          )}
+        </Modal>
+  
   
       <div
         style={{
@@ -296,7 +344,7 @@ const handleReturn = () => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            marginRight: "50px", // Spacing between the button and the card
+            marginRight: "100px", // Spacing between the button and the card
           }}
         >
 <Button variant="primary" onClick={handleDislike} style={{ fontSize: '30px', padding: '10px 20px' }}>
@@ -335,7 +383,9 @@ const handleReturn = () => {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    marginRight: "50px", // Adjust as needed
+    marginTop: "50px", // Adjust as needed
+    marginBottom: "50px", // Adjust as needed
+
   }}
 >
   <Button variant="warning" onClick={handleReturn} style={{ fontSize: '30px', padding: '10px 20px' }}>
@@ -389,12 +439,21 @@ const handleReturn = () => {
                     </Card.Text>
 
   
-                    <Card.Text>
-  <strong>Start:</strong> {formatMomentDate(currentProject.start_date)}
+
+<Card.Text>
+  <strong>Start:</strong>{" "}
+  {formatMomentDate(currentProject.start_date)}
+  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
+    (<strong>Event starts in:</strong> {timeUntilStart(currentProject.start_date)})
+  </span>
 </Card.Text>
 
 <Card.Text>
-  <strong>End:</strong> {formatMomentDate(currentProject.end_date)}
+  <strong>End:</strong>{" "}
+  {formatMomentDate(currentProject.end_date)}
+  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
+    (<strong>Event ends in:</strong> {timeUntilEnd(currentProject.end_date)})
+  </span>
 </Card.Text>
 
 <Card.Text>
@@ -430,7 +489,7 @@ const handleReturn = () => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            marginLeft: "50px", // Spacing between the card and the button
+            marginLeft: "100px", // Spacing between the card and the button
           }}
         >
           <Button variant="success" onClick={handleLike} style={{ fontSize: '30px', padding: '10px 20px' }}>
@@ -461,7 +520,7 @@ const handleReturn = () => {
           <Button variant="secondary" onClick={handleDislike}>
             Keep Picking
           </Button>
-          <AttendButton projectId={currentProject.id} token={localStorage.getItem("token")} fontSize="22px" />
+          <AttendButton projectId={currentProject.id} token={localStorage.getItem("token")} fontSize="22px" onModalChange={handleModalChange} />
 
           {isFavorited ? (
             <Button variant="danger" onClick={confirmRemoveFavorite}>

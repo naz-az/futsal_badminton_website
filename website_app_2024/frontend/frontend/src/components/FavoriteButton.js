@@ -3,7 +3,7 @@ import axios from "axios";
 import { Button } from "react-bootstrap";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-function FavoriteButton({ projectId, token }) {
+function FavoriteButton({ projectId, token, onFavoriteChange  }) {
     const [isFavorited, setIsFavorited] = useState(false);
     const navigate = useNavigate(); // Initialize navigate
 
@@ -37,10 +37,12 @@ function FavoriteButton({ projectId, token }) {
         const method = isFavorited ? 'delete' : 'post';
 
         axios({ method, url, headers: { Authorization: `Bearer ${token}` } })
-        .then(() => setIsFavorited(!isFavorited))
+        .then(() => {
+            setIsFavorited(!isFavorited);
+            onFavoriteChange(!isFavorited); // Pass boolean indicating if bookmark was added
+        })
         .catch(error => console.error(`Error ${isFavorited ? 'removing from' : 'adding to'} favorites:`, error));
     };
-
     
 
     return (

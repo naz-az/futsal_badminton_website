@@ -44,7 +44,8 @@ function FollowingPage() {
 
     return (
         <div className="my-md">
-            <h2>You're following {followingProfiles.length} people</h2>
+                  <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Following ({followingProfiles.length})</h2>
+
             {followingProfiles.map(profile => (
                 <Card key={profile.id} className="mb-3 d-flex flex-row align-items-center">
                     <div style={{ width: '10%' , marginRight: '20px'}}>

@@ -11,6 +11,10 @@ import ProjectCard from "../components/ProjectCard";
 
 import moment from 'moment';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+
+
 function Categories() {
   const [tags, setTags] = useState([]);
   const [currentTagProjects, setCurrentTagProjects] = useState([]);
@@ -141,45 +145,74 @@ function Categories() {
   };
 
 
-
+  // Revised scroll handlers with animation
+  const handleScroll = (direction) => {
+    if (tabWrapperRef.current) {
+      const scrollAmount = 150;
+      let scrollPosition = tabWrapperRef.current.scrollLeft;
+      tabWrapperRef.current.scrollTo({
+        left: direction === 'left' ? scrollPosition - scrollAmount : scrollPosition + scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
     <div>
-      <h1>Categories</h1>
+      {/* <h1>Categories</h1> */}
+      <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Categories</h2>
 
       {auth.isAuthenticated && (
         <div style={{ marginBottom: "25px" }}>
           <Button onClick={() => navigate("/followed-tags")}>
-            View Followed Tags
+            View Followed Categories
           </Button>
         </div>
       )}
 
-      <Button onClick={handleScrollLeft}>&#8678;</Button>
-      <div className="tab-wrapper" ref={tabWrapperRef}>
-        {tags.map((tag) => (
-          <div key={tag.id}>
-            <Button
-              data-id={tag.id}
-              onClick={() => {
-                fetchProjectsByTag(tag.id);
-                setActiveTagId(tag.id);
-              }}
-              variant={tag.id === activeTagId ? "primary" : "secondary"}
-            >
-              {tag.name}
-            </Button>
-          </div>
-        ))}
+<div className="scroll-container" style={{ display: 'flex', alignItems: 'center' }}>
+        <Button 
+          className="scroll-button left" 
+          onClick={() => handleScroll('left')} 
+          style={{ margin: '0 10px 0 0' }}> {/* Added right margin */}
+          <FontAwesomeIcon icon={faArrowLeft} />
+        </Button>
+
+        <div 
+          className="tab-wrapper" 
+          ref={tabWrapperRef} 
+          style={{ overflowX: 'auto', flexGrow: 1, whiteSpace: 'nowrap' }}>
+          {tags.map((tag) => (
+            <div key={tag.id}>
+              <Button
+                data-id={tag.id}
+                onClick={() => {
+                  fetchProjectsByTag(tag.id);
+                  setActiveTagId(tag.id);
+                }}
+                variant={tag.id === activeTagId ? "primary" : "secondary"}
+                style={{ margin: '0 1px' }}> {/* Added margin for spacing between tags */}
+                {tag.name}
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        <Button 
+          className="scroll-button right" 
+          onClick={() => handleScroll('right')} 
+          style={{ margin: '0 0 0 10px' }}> {/* Added left margin */}
+          <FontAwesomeIcon icon={faArrowRight} />
+        </Button>
       </div>
 
-      <Button onClick={handleScrollRight}>&#8680;</Button>
 
       <div>
 
+
         <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
     {activeTagName && (
-      <h3 style={{ marginRight: '20px' }}>Deals for {activeTagName}</h3>
+      <h3 style={{ marginRight: '20px' }}>Events for {activeTagName}</h3>
     )}
     {/* Follow/Unfollow Button for Active Tag */}
     {activeTagId && (

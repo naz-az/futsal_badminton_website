@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Container, Card, Dropdown, Image, Row, Col, Badge, Button } from "react-bootstrap";
+import { Container, Card, Dropdown, Image, Row, Col, Badge, Button, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 import axios from "axios";
@@ -10,6 +10,7 @@ import AttendButton from "../components/AttendButton";
 import FavoriteButton from "../components/FavoriteButton";
 
 import moment from 'moment';
+import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom v6
 
 
 export default function FavouritesScreen() {
@@ -21,6 +22,7 @@ export default function FavouritesScreen() {
   const currentUserId = auth.user?.profile.id; // Get the current user's ID
 
   const [showFullText, setShowFullText] = useState(false);
+  const navigate = useNavigate();
 
   const formatMomentDate = (dateString) => {
     return dateString 
@@ -83,6 +85,45 @@ export default function FavouritesScreen() {
     }
   };
 
+
+  const timeUntilStart = (startDate) => {
+    const now = moment();
+    const start = moment.utc(startDate);
+  
+    if (now.isBefore(start)) {
+      // Calculate difference from now to start date
+      const duration = moment.duration(start.diff(now));
+      return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+    } 
+    return "Event has started";
+  };
+
+  const timeUntilEnd = (endDate) => {
+    const now = moment();
+    const end = moment.utc(endDate);
+  
+    if (now.isBefore(end)) {
+      // Calculate difference from now to end date
+      const duration = moment.duration(end.diff(now));
+      return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+    }
+    return "Event ended";
+  };
+  
+
+    // Modal state
+    const [showAttendModal, setShowAttendModal] = useState(false);
+    const [attendModalMessage, setAttendModalMessage] = useState('');
+    const [showAttendButton, setShowAttendButton] = useState(false);
+
+    
+  const handleModalChange = (show, message, showButton) => {
+    setShowAttendModal(show);
+    setAttendModalMessage(message);
+    setShowAttendButton(showButton);
+  };
+
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -99,9 +140,20 @@ export default function FavouritesScreen() {
   return (
     <Container>
       <section className="text-center">
-        <h2>My Bookmarks</h2>
-        <p>You have {favorites.length} bookmark item{favorites.length > 1 ? "s" : ""}</p>
+        <h2>Bookmarks</h2>
+        <p>{favorites.length} bookmark item{favorites.length > 1 ? "s" : ""}</p>
 
+            {/* Modal component */}
+            <Modal show={showAttendModal} onHide={() => setShowAttendModal(false)}>
+          <Modal.Body>{attendModalMessage}</Modal.Body>
+          {showAttendButton && (
+            <Modal.Footer>
+              <Button variant="primary" onClick={() => navigate('/attending')}>
+                View All Attending Events
+              </Button>
+            </Modal.Footer>
+          )}
+        </Modal>
 
         {/* Dropdown for sorting by newest */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
@@ -179,15 +231,21 @@ export default function FavouritesScreen() {
     <Card.Text style={{ fontSize: '22px' }}>RM {favorite.project.price}</Card.Text>
 
 
-    <Card.Text>
-            <strong>Start:</strong>{" "}
-            {formatMomentDate(favorite.project.start_date)}
-          </Card.Text>
+<Card.Text>
+  <strong>Start:</strong>{" "}
+  {formatMomentDate(favorite.project.start_date)}
+  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
+    (<strong>Event starts in:</strong> {timeUntilStart(favorite.project.start_date)})
+  </span>
+</Card.Text>
 
-          <Card.Text>
-            <strong>End:</strong>{" "}
-{formatMomentDate(favorite.project.end_date)}
-          </Card.Text>
+<Card.Text>
+  <strong>End:</strong>{" "}
+  {formatMomentDate(favorite.project.end_date)}
+  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
+    (<strong>Event ends in:</strong> {timeUntilEnd(favorite.project.end_date)})
+  </span>
+</Card.Text>
 
           <Card.Text>
             <strong>Location:</strong>{" "}
@@ -223,7 +281,7 @@ export default function FavouritesScreen() {
       Go to deal <i className="fa-solid fa-up-right-from-square"></i>
     </Button> */}
 
-    <AttendButton projectId={favorite.project.id} token={localStorage.getItem("token")} style={{ marginRight: '1rem' }} />
+    <AttendButton projectId={favorite.project.id} onModalChange={handleModalChange} token={localStorage.getItem("token")} style={{ marginRight: '1rem' }} />
 
 
 

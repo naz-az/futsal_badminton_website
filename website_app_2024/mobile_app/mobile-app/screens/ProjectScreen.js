@@ -304,6 +304,30 @@ const formatMomentDate = (dateString) => {
   return dateString ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A,") + " UTC+8" : "N/A";
 };
 
+
+const timeUntilStart = (startDate) => {
+  const now = moment();
+  const start = moment.utc(startDate);
+
+  if (now.isBefore(start)) {
+    const duration = moment.duration(start.diff(now));
+    return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+  } 
+  return "Event has started";
+};
+
+const timeUntilEnd = (endDate) => {
+  const now = moment();
+  const end = moment.utc(endDate);
+
+  if (now.isBefore(end)) {
+    const duration = moment.duration(end.diff(now));
+    return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+  }
+  return "Event ended";
+};
+
+
   return (
     <ScrollView style={styles.container}>
 
@@ -343,12 +367,18 @@ const formatMomentDate = (dateString) => {
             <Icon name="event-available" size={25} color="#333" />
             <Text style={styles.label}>Start:</Text>
             <Text style={styles.value}>{formatMomentDate(project.start_date)}</Text>
+            <Text style={styles.italic}>
+          (Event starts in: {timeUntilStart(project.start_date)})
+        </Text>
         </View>
 
         <View style={styles.item}>
             <Icon name="event-busy" size={25} color="#333" />
             <Text style={styles.label}>End:</Text>
             <Text style={styles.value}>{formatMomentDate(project.end_date)}</Text>
+            <Text style={styles.italic}>
+          (Event ends in: {timeUntilEnd(project.end_date)})
+        </Text>
         </View>
 
       <View style={styles.item}>
@@ -711,6 +741,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   }, 
+  italic: {
+    fontStyle: 'italic',
+    color: 'orange',
+    fontSize: 14,
+    marginLeft: 10,
+  }
 });
 
 export default ProjectScreen;

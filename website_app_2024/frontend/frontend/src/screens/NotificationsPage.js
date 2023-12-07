@@ -242,7 +242,7 @@ const formatDateTime = (timestamp) => {
 
     return (
         <Container>
-          <h1>Notifications</h1>
+      <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Notifications</h2>
           <Row>
   <Col sm={12} className="mb-5">
     <Card>

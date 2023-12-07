@@ -262,6 +262,8 @@ const clearMessageNotifications = async () => {
               <Nav.Link>Swipe</Nav.Link>
             </LinkContainer>
 
+
+
             <LinkContainer to="/categories">
               <Nav.Link>Categories</Nav.Link>
             </LinkContainer>
@@ -294,7 +296,9 @@ const clearMessageNotifications = async () => {
                 <LinkContainer to="/favourites">
                   <NavDropdown.Item>Bookmarks</NavDropdown.Item>
                 </LinkContainer>
-
+                <LinkContainer to="/attending">
+                <NavDropdown.Item>Attending</NavDropdown.Item>
+            </LinkContainer>
 
                 <LinkContainer to="/thread">
   <NavDropdown.Item 

@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
+    marginTop:20,
   },
   headerSubtitle: {
     fontSize: 16,

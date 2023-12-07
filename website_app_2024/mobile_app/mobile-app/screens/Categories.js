@@ -222,11 +222,11 @@ function Categories({ route }) {
   return (
     <ScrollView style={{ backgroundColor: '#ffffff' }}>
       <View style={styles.container}>
-        <Text style={styles.header}>Categories</Text>
+        <Text style={styles.title}>Categories</Text>
 
         {auth.isAuthenticated && (
           <View style={styles.followTagsButton}>
-            <CustomButton title="View Followed Tags" color="#2e4457" fontSize={12} onPress={navigateToFollowedTags} />
+            <CustomButton title="View Followed Categories" color="#2e4457" fontSize={12} onPress={navigateToFollowedTags} />
           </View>
         )}
 
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   },
   followTagsButton: {
     marginBottom: 25,
-    alignSelf: 'flex-start', // Aligns the button to the left
+    alignSelf: 'center', // Aligns the button to the left
   },
   customButton: {
     backgroundColor: '#75481e', // Example creative color
@@ -376,6 +376,13 @@ noEventsText: {
     paddingLeft: 15,
     paddingRight: 15,
     // ... other styles you might need ...
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 24,
+    textAlign: 'center',
+    margin: 20,    
+    color: '#333333', // Darker color for better readability
   },
 });
 

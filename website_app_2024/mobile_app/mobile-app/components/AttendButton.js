@@ -1,33 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import CustomButton from './CustomButton';
+import { useNavigation } from "@react-navigation/native";
 
-const processImageUrl = (imageUrl) => {
-  if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-    return `http://127.0.0.1:8000${imageUrl}`;
-  }
-  return imageUrl;
-};
-
-function AttendButton({ projectId, token, fontSize = 14 }) { // Default font size is set to 16
+function AttendButton({ projectId, token, onAttendChange }) {
   const [isAttending, setIsAttending] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const navigation = useNavigation();
 
-  // Check if user is authenticated
   const isAuthenticated = async () => {
     const storedToken = await AsyncStorage.getItem('token');
     return storedToken != null;
   };
 
-  // Redirect to login if not authenticated
-  const redirectToLogin = () => {
-    // Handle navigation to login screen
-  };
-
   useEffect(() => {
-    if (token && projectId) { // Check if projectId is defined
+    if (token && projectId) {
       axios.get(`http://127.0.0.1:8000/api/attendance/is-attending/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -35,39 +23,74 @@ function AttendButton({ projectId, token, fontSize = 14 }) { // Default font siz
       .catch(error => console.error("Error checking attendance status:", error));
     }
   }, [projectId, token]);
-  
+
+  const closeAndNotify = () => {
+    setShowModal(false);
+    if (onAttendChange) onAttendChange();
+  };
 
   const handleAttendance = async () => {
     if (!await isAuthenticated()) {
-      redirectToLogin();
+      navigation.navigate('Login');
       return;
     }
 
     const url = `http://127.0.0.1:8000/api/attendance/${isAttending ? `remove/${projectId}/` : `add/${projectId}/`}`;
     const method = isAttending ? 'delete' : 'post';
 
-    axios({ method, url, headers: { Authorization: `Bearer ${token}` } })
-    .then(() => setIsAttending(!isAttending))
-    .catch(error => console.error(`Error ${isAttending ? 'cancelling attendance' : 'attending'}:`, error));
+    try {
+      await axios({ method, url, headers: { Authorization: `Bearer ${token}` } });
+      setIsAttending(!isAttending);
+      setShowModal(true);
+
+      setTimeout(closeAndNotify, 3000);
+    } catch (error) {
+      console.error(`Error ${isAttending ? 'cancelling attendance' : 'attending'}:`, error);
+    }
   };
 
   return (
     <View style={styles.container}>
+      <Modal
+        visible={showModal}
+        transparent
+        animationType="fade"
+        onRequestClose={closeAndNotify}
+      >
+        <TouchableWithoutFeedback onPress={closeAndNotify}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>
+                {isAttending ? "You're attending this event" : "You cancelled attending this event"}
+              </Text>
+              {isAttending && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowModal(false);
+                    navigation.navigate('AttendingProjects', { projectId });
+                  }}
+                  style={styles.viewButton}
+                >
+                  <Text style={styles.viewButtonText}>View all attending events</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       {isAttending ? (
         <TouchableOpacity style={[styles.button, styles.attending]} onPress={handleAttendance}>
-          <Icon name="check" size={fontSize} color="#fff" style={styles.icon}/>
-          <Text style={[styles.buttonText, { fontSize }]}>Attending</Text>
+          <Text style={[styles.buttonText]}>Attending</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity style={[styles.button, styles.notAttending]} onPress={handleAttendance}>
-          {/* <Icon name="check" size={fontSize} color="#fff" style={styles.icon}/> */}
-          <Text style={[styles.buttonText, { fontSize }]}>Attend</Text>
+          <Text style={[styles.buttonText]}>Attend</Text>
         </TouchableOpacity>
       )}
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     // Add your container styles here
@@ -93,7 +116,34 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 8
-  }
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-start', // Align to the top
+    alignItems: 'center',         // Keep it centered horizontally
+    paddingTop: 50, 
+    backgroundColor: 'transparent',
+  },
+  modalContent: {
+    backgroundColor: '#e1eef0c2',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  viewButton: {
+    backgroundColor: '#366d6b',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  viewButtonText: {
+    color: 'white',
+    fontSize: 12,
+  },
 });
 
 export default AttendButton;

@@ -8,6 +8,7 @@ import {
   Card,
   Form,
   ButtonGroup,
+  Modal,
 } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -136,6 +137,10 @@ function ProjectScreen() {
       };
       await axios.post(`/api/favorites/add/${id}/`, {}, config);
       setIsFavorited(true);
+      setShowBookmarkModal(true);
+      setBookmarkModalMessage("You've bookmarked this event");
+      setShowViewBookmarksButton(true);
+      setTimeout(() => setShowBookmarkModal(false), 3000);
     } catch (error) {
       console.error("Error adding to favorites:", error);
     }
@@ -154,6 +159,10 @@ function ProjectScreen() {
       };
       await axios.delete(`/api/favorites/remove/${id}/`, config);
       setIsFavorited(false);
+      setShowBookmarkModal(true);
+      setBookmarkModalMessage("You removed this event from bookmarks");
+      setShowViewBookmarksButton(false);
+      setTimeout(() => setShowBookmarkModal(false), 3000);
     } catch (error) {
       console.error("Error removing from favorites:", error);
     }
@@ -248,6 +257,41 @@ const formatMomentDate = (dateString) => {
     : "N/A";
 };
 
+const [showModal, setShowModal] = useState(false);
+const [modalMessage, setModalMessage] = useState('');
+const [showViewAllButton, setShowViewAllButton] = useState(false);
+
+const handleAttendClick = () => {
+  handleAddAttendance();
+  setShowModal(true);
+  setModalMessage("You're attending this event");
+  setShowViewAllButton(true);
+  setTimeout(() => {
+    setShowModal(false);
+  }, 3000);
+};
+
+const handleCancelAttendanceClick = () => {
+  handleRemoveAttendance();
+  setShowModal(true);
+  setModalMessage("You cancelled on attending this event");
+  setShowViewAllButton(false);
+  setTimeout(() => {
+    setShowModal(false);
+  }, 3000);
+};
+
+
+const [showBookmarkModal, setShowBookmarkModal] = useState(false);
+const [bookmarkModalMessage, setBookmarkModalMessage] = useState("");
+const [showViewBookmarksButton, setShowViewBookmarksButton] = useState(false);
+
+
+
+
+
+
+
   return (
     <div>
       <Button className="btn btn-light my-3" onClick={() => navigate(-1)}>
@@ -255,6 +299,27 @@ const formatMomentDate = (dateString) => {
       </Button>
       <Row>
 
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+  <Modal.Body>{modalMessage}</Modal.Body>
+  {showViewAllButton && (
+    <Modal.Footer>
+      <Button variant="secondary" onClick={() => navigate("/attending")}>
+        View all attending events
+      </Button>
+    </Modal.Footer>
+  )}
+</Modal>
+
+<Modal show={showBookmarkModal} onHide={() => setShowBookmarkModal(false)}>
+  <Modal.Body>{bookmarkModalMessage}</Modal.Body>
+  {showViewBookmarksButton && (
+    <Modal.Footer>
+      <Button variant="secondary" onClick={() => navigate("/favourites")}>
+        View all bookmarks
+      </Button>
+    </Modal.Footer>
+  )}
+</Modal>
 
       <Col md={6}>
           <Image src={selectedImage} alt={project.title} style={{ width: '550px', height: '450px', objectFit: 'cover', marginRight: '50px' }} fluid />
@@ -382,13 +447,13 @@ const formatMomentDate = (dateString) => {
   <Row>
     <Col>
       {isAttending ? (
-        <Button variant="primary" onClick={handleRemoveAttendance}>
-                    <i className="fa-solid fa-xmark" style={{ marginRight: '0.3rem' }}></i> Cancel Attending
-        </Button>
+        <Button variant="primary" onClick={handleCancelAttendanceClick}>
+  <i className="fa-solid fa-xmark" style={{ marginRight: '0.3rem' }}></i> Cancel Attending
+</Button>
       ) : (
-        <Button variant="outline-success" onClick={handleAddAttendance}>
-          <i className="fa-solid fa-check" style={{ marginRight: '0.3rem' }}></i> Attend
-        </Button>
+<Button variant="outline-success" onClick={handleAttendClick}>
+  <i className="fa-solid fa-check" style={{ marginRight: '0.3rem' }}></i> Attend
+</Button>
       )}
     </Col>
   </Row>

@@ -421,10 +421,10 @@ function UserProfileDetail() {
 
 
     <View style={styles.card}>
-      <Text style={styles.cardHeader}>Deals</Text>
+      <Text style={styles.cardHeader}>Events ({projects.length}) </Text>
       <View style={styles.cardBody}>
         {projects && projects.length === 0 ? (
-          <Text>No deals posted by user</Text>
+          <Text>No events posted by user</Text>
         ) : (
           <>
             <SortingComponent sortType={sortType} setSortType={setSortType} />

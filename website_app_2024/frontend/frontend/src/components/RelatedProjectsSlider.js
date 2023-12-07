@@ -21,9 +21,11 @@ const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
     return (
       <div
         className={className}
-        style={{ ...style, display: "block", background: "grey" }}
+        style={{ ...style, display: "block", background: "transparent" }}
         onClick={onClick}
-      ></div>
+      >
+        <i className="fas fa-chevron-left" style={{ color: "grey", fontSize: "24px" }}></i> {/* Chevron Left Icon */}
+      </div>
     );
   }
 
@@ -32,12 +34,14 @@ const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
     return (
       <div
         className={className}
-        style={{ ...style, display: "block", background: "grey" }}
+        style={{ ...style, display: "block", background: "transparent" }}
         onClick={onClick}
-      ></div>
+      >
+        <i className="fas fa-chevron-right" style={{ color: "grey", fontSize: "24px" }}></i> {/* Chevron Right Icon */}
+      </div>
     );
   }
-
+  
   const settings = {
     dots: true,
     infinite: false,

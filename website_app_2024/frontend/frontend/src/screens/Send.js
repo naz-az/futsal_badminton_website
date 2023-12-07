@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { Form, Button, Container, Col, Modal } from 'react-bootstrap';
+import { Form, Button, Container, Col, Modal,ListGroup, Image  } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../context/authContext';
+import { Link } from 'react-router-dom';
 
 function Send() {
     const [formData, setFormData] = useState({
@@ -24,6 +25,12 @@ function Send() {
     const [blockedByUsers, setBlockedByUsers] = useState([]);
 
     const [usersBlockingMe, setUsersBlockingMe] = useState([]);
+
+    const [searchInput, setSearchInput] = useState(''); // State for search input
+
+    const [selectedProfile, setSelectedProfile] = useState(null); // State for selected profile
+
+    const [showAlertModal, setShowAlertModal] = useState(false);
 
     const token = localStorage.getItem("token"); // Token retrieved from localStorage
     const authHeaders = {  // Define authHeaders for axios requests
@@ -56,6 +63,7 @@ function Send() {
 
     useEffect(() => {
         if (recipientFromQuery) {
+            
             setFormData(prevState => ({
                 ...prevState,
                 recipientId: recipientFromQuery
@@ -92,16 +100,32 @@ console.log("Auth User:", auth.user);
     const currentUserId =  auth.user.profile.id;
     console.log("currentUserId:", currentUserId);
 
+    // useEffect(() => {
+    //     const newFilteredProfiles = profiles.filter(profile => 
+    //         profile.id !== currentUserId && // Exclude current user
+    //         !blockedByUsers.some(blockedUser => blockedUser.id === profile.id) &&
+    //         !usersBlockingMe.some(blockingUser => blockingUser.id === profile.id)
+    //     );
+    //     setFilteredProfiles(newFilteredProfiles);
+    // }, [blockedByUsers, usersBlockingMe, profiles, currentUserId]); // Include currentUserId as a dependency
+    
+   
     useEffect(() => {
-        const newFilteredProfiles = profiles.filter(profile => 
-            profile.id !== currentUserId && // Exclude current user
-            !blockedByUsers.some(blockedUser => blockedUser.id === profile.id) &&
-            !usersBlockingMe.some(blockingUser => blockingUser.id === profile.id)
-        );
-        setFilteredProfiles(newFilteredProfiles);
-    }, [blockedByUsers, usersBlockingMe, profiles, currentUserId]); // Include currentUserId as a dependency
-    
-    
+        // Only filter profiles if there is search input
+        if (searchInput) {
+            const newFilteredProfiles = profiles.filter(profile => 
+                profile.id !== currentUserId &&
+                !blockedByUsers.some(blockedUser => blockedUser.id === profile.id) &&
+                !usersBlockingMe.some(blockingUser => blockingUser.id === profile.id) &&
+                profile.name.toLowerCase().includes(searchInput.toLowerCase())
+            );
+            setFilteredProfiles(newFilteredProfiles);
+        } else {
+            setFilteredProfiles([]); // Clear the filtered profiles if search input is empty
+        }
+    }, [blockedByUsers, usersBlockingMe, profiles, currentUserId, searchInput]);
+
+
     const handleChange = e => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -112,6 +136,13 @@ console.log("Auth User:", auth.user);
 
     const handleSubmit = async e => {
         e.preventDefault();
+        
+        // Check if a recipient is selected. If not, show the custom alert modal.
+        if (!formData.recipientId) {
+            setShowAlertModal(true);
+            return;
+        }
+    
         try {
             const response = await axios.post('/api/send_message/', formData, authHeaders);
             setResponseMessage(response.data.message);
@@ -124,38 +155,160 @@ console.log("Auth User:", auth.user);
             console.error('Error sending message:', error);
         }
     };
+    
+    
 
     const handleModalClose = () => {
         setShowModal(false);
         setExistingThreadId(null);
-        setFormData({ ...formData, recipientId: '' });
+        setSelectedProfile(null); // Clear the selected profile
+        setFormData({ ...formData, recipientId: '' }); // Clear the recipientId in formData
+        setSearchInput(''); // Show the search bar again
     };
-
+    
     const navigateToThread = () => {
         navigate(`/thread/${existingThreadId}/`);
     };
+
+
+    
+    const handleSearchChange = (e) => {
+        setSearchInput(e.target.value);
+    };
+
+    const handleSelectRecipient = (profile) => {
+        setFormData({ ...formData, recipientId: profile.id });
+        setSelectedProfile(profile); // Set the selected profile
+        setSearchInput(''); // Clear the search input
+    };
+
+    const handleDeselectRecipient = () => {
+        setSelectedProfile(null); // Clear the selected profile
+        setFormData({ ...formData, recipientId: '' }); // Clear the recipientId in formData
+    };
+
+    const [recipientProfile, setRecipientProfile] = useState(null);
+
+        // Fetch recipient's profile when recipientFromQuery changes
+        useEffect(() => {
+            if (recipientFromQuery) {
+                axios.get(`/api/profiles/${recipientFromQuery}`, authHeaders)
+                    .then(response => {
+                        setRecipientProfile(response.data);
+                        setFormData(prevState => ({
+                            ...prevState,
+                            recipientId: recipientFromQuery
+                        }));
+                    })
+                    .catch(err => console.log(err));
+            } else {
+                setRecipientProfile(null); // Reset if recipientFromQuery is not present
+            }
+        }, [recipientFromQuery]);
+    
+        // Function to handle deselecting the recipient
+// Function to handle deselecting the recipient
+const handleDeselectQueryRecipient = () => {
+    setRecipientProfile(null);
+    setFormData({ ...formData, recipientId: '' });
+    navigate("/send"); // Add this line to navigate to "/send"
+};
+
+
     return (
         <Container>
+
+<Modal show={showAlertModal} onHide={() => setShowAlertModal(false)}>
+    <Modal.Header closeButton>
+        <Modal.Title>Alert</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>Recipient not selected! Please select a recipient.</Modal.Body>
+    <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowAlertModal(false)}>
+            Close
+        </Button>
+    </Modal.Footer>
+</Modal>
+
+
             <h1>Send Message</h1>
             <Col>
-              <Button variant="primary" onClick={() => navigate('/thread')}>Back to Inbox</Button>
+                <Button variant="info" onClick={() => navigate('/thread')}>Back to Inbox</Button>
             </Col>
             <Form onSubmit={handleSubmit}>
-                {!recipientFromQuery && (
-                    <Form.Group controlId="recipientId">
-                        <Form.Label>Recipient:</Form.Label>
-                        <Form.Control 
-                            as="select" 
-                            name="recipientId" 
-                            value={formData.recipientId} 
-                            onChange={handleChange}>
-                            <option value="">Select Recipient</option>
-                            {filteredProfiles.map(profile => (
-                                <option key={profile.id} value={profile.id}>{profile.name || profile.username}</option>
-                            ))}
-                        </Form.Control>
-                    </Form.Group>
+
+
+            {recipientProfile && (
+                    <div className="selected-recipient d-flex align-items-center" style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px' }}>
+                        <Image 
+                            src={recipientProfile.profile_image} 
+                            alt={`${recipientProfile.username}'s profile`} 
+                            roundedCircle 
+                            style={{ width: '40px', height: '40px', marginRight: '15px' }}
+                        />
+                        <span style={{ flex: 1 }}>{recipientProfile.name || recipientProfile.username}</span>
+                        <Button variant="primary" size="sm" onClick={handleDeselectQueryRecipient}>X</Button>
+                    </div>
                 )}
+
+
+
+
+
+
+
+                {!recipientFromQuery && (
+                    <>
+                        <Form.Group controlId="searchRecipient">
+                            <Form.Label>Search Recipient:</Form.Label>
+                            {selectedProfile ? (
+                                <div className="selected-recipient d-flex align-items-center" style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px' }}>
+                                    <Image 
+                                        src={selectedProfile.profile_image} 
+                                        alt={`${selectedProfile.username}'s profile`} 
+                                        roundedCircle 
+                                        style={{ width: '40px', height: '40px', marginRight: '15px' }}
+                                    />
+                                    <span style={{ flex: 1 }}>{selectedProfile.name || selectedProfile.username}</span>
+                                    <Button variant="primary" size="sm" onClick={handleDeselectRecipient}>X</Button>
+                                </div>
+                            ) : (
+                                <Form.Control 
+                                    type="text" 
+                                    placeholder="Enter username" 
+                                    value={searchInput} 
+                                    onChange={handleSearchChange}
+                                />
+                            )}
+                        </Form.Group>
+        
+                        {!selectedProfile && searchInput && (
+    <ListGroup>
+        {filteredProfiles.map(profile => (
+            <ListGroup.Item key={profile.id} className="d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center">
+                    <Image 
+                        src={profile.profile_image} 
+                        alt={`${profile.username}'s profile`} 
+                        roundedCircle 
+                        style={{ width: '30px', height: '30px', marginRight: '10px' }}
+                    />
+                    <span>{profile.name || profile.username}</span>
+                </div>
+                <Button 
+                    variant="success" 
+                    onClick={() => handleSelectRecipient(profile)}
+                >
+                    Select
+                </Button>
+            </ListGroup.Item>
+        ))}
+    </ListGroup>
+)}
+
+                    </>
+                )}
+
                 <Form.Group controlId="body">
                     <Form.Label>Body</Form.Label>
                     <Form.Control 
@@ -166,7 +319,7 @@ console.log("Auth User:", auth.user);
                         onChange={handleChange} 
                     />
                 </Form.Group>
-                <Button variant="primary" type="submit">Submit</Button>
+                <Button variant="dark" type="submit">Submit</Button>
             </Form>
 
             {responseMessage && (

@@ -153,7 +153,7 @@ function ThreadMessages() {
 
   return (
     <Container>
-      <h1>Inbox</h1>
+      <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Inbox</h2>
       <Button style={{marginBottom: "30px"}} onClick={() => navigate("/send")}>Create New Message</Button>
 <br></br>
       <Button

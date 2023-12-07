@@ -105,9 +105,9 @@ const SettingsPage = () => {
     <Container style={{ marginTop: "50px" }}>
       <Row className="justify-content-center">
         <Col md={6}>
-          <h2>YOUR SETTINGS</h2>
-          <br />
-          <h4>Manage Your Account</h4>
+        <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Settings</h2>
+
+          {/* <h4>Manage Your Account</h4> */}
           <br />
           <div>
             <h5>Edit Account</h5>
@@ -143,7 +143,7 @@ const SettingsPage = () => {
           <br />
           <div>
             <h5>Deactivate Account</h5>
-            <Button variant="danger" onClick={handleDeactivateClick}>
+            <Button variant="primary" onClick={handleDeactivateClick}>
               Deactivate Account
             </Button>
           </div>

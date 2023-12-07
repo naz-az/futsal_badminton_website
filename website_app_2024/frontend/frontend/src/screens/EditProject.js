@@ -306,7 +306,9 @@ setImagePreviews(prevState => ({
     <Container>
       <Row className="justify-content-md-center">
         <Col md={6}>
-          Edit Project
+        <h2>Edit Event</h2>
+
+      
           <Form onSubmit={handleSubmit}>
             {/* Title */}
             <Form.Group controlId="title">
@@ -501,7 +503,7 @@ setImagePreviews(prevState => ({
 
    {/* Tags Section */}
    <Form.Group controlId="tags">
-      <Form.Label>Available Tags</Form.Label>
+      <Form.Label>Available Categories</Form.Label>
       <div>
         {tags.slice(0, visibleTagCount).map(tag => (
           <Button 
@@ -532,7 +534,7 @@ setImagePreviews(prevState => ({
 
     {/* Selected Tags Display */}
     <Form.Group controlId="selectedTags">
-      <Form.Label>Selected Tags</Form.Label>
+      <Form.Label>Selected Categories</Form.Label>
       <div>
         {selectedTags.map(tagId => {
           const tag = tags.find(t => t.id === tagId);

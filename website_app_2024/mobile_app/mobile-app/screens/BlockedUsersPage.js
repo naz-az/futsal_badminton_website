@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Button, FlatList, Image, Alert, ScrollView, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, Image, Alert, ScrollView, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthContext from '../context/authContext'; // Import AuthContext
@@ -93,6 +93,7 @@ const BlockedUsersPage = () => {
         }
     };
     
+    
 
     const ConfirmationModal = () => (
         <Modal
@@ -128,7 +129,24 @@ const BlockedUsersPage = () => {
         </Modal>
     );
 
-    
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // handleSearchChange adjusted for React Native
+    const handleSearchChange = (value) => {
+        setSearchTerm(value);
+    };
+
+    // Adjusted filteredProfiles for React Native
+    const filteredProfiles = profiles.filter(profile => 
+        profile.username.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const [isFocused, setIsFocused] = useState(false); // State to handle focus
+
+    // Function to handle focus state change
+    const handleFocus = () => setIsFocused(true);
+    const handleBlur = () => setIsFocused(false);
+
     return (
         <ScrollView style={{ flex: 1 }}>
             <View style={{ padding: 20 }}>
@@ -167,11 +185,26 @@ const BlockedUsersPage = () => {
                     />
                 </View>
 
-                {showProfiles && (
+                {/* {showProfiles && (
     <View style={{ marginVertical: 20 }}>
-        <Text style={{ fontSize: 18, marginBottom: 10 }}>Select a User to Block or Unblock</Text>
+        <Text style={{ fontSize: 18, marginBottom: 10 }}>Select a User to Block or Unblock</Text> */}
+
+        {showProfiles && (
+                    <View style={{ marginVertical: 20 }}>
+                                <Text style={{ fontSize: 18, marginBottom: 10 }}>Select a User to Block or Unblock</Text>
+
+                <TextInput 
+                    style={[styles.textInputStyle, isFocused && styles.textInputFocused]}
+                    placeholder="Search users..."
+                    placeholderTextColor={styles.textInputPlaceholder.color} // Apply placeholder style
+                    value={searchTerm}
+                    onChangeText={handleSearchChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                />
+
         <FlatList
-            data={profiles}
+            data={filteredProfiles}
             keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => (
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -251,7 +284,33 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "bold",
         textAlign: "center"
-    }
+    },
+        // Enhanced TextInput style
+        textInputStyle: {
+            borderWidth: 1,
+            borderColor: '#bdbdbd', // Light blue border color
+            borderRadius: 10, // Rounded corners
+            padding: 10,
+            marginBottom: 10,
+            fontSize: 16,
+            color: '#333', // Dark text color for better readability
+            backgroundColor: '#FFF', // White background
+            shadowColor: '#000', // Shadow for a subtle 3D effect
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.2,
+            shadowRadius: 1,
+            elevation: 2,
+        },
+    
+        // Placeholder style (optional, use if needed)
+        textInputPlaceholder: {
+            color: '#AAA', // Light grey color for the placeholder
+        },
+    
+        // Interactive element: Change border color on focus
+        textInputFocused: {
+            borderColor: '#FF4500', // Change to a different color when focused (e.g., bright orange)
+        },
 });
 
 export default BlockedUsersPage;

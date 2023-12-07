@@ -21,7 +21,7 @@ import FavoriteButton from "./FavoriteButton";
 import CustomButton from "./CustomButton";
 import moment from 'moment';
 
-function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, onRemove, onUnbookmark }) {
+function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, onRemove, onUnbookmark, onRemoveProject }) {
   const auth = useContext(AuthContext);
   const [isFavorited, setIsFavorited] = useState(false);
   const navigation = useNavigation();
@@ -195,6 +195,28 @@ function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, on
         return dateString ? moment.utc(dateString).format("DD/MM/YY, (ddd), hh:mm A,") + " UTC+8" : "N/A";
     };
     
+    const timeUntilStart = (startDate) => {
+      const now = moment();
+      const start = moment.utc(startDate);
+    
+      if (now.isBefore(start)) {
+        const duration = moment.duration(start.diff(now));
+        return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+      } 
+      return "Event has started";
+    };
+    
+    const timeUntilEnd = (endDate) => {
+      const now = moment();
+      const end = moment.utc(endDate);
+    
+      if (now.isBefore(end)) {
+        const duration = moment.duration(end.diff(now));
+        return `${duration.days()}d:${duration.hours()}h:${duration.minutes()}m`;
+      }
+      return "Event ended";
+    };
+
 
   return (
     <ScrollView style={styles.container}>
@@ -231,8 +253,14 @@ function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, on
         <View style={styles.dateRow}>
                 <Text style={styles.dateText}>
                     <Text style={styles.boldText}>Start:</Text> {formatMomentDate(project.start_date)}
+                    <Text style={styles.italic}>
+          (Event starts in: {timeUntilStart(project.start_date)})
+        </Text>
                     <Text style={styles.marginText}> | </Text>
                     <Text style={styles.boldText}>End:</Text> {formatMomentDate(project.end_date)}
+                    <Text style={styles.italic}>
+          (Event ends in: {timeUntilEnd(project.end_date)})
+        </Text>
                 </Text>
             </View>
 
@@ -265,9 +293,11 @@ function ProjectComponent({ project, showEditDeleteButtons, onEdit, onDelete, on
         <View style={buttonContainerStyle}>
           {token && (
             <AttendButton
-              projectId={project.id}
-              token={token}
-            />
+  projectId={project.id}
+  token={token}
+  onAttendChange={() => onRemoveProject && onRemoveProject(project.id)} 
+/>
+
           )}
 
 <FavoriteButton 
@@ -521,6 +551,12 @@ const styles = StyleSheet.create({
     flex: 1, // Equal space distribution
     marginLeft: 20, // Margin to separate the buttons, adjust as needed
   },
+  italic: {
+    fontStyle: 'italic',
+    color: 'orange',
+    fontSize: 14,
+    marginLeft: 10,
+  }
 });
 
 export default ProjectComponent;

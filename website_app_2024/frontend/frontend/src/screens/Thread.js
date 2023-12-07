@@ -198,7 +198,7 @@ const renderMessages = (messages) => {
           as="textarea"
           value={mainReply}
           onChange={(e) => setMainReply(e.target.value)}
-          placeholder="Reply to the main thread..."
+          placeholder="Write a message..."
         />
         <Button
           className="mt-2"
