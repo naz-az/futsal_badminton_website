@@ -193,7 +193,7 @@ function MainTabNavigator() {
 function MainDrawerNavigator() {
   return (
     <Drawer.Navigator>
-      <Drawer.Screen name="Tabs" component={MainTabNavigator} />
+      {/* <Drawer.Screen name="Tabs" component={MainTabNavigator} /> */}
 
       <Drawer.Screen name="Home" component={HomeStackNavigator} />
       <Drawer.Screen name="ProfileScreen" component={ProfileScreen} />
