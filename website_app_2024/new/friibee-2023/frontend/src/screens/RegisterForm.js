@@ -34,31 +34,33 @@ function RegisterForm() {
       alert("Passwords don't match");
       return;
     }
-
+  
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/register/', {
+      // Use relative URL path here
+      const response = await axios.post('/api/register/', {
         username: formData.username,
         email: formData.email,
         password: formData.password
       });
       localStorage.setItem('token', response.data.access);
-
-      // Fetch the user's profile with the token
-      const profileResponse = await axios.get('http://127.0.0.1:8000/api/user/account/', {
+  
+      // Fetch the user's profile with the token using relative URL path
+      const profileResponse = await axios.get('/api/user/account/', {
         headers: {
           Authorization: `Bearer ${response.data.access}`
         }
       });
-
+  
       // Update the AuthContext
       auth.login(profileResponse.data);
-
+  
       navigate('/user/edit-account');  // Navigate to edit profile after registration
     } catch (error) {
       console.error('Registration failed:', error);
       // Handle registration failure
     }
   };
+  
   
   return (
     <Container className="mt-5">

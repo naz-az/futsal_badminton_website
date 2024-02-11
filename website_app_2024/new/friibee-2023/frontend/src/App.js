@@ -90,7 +90,7 @@ function App() {
     // Function to fetch user profile
     const fetchUserProfile = async (token) => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/user/account/', {
+        const response = await axios.get('/api/user/account/', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

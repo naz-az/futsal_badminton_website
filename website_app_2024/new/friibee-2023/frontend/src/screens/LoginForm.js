@@ -19,7 +19,7 @@ function LoginForm() {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/user/account/', {
+      const response = await axios.get('/api/user/account/', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -42,7 +42,7 @@ function LoginForm() {
     };
   
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/users/token/', formData);
+      const response = await axios.post('/api/users/token/', formData);
   
       if (response.data.access) {
         localStorage.setItem('token', response.data.access);

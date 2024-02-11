@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.28fd51b7.css",
-    "main.js": "/static/js/main.f257eb4e.js",
+    "main.js": "/static/js/main.bd71363d.js",
     "static/js/787.cda612ba.chunk.js": "/static/js/787.cda612ba.chunk.js",
     "static/media/1kickmates-high-resolution-logo-black.png": "/static/media/1kickmates-high-resolution-logo-black.8f96e932f75f0649aac9.png",
     "static/media/friibee-logo.png": "/static/media/friibee-logo.1cb736bca3e76575327c.png",
@@ -11,11 +11,11 @@
     "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
     "index.html": "/index.html",
     "main.28fd51b7.css.map": "/static/css/main.28fd51b7.css.map",
-    "main.f257eb4e.js.map": "/static/js/main.f257eb4e.js.map",
+    "main.bd71363d.js.map": "/static/js/main.bd71363d.js.map",
     "787.cda612ba.chunk.js.map": "/static/js/787.cda612ba.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.28fd51b7.css",
-    "static/js/main.f257eb4e.js"
+    "static/js/main.bd71363d.js"
   ]
 }

@@ -1,11 +1,11 @@
 import axios from 'axios';
 
+// Update the baseURL to use a relative path
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api/',
-    timeout: 1000,
+    baseURL: '/api/',
+    // timeout: 1000,
 });
 
-// This function is an interceptor to attach the token to requests
 api.interceptors.request.use(function (config) {
     const token = localStorage.getItem('accessToken');
     if (token) {
