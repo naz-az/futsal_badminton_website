@@ -19,11 +19,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--4iws!uc#2j2cwb2llj!)k&lw3=+zy^2cxqrdj2h=nai8eiq*8'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+SECRET_KEY = os.environ.get('SECRET_KEY', 'default_secret_key')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -125,23 +124,35 @@ TEMPLATES = [
 WSGI_APPLICATION = 'devsearch.wsgi.application'
 
 
+
+
+import os
+import dj_database_url
+
+DATABASE_URL = os.environ.get('DATABASE_URL', 'default_database_url')
+DATABASES = {
+    'default': dj_database_url.parse(DATABASE_URL)
+}
+
+
+
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'kickmates',
-        'USER': 'postgres',
-        'PASSWORD': 'pgadminpostgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        
-        # 'USER': os.environ.get('DB_USER'),
-        # 'PASSWORD': os.environ.get('DB_PASS'),
-        # 'HOST': os.environ.get('DB_HOST'),
-        # 'PORT': '5432',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.environ.get('DB_NAME'),
+#         'USER': os.environ.get('DB_USER'),
+#         'PASSWORD': os.environ.get('DB_PASS'),
+#         'HOST': os.environ.get('DB_HOST'),
+#         'PORT': os.environ.get('DB_PORT', '5432'),  # Default to 5432 if not specified
+
+#         # 'USER': os.environ.get('DB_USER'),
+#         # 'PASSWORD': os.environ.get('DB_PASS'),
+#         # 'HOST': os.environ.get('DB_HOST'),
+#         # 'PORT': '5432',
+#     }
+# }
 
 
 # DATABASES = {
