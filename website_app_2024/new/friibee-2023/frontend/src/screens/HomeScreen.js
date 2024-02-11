@@ -187,7 +187,6 @@ function HomeScreen() {
             </div>
 
 
-            {/* Layout selection buttons */}
 {/* Layout selection buttons */}
 <div className="mb-3 d-flex ">
     <Button 
@@ -205,7 +204,6 @@ function HomeScreen() {
         <i className="fa-solid fa-grip"></i>
     </Button>
 </div>
-
 
 
             <Row>

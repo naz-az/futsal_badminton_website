@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.urls import conf
 from django.db.models import Q
 from .models import Profile, Message, Notification, Favorite
-from .forms import CustomUserCreationForm, ProfileForm, SkillForm, MessageForm
+from .forms import CustomUserCreationForm, ProfileForm, SkillForm
 from .utils import searchProfiles, paginateProfiles
 from projects.models import Project
 from django.utils import timezone
@@ -224,37 +224,37 @@ def viewMessage(request, pk):
     return render(request, 'users/message.html', context)
 
 
-def createMessage(request, pk):
-    recipient = Profile.objects.get(id=pk)
-    form = MessageForm()
-    parent_msg = None
-    if 'parent_id' in request.GET:
-        parent_msg = Message.objects.get(id=request.GET['parent_id'])
+# def createMessage(request, pk):
+#     recipient = Profile.objects.get(id=pk)
+#     form = MessageForm()
+#     parent_msg = None
+#     if 'parent_id' in request.GET:
+#         parent_msg = Message.objects.get(id=request.GET['parent_id'])
 
-    try:
-        sender = request.user.profile
-    except:
-        sender = None
+#     try:
+#         sender = request.user.profile
+#     except:
+#         sender = None
 
-    if request.method == 'POST':
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.sender = sender
-            message.recipient = recipient
+#     if request.method == 'POST':
+#         form = MessageForm(request.POST)
+#         if form.is_valid():
+#             message = form.save(commit=False)
+#             message.sender = sender
+#             message.recipient = recipient
 
-            if sender:
-                message.name = sender.name
-                message.email = sender.email
+#             if sender:
+#                 message.name = sender.name
+#                 message.email = sender.email
 
-            message.parent_message = parent_msg
-            message.save()
+#             message.parent_message = parent_msg
+#             message.save()
 
-            messages.success(request, 'Your message was successfully sent!')
-            return redirect('user-profile', pk=recipient.id)
+#             messages.success(request, 'Your message was successfully sent!')
+#             return redirect('user-profile', pk=recipient.id)
 
-    context = {'recipient': recipient, 'form': form, 'parent_msg': parent_msg}
-    return render(request, 'users/message_form.html', context)
+#     context = {'recipient': recipient, 'form': form, 'parent_msg': parent_msg}
+#     return render(request, 'users/message_form.html', context)
 
 @login_required(login_url='login')
 def sentMessages(request):
@@ -468,63 +468,63 @@ def terms_service_footer(request):
     return render(request, 'terms-service-footer.html')
 
 
-@login_required(login_url='login')
-def createNewMessage(request):
-    form = MessageForm()
-    sender = request.user.profile
+# @login_required(login_url='login')
+# def createNewMessage(request):
+#     form = MessageForm()
+#     sender = request.user.profile
 
-    # 1. Exclude profiles that the sender (Panda Bear) has blocked.
-    # 2. Exclude profiles that have blocked the sender (Panda Bear).
-    profiles = Profile.objects.exclude(blocked_users=sender).exclude(blocking_users=sender)
+#     # 1. Exclude profiles that the sender (Panda Bear) has blocked.
+#     # 2. Exclude profiles that have blocked the sender (Panda Bear).
+#     profiles = Profile.objects.exclude(blocked_users=sender).exclude(blocking_users=sender)
 
-    if request.method == 'POST':
-        recipient_id = request.POST.get('recipient')
-        recipient = Profile.objects.get(id=recipient_id)
+#     if request.method == 'POST':
+#         recipient_id = request.POST.get('recipient')
+#         recipient = Profile.objects.get(id=recipient_id)
 
-        # Check if the recipient has blocked the sender
-        if sender in recipient.blocking_users.all():
-            messages.error(request, 'You cannot send a message to this user.')
-            return redirect('inbox-sent-messages')
+#         # Check if the recipient has blocked the sender
+#         if sender in recipient.blocking_users.all():
+#             messages.error(request, 'You cannot send a message to this user.')
+#             return redirect('inbox-sent-messages')
 
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.sender = sender
-            message.recipient = recipient
-            message.name = sender.name
-            message.email = sender.email
-            message.save()
+#         form = MessageForm(request.POST)
+#         if form.is_valid():
+#             message = form.save(commit=False)
+#             message.sender = sender
+#             message.recipient = recipient
+#             message.name = sender.name
+#             message.email = sender.email
+#             message.save()
 
-            messages.success(request, 'Your message was successfully sent!')
-            return redirect('inbox-sent-messages')
+#             messages.success(request, 'Your message was successfully sent!')
+#             return redirect('inbox-sent-messages')
 
-    context = {'form': form, 'profiles': profiles}
-    return render(request, 'users/new_message_form.html', context)
+#     context = {'form': form, 'profiles': profiles}
+#     return render(request, 'users/new_message_form.html', context)
 
 
 
-@login_required(login_url='login')
-def replyMessage(request, pk):
-    main_message = Message.objects.get(id=pk)
+# @login_required(login_url='login')
+# def replyMessage(request, pk):
+#     main_message = Message.objects.get(id=pk)
     
-    form = MessageForm(initial={'subject': main_message.formatted_subject})
+#     form = MessageForm(initial={'subject': main_message.formatted_subject})
     
-    if request.method == 'POST':
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            reply = form.save(commit=False)
-            reply.sender = request.user.profile
-            reply.recipient = main_message.sender
+#     if request.method == 'POST':
+#         form = MessageForm(request.POST)
+#         if form.is_valid():
+#             reply = form.save(commit=False)
+#             reply.sender = request.user.profile
+#             reply.recipient = main_message.sender
             
-            # Setting the parent_message for the reply to the main_message
-            reply.parent_message = main_message
+#             # Setting the parent_message for the reply to the main_message
+#             reply.parent_message = main_message
             
-            reply.save()
-            messages.success(request, 'Reply sent successfully!')
-            return redirect('inbox-and-sent-messages')
+#             reply.save()
+#             messages.success(request, 'Reply sent successfully!')
+#             return redirect('inbox-and-sent-messages')
     
-    context = {'main_message': main_message, 'form': form}
-    return render(request, 'users/reply_message_form.html', context)
+#     context = {'main_message': main_message, 'form': form}
+#     return render(request, 'users/reply_message_form.html', context)
 
 # views.py
 @login_required(login_url='login')
