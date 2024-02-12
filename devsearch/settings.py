@@ -161,7 +161,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-DATABASES["default"] = dj_database_url.parse("postgres://kickmates_user:piPF9MJU8YqMr2Z3EIwi3VkdnVHOyBJw@dpg-cn49i9n109ks73etdr30-a.singapore-postgres.render.com/kickmates") 
+# DATABASES["default"] = dj_database_url.parse("postgres://kickmates_user:piPF9MJU8YqMr2Z3EIwi3VkdnVHOyBJw@dpg-cn49i9n109ks73etdr30-a.singapore-postgres.render.com/kickmates") 
 
 
 # Password validation
