@@ -130,11 +130,10 @@ WSGI_APPLICATION = 'devsearch.wsgi.application'
 import os
 import dj_database_url
 
-DATABASE_URL = os.environ.get('DATABASE_URL', 'default_database_url')
-DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL)
-}
-
+# DATABASE_URL = os.environ.get('DATABASE_URL', 'default_database_url')
+# DATABASES = {
+#     'default': dj_database_url.parse(DATABASE_URL)
+# }
 
 
 # Database
@@ -156,12 +155,13 @@ DATABASES = {
 # }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+DATABASES["default"] = dj_database_url.parse("postgres://kickmates_user:piPF9MJU8YqMr2Z3EIwi3VkdnVHOyBJw@dpg-cn49i9n109ks73etdr30-a.singapore-postgres.render.com/kickmates") 
 
 
 # Password validation
