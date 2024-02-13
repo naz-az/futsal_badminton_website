@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'default_secret_key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-ALLOWED_HOSTS = ['kickmates.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['kickmates.onrender.com']
 
 # , '192.168.0.102'
 # Application definition
@@ -128,12 +128,21 @@ WSGI_APPLICATION = 'devsearch.wsgi.application'
 
 
 import os
-import dj_database_url
+# import dj_database_url
 
 # DATABASE_URL = os.environ.get('DATABASE_URL', 'default_database_url')
 # DATABASES = {
 #     'default': dj_database_url.parse(DATABASE_URL)
 # }
+
+import dj_database_url
+
+import os
+
+
+DATABASES = {
+    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+}
 
 
 # Database
@@ -155,18 +164,18 @@ import dj_database_url
 # }
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
-import dj_database_url
+# import dj_database_url
 
-DATABASES = {
-    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-}
+# DATABASES = {
+#     'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+# }
 
 
 # Password validation
