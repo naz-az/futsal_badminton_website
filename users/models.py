@@ -53,11 +53,18 @@ class Profile(models.Model):
 
     @property
     def imageURL(self):
-        try:
-            url = self.profile_image.url
-        except:
-            url = ''
-        return url
+        if self.profile_image:
+            # Check if the file exists in storage
+            if self.profile_image.storage.exists(self.profile_image.name):
+                # If the file exists, generate a signed URL
+                url = self.profile_image.storage.url(self.profile_image.name)
+                return url
+            else:
+                # Log an error or handle the missing file case
+                logger.error(f"File does not exist in storage: {self.profile_image.name}")
+                return ''
+        return ''
+
     
     def has_blocked(self, user_profile_id):
         return self.blocked_users.filter(id=user_profile_id).exists()

@@ -286,5 +286,14 @@ AWS_STORAGE_BUCKET_NAME = os.getenv('B2_BUCKET_NAME')
 AWS_S3_ENDPOINT_URL = os.getenv('B2_ENDPOINT_URL')
 # AWS_S3_CUSTOM_DOMAIN = os.getenv('B2_BUCKET_URL')
 
+# Add the region name of your bucket
+AWS_S3_REGION_NAME = 'us-east-005'  # Example, adjust to your bucket's region
+
+# Enable querystring auth to generate signed URLs
+AWS_QUERYSTRING_AUTH = True
+
+# Use the s3v4 signature version
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+
 if os.getcwd() == '/app':
     DEBUG = False
