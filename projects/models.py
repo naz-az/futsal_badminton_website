@@ -12,6 +12,7 @@ from PIL import Image as PilImage
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
+from django.core.files.base import ContentFile
 
 from devsearch.storage_backends import B2MediaStorage
 
