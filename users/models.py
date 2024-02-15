@@ -6,7 +6,7 @@ import uuid
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from PIL import Image as PilImage
+from PIL import Image as PilImage, ImageResampling
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
@@ -96,7 +96,7 @@ class Profile(models.Model):
             # Check if the image needs to be resized
             if img.height > 400 or img.width > 400:
                 output_size = (400, 400)
-                img.thumbnail(output_size, PilImage.ANTIALIAS)
+                img.thumbnail(output_size, PilImage.Resampling.LANCZOS)  # Updated line
                 output = BytesIO()
                 img.save(output, format=img_format)
                 output.seek(0)
