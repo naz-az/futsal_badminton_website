@@ -12,13 +12,16 @@ from PIL import Image as PilImage
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
+
+from devsearch.storage_backends import B2MediaStorage
+
 class Project(models.Model):
     owner = models.ForeignKey('users.Profile', null=True, blank=True, 
                               on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     featured_image = models.ImageField(
-        null=True, blank=True, default="default.jpg")
+        null=True, blank=True, default="default.jpg", storage=B2MediaStorage())
     brand = models.CharField(max_length=2000, null=True, blank=True)
     deal_link = models.CharField(max_length=2000, null=True, blank=True)
     tags = models.ManyToManyField('Tag', blank=True)
@@ -50,22 +53,22 @@ class Project(models.Model):
         queryset = self.review_set.all().values_list('owner__id', flat=True)
         return queryset
 
+    # Modify the save method
     def save(self, *args, **kwargs):
+        if self.featured_image:
+            # If the image file is large, process it
+            if hasattr(self.featured_image, 'file') and not hasattr(self.featured_image.file, 'seek'):
+                img = PilImage.open(BytesIO(self.featured_image.read()))
+                img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'
+                # Check if the image needs to be resized
+                if img.height > 800 or img.width > 800:
+                    output_size = (800, 800)
+                    img.thumbnail(output_size, PilImage.ANTIALIAS)
+                    output = BytesIO()
+                    img.save(output, format=img_format)
+                    output.seek(0)
+                    self.featured_image = InMemoryUploadedFile(output, 'ImageField', f"{self.featured_image.name.split('.')[0]}.{img_format.lower()}", f'image/{img_format.lower()}', sys.getsizeof(output), None)
         super().save(*args, **kwargs)
-        print("Inside the save method of Project model")
-
-        img = PilImage.open(self.featured_image.path)
-
-    # Print the original image size
-        print(f"Original Image Size: {img.size}")
-
-        if img.height > 800 or img.width > 800:
-            output_size = (800, 800)
-            img.thumbnail(output_size)
-            img.save(self.featured_image.path)
-        
-        img = PilImage.open(self.featured_image.path)
-        print(f"Resized Image Size: {img.size}")
 
     def vote_count(self):
         up_votes = Vote.objects.filter(project=self, vote_type=Vote.UP).count()
@@ -159,24 +162,34 @@ class Review(models.Model):
 
 
 
+from django.core.files import File
+
 class Image(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_images', null=True)
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='images/', storage=B2MediaStorage()) 
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        img = PilImage.open(self.image.path)
-        print(f"Original Image Size: {img.size}")
+        # Open the image using the file storage, not the local path
+        img = PilImage.open(self.image)
+        output = BytesIO()
+        
+        # Check if the image needs to be resized
         if img.height > 800 or img.width > 800:
             output_size = (800, 800)
-            img.thumbnail(output_size)
-            img.save(self.image.path)
-
-                    # Log the size
-        img = PilImage.open(self.image.path)
-        print(f"Resized Image Size: {img.size}")
+            img.thumbnail(output_size, PilImage.ANTIALIAS)
+        
+        # Save the resized image to the output buffer
+        img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'  # Adjust format as needed
+        img.save(output, format=img_format)
+        output.seek(0)
+        
+        # Change the ImageField to use the new resized image
+        self.image = File(output, self.image.name)
+        
+        # Save the model instance
+        super().save(*args, **kwargs)
+        output.close()
 # class Comment(models.Model):
 #     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='comments')
 #     user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)

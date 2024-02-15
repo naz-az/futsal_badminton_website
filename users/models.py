@@ -11,6 +11,8 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
 
+from devsearch.storage_backends import B2MediaStorage
+
 class Profile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, null=True, blank=True)
@@ -21,7 +23,7 @@ class Profile(models.Model):
     short_intro = models.CharField(max_length=200, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     profile_image = models.ImageField(
-        null=True, blank=True, upload_to='profiles/', default="profiles/user-default.png")
+        null=True, blank=True, upload_to='profiles/', default="profiles/user-default.png", storage=B2MediaStorage())
     social_facebook = models.CharField(max_length=200, blank=True, null=True)
     social_twitter = models.CharField(max_length=200, blank=True, null=True)
     social_instagram = models.CharField(max_length=200, blank=True, null=True)
@@ -67,20 +69,20 @@ class Profile(models.Model):
     
     
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
         if self.profile_image:
-            img_path = self.profile_image.path
-            img = PilImage.open(img_path)
-
-            if img.height > 400 or img.width > 400:
-                output_size = (400, 400)
-                img.thumbnail(output_size)
-                img.save(img_path)
-
-            print(f"Resized Profile Image Size: {img.size}")
-
-
+            # If the image file is large, process it
+            if hasattr(self.profile_image, 'file') and not hasattr(self.profile_image.file, 'seek'):
+                img = PilImage.open(BytesIO(self.profile_image.read()))
+                img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'
+                # Check if the image needs to be resized
+                if img.height > 400 or img.width > 400:
+                    output_size = (400, 400)
+                    img.thumbnail(output_size, PilImage.ANTIALIAS)
+                    output = BytesIO()
+                    img.save(output, format=img_format)
+                    output.seek(0)
+                    self.profile_image = InMemoryUploadedFile(output, 'ImageField', f"{self.profile_image.name.split('.')[0]}.{img_format.lower()}", f'image/{img_format.lower()}', sys.getsizeof(output), None)
+        super().save(*args, **kwargs)
 
 
 

@@ -252,6 +252,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 # AWS_STORAGE_BUCKET_NAME = 'devsearch-bucket'
 
+# Add these imports at the top of your settings.py
+from storages.backends.s3boto3 import S3Boto3Storage
+
+
+# Overriding the storage settings with environment variables
+DEFAULT_FILE_STORAGE = 'devsearch.storage_backends.B2MediaStorage'  # Update with your custom storage class path
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+AWS_ACCESS_KEY_ID = os.getenv('B2_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('B2_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('B2_BUCKET_NAME')
+AWS_S3_ENDPOINT_URL = os.getenv('B2_ENDPOINT_URL')
+# AWS_S3_CUSTOM_DOMAIN = os.getenv('B2_BUCKET_URL')
 
 if os.getcwd() == '/app':
     DEBUG = False
