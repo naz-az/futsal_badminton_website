@@ -12,6 +12,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
 
 from devsearch.storage_backends import B2MediaStorage
+logger = logging.getLogger(__name__)
 
 class Profile(models.Model):
     user = models.OneToOneField(
@@ -69,21 +70,30 @@ class Profile(models.Model):
     
     
     def save(self, *args, **kwargs):
-        if self.profile_image:
-            # If the image file is large, process it
-            if hasattr(self.profile_image, 'file') and not hasattr(self.profile_image.file, 'seek'):
-                img = PilImage.open(BytesIO(self.profile_image.read()))
-                img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'
-                # Check if the image needs to be resized
-                if img.height > 400 or img.width > 400:
-                    output_size = (400, 400)
-                    img.thumbnail(output_size, PilImage.ANTIALIAS)
-                    output = BytesIO()
-                    img.save(output, format=img_format)
-                    output.seek(0)
-                    self.profile_image = InMemoryUploadedFile(output, 'ImageField', f"{self.profile_image.name.split('.')[0]}.{img_format.lower()}", f'image/{img_format.lower()}', sys.getsizeof(output), None)
-        super().save(*args, **kwargs)
+        # Debugging: Log the storage backend information
+        logger.debug(f"Using storage backend: {self.profile_image.storage}")
+        logger.debug(f"Default file name: {self.profile_image.name}")
 
+        # Check if the default image file exists in the storage backend
+        if self.profile_image and not self.profile_image.storage.exists(self.profile_image.name):
+            logger.error(f"File does not exist: {self.profile_image.name}")
+        else:
+            logger.debug(f"File exists: {self.profile_image.name}")
+
+        # Your existing image processing logic
+        if self.profile_image and hasattr(self.profile_image, 'file'):
+            img = PilImage.open(BytesIO(self.profile_image.read()))
+            img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'
+            # Check if the image needs to be resized
+            if img.height > 400 or img.width > 400:
+                output_size = (400, 400)
+                img.thumbnail(output_size, PilImage.ANTIALIAS)
+                output = BytesIO()
+                img.save(output, format=img_format)
+                output.seek(0)
+                self.profile_image = InMemoryUploadedFile(output, 'ImageField', f"{self.profile_image.name.split('.')[0]}.{img_format.lower()}", f'image/{img_format.lower()}', sys.getsizeof(output), None)
+
+        super().save(*args, **kwargs)
 
 
 
