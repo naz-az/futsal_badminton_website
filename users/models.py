@@ -12,6 +12,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
 
 from devsearch.storage_backends import B2MediaStorage
+import logging
+
 logger = logging.getLogger(__name__)
 
 class Profile(models.Model):

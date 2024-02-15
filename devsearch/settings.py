@@ -253,7 +253,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # AWS_STORAGE_BUCKET_NAME = 'devsearch-bucket'
 
 
-# settings.py
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
