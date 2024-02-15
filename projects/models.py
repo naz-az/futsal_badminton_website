@@ -55,19 +55,16 @@ class Project(models.Model):
 
     # Modify the save method
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
         if self.featured_image:
-            # If the image file is large, process it
-            if hasattr(self.featured_image, 'file') and not hasattr(self.featured_image.file, 'seek'):
-                img = PilImage.open(BytesIO(self.featured_image.read()))
-                img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'
-                # Check if the image needs to be resized
-                if img.height > 800 or img.width > 800:
-                    output_size = (800, 800)
-                    img.thumbnail(output_size, PilImage.ANTIALIAS)
-                    output = BytesIO()
-                    img.save(output, format=img_format)
-                    output.seek(0)
-                    self.featured_image = InMemoryUploadedFile(output, 'ImageField', f"{self.featured_image.name.split('.')[0]}.{img_format.lower()}", f'image/{img_format.lower()}', sys.getsizeof(output), None)
+            img = PilImage.open(self.featured_image.path)
+
+            if img.height > 800 or img.width > 800:
+                output_size = (800, 800)
+                img.thumbnail(output_size, PilImage.Resampling.LANCZOS)  # Updated from ANTIALIAS to Resampling.LANCZOS
+                img.save(self.featured_image.path)
+
         super().save(*args, **kwargs)
 
     def vote_count(self):
