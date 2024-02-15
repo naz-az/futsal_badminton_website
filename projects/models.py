@@ -183,10 +183,10 @@ class Image(models.Model):
         # Check if the image needs to be resized
         if img.height > 800 or img.width > 800:
             output_size = (800, 800)
-            img.thumbnail(output_size, PilImage.ANTIALIAS)
+            img.thumbnail(output_size, PilImage.Resampling.LANCZOS)  # Updated line here
         
         # Save the resized image to the output buffer
-        img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'  # Adjust format as needed
+        img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'
         img.save(output, format=img_format)
         output.seek(0)
         
