@@ -6,7 +6,7 @@ import uuid
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from PIL import Image as PilImage, ImageResampling
+from PIL import Image as PilImage
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
