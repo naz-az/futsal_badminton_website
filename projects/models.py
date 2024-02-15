@@ -55,17 +55,25 @@ class Project(models.Model):
 
     # Modify the save method
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
+        # Process the featured image if it exists
         if self.featured_image:
-            img = PilImage.open(self.featured_image.path)
+            # Open the image directly from the InMemoryUploadedFile
+            pil_img = PilImage.open(self.featured_image)
+            output = BytesIO()
 
-            if img.height > 800 or img.width > 800:
+            # Resize the image
+            if pil_img.height > 800 or pil_img.width > 800:
                 output_size = (800, 800)
-                img.thumbnail(output_size, PilImage.Resampling.LANCZOS)  # Updated from ANTIALIAS to Resampling.LANCZOS
-                img.save(self.featured_image.path)
+                pil_img.thumbnail(output_size, PilImage.Resampling.LANCZOS)
 
-        super().save(*args, **kwargs)
+            # Save the resized image to the output
+            pil_img.save(output, format='JPEG', quality=95)
+            output.seek(0)
+
+            # Change the ImageField to use the new resized image
+            self.featured_image.save(self.featured_image.name, ContentFile(output.read()), save=False)
+
+        super(Project, self).save(*args, **kwargs)
 
     def vote_count(self):
         up_votes = Vote.objects.filter(project=self, vote_type=Vote.UP).count()
