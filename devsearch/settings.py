@@ -141,6 +141,11 @@ import dj_database_url
 
 import os
 
+# DATABASES = {
+#     'default': dj_database_url.parse("postgres://kickmates_n8p4_user:UQgWiIwyLPWCHTvAdTMb2qYNt0VgiY0S@dpg-cn7lls8l6cac73anqdog-a.singapore-postgres.render.com/kickmates_n8p4")
+
+# }
+
 
 DATABASES = {
     'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
