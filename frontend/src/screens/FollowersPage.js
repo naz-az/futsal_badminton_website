@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, Container, Button, Modal } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 
 function FollowersPage() {
     const [followers, setFollowers] = useState([]);
-    const [followersCount, setFollowersCount] = useState(0);
     const [showModal, setShowModal] = useState(false);
     const [profileToRemove, setProfileToRemove] = useState(null);
-    const navigate = useNavigate(); // Use navigate for redirection
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchFollowers = async () => {
@@ -19,26 +18,19 @@ function FollowersPage() {
             };
             const response = await axios.get('/api/profiles/followers/', config);
             setFollowers(response.data);
-            setFollowersCount(response.data.length);
         };
 
         fetchFollowers();
     }, []);
 
     const removeFollower = async (profileId) => {
-        try {
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            };
-            await axios.post(`/api/profiles/${profileId}/remove_follower/`, {}, config);
-            setFollowers(followers.filter(profile => profile.id !== profileId));
-            setFollowersCount(followersCount - 1);
-        } catch (error) {
-            console.error("Error removing follower", error);
-            // Handle error (show error message to user, etc.)
-        }
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        };
+        await axios.post(`/api/profiles/${profileId}/remove_follower/`, {}, config);
+        setFollowers(followers.filter(profile => profile.id !== profileId));
     };
 
     const handleRemoveClick = (profileId) => {
@@ -46,12 +38,10 @@ function FollowersPage() {
         setShowModal(true);
     };
 
-    const confirmRemoveFollower = async () => {
-        if (profileToRemove) {
-            await removeFollower(profileToRemove);
-            setShowModal(false);
-            setProfileToRemove(null);
-        }
+    const confirmRemoveFollower = () => {
+        removeFollower(profileToRemove);
+        setShowModal(false);
+        setProfileToRemove(null);
     };
 
     const handleSendMessage = (profileId) => {
@@ -59,57 +49,42 @@ function FollowersPage() {
     };
 
     return (
-        <Container className="my-md">
-                              <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>({followersCount}) Followers</h2>
-
+        <Container className="my-4">
+            <h2 className="text-center my-4">Followers</h2>
             {followers.map(profile => (
-                <Card key={profile.id} className="mb-3 d-flex flex-row align-items-center">
-                    <div style={{ width: '10%', marginRight: '20px' }}>
+                <Row key={profile.id} className="mb-3 align-items-center">
+                    <Col xs={3} className="d-flex justify-content-center">
                         <Link to={`/profiles/${profile.id}`}>
-                        <Card.Img src={profile.profile_image} style={{ width: '150px', height: '200px', objectFit: 'cover' }}/>
+                            <img src={profile.profile_image} alt="Profile" className="img-fluid" style={{ maxWidth: '60px', maxHeight: '60px', width: '60px', height: '60px', borderRadius: '50%' }} />
                         </Link>
-                    </div>
-                    <Card.Body className="d-flex flex-column justify-content-center" style={{ width: '70%' }}>
-                        <Card.Title>
-                            <Link to={`/profiles/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                {profile.name}
-                            </Link>
-                        </Card.Title>
-
-                        <Card.Text>
-                        {profile.short_intro?.slice(0, 60) ?? ''}
-                    </Card.Text>
-
-                    </Card.Body>
-                    <Button 
-                        variant="primary" 
-                        onClick={() => handleSendMessage(profile.id)} 
-                        className="align-self-center mx-1" 
-                        style={{ width: '10%' }}>
-                        Send Message
-                    </Button>
-                    <Button 
-                        variant="secondary" 
-                        onClick={() => handleRemoveClick(profile.id)}
-                        className="align-self-center mx-4" 
-                        style={{ width: '10%' }}>
-                        Remove Follower
-                    </Button>
-                </Card>
+                    </Col>
+                    <Col xs={5} className="d-flex flex-column justify-content-center px-1">
+                        <Link to={`/profiles/${profile.id}`} className="text-decoration-none text-dark">
+                            <strong>{profile.name}</strong>
+                        </Link>
+                        <p>{profile.short_intro}</p>
+                    </Col>
+                    <Col xs={4} className="d-flex justify-content-end">
+                        <Button variant="outline-primary" onClick={() => handleSendMessage(profile.id)} className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
+                            Message
+                        </Button>
+                        <Button variant="outline-danger" onClick={() => handleRemoveClick(profile.id)} className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
+                            Remove
+                        </Button>
+                    </Col>
+                </Row>
             ))}
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirm Removal</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    Are you sure you want to remove this follower?
-                </Modal.Body>
+                <Modal.Body>Are you sure you want to remove this follower?</Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={confirmRemoveFollower}>
+                    <Button variant="danger" onClick={confirmRemoveFollower}>
                         Confirm
                     </Button>
                 </Modal.Footer>

@@ -169,7 +169,7 @@ function ProjectCard({ project, auth, navigate }) {
       )}
   </Modal>
 
-      <Card className="mb-4 mt-4" style={{ padding: "5px", width: "105%" }}>
+      <Card className="mb-4 mt-4" style={{ padding: "5px", width: "100%" }}>
         <Link to={`/project/${project.id}`} style={{ textDecoration: "none" }}>
           <Card.Img
             variant="top"

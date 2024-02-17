@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ProjectCard from '../components/ProjectCard';
-import { Row, Dropdown, Modal } from 'react-bootstrap';    // Import Row from react-bootstrap for layout
+import { Container, Row, Dropdown, Modal } from 'react-bootstrap';    // Import Row from react-bootstrap for layout
 import ProjectAttending from '../components/ProjectAttending';
 
 function AttendingProjects() {
@@ -53,18 +53,18 @@ function AttendingProjects() {
   };
 
   return (
-    <div>
-      <h2 style={{ textAlign: 'center',marginTop: '20px' }}>Attending Events</h2>
-      <p style={{ textAlign: 'center', marginBottom: '30px'  }}> {/* Adjust the marginBottom value as needed */}
-        {projects.length} Event{projects.length !== 1 ? "s" : ""} Attending
-      </p>
+    <Container fluid>
+    <Row className="justify-content-center my-4">
+        <h2 className="text-center">Attending Events</h2>
+        <p className="text-center">{projects.length} Event{projects.length !== 1 ? "s" : ""} Attending</p>
+
 
       <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)}>
         <Modal.Body>{cancelModalMessage}</Modal.Body>
       </Modal>
 
 {/* Dropdown for sorting by newest */}
-<div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
+<div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '50px' }}>
           {/* Dropdown for sorting by newest */}
           <Dropdown onSelect={(e) => handleSort('created', e)}> {/* Use 'created' for sorting by newest */}
             <Dropdown.Toggle variant="outline-info" id="dropdown-new">
@@ -113,8 +113,10 @@ function AttendingProjects() {
           />
         ))}
       </Row>
-    </div>
-  );
+
+      </Row>
+      </Container>
+        );
 }
 
 

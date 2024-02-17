@@ -296,7 +296,7 @@ function UserProfileDetail() {
   };
 
   return (
-    <Container className="my-md">
+    <Container fluid className="my-4">
       {/* Modal component */}
       <Modal show={showAttendModal} onHide={() => setShowAttendModal(false)}>
         <Modal.Body>{attendModalMessage}</Modal.Body>
@@ -325,8 +325,8 @@ function UserProfileDetail() {
       </Modal>
 
       <Row>
-        <Col xs={12} md={3} style={{ marginRight: "100px" }}>
-          <Card className="text-center profile-card">
+      <Col xs={12} lg={4} xl={3}>
+          <Card className="mb-4">
             {" "}
             {/* Add a custom class for styling */}
             <Card.Body>
@@ -498,8 +498,8 @@ function UserProfileDetail() {
           </Card>
         </Col>
 
-        <Col xs={12} md={8}>
-          <Card>
+        <Col xs={12} lg={8} xl={9}>
+        <Card className="mb-4">
             <Card.Header>About Me</Card.Header>
             <Card.Body>
               <Card.Text>{profile.bio}</Card.Text>
@@ -593,11 +593,7 @@ function UserProfileDetail() {
 
                   <Row>
                     {sortedProjects.map((project) => (
-                      <Col
-                        md={4}
-                        style={{ paddingRight: "5px", paddingLeft: "5px" }}
-                        key={project.id}
-                      >
+                      <Col md={6} lg={4} key={project.id}>
                         <Card className="mb-3">
                           <Link
                             to={`/project/${project.id}`}
@@ -779,21 +775,14 @@ function UserProfileDetail() {
                   </Row>
 
                   {/* Show more or less projects buttons */}
-                  <div className="text-center mt-4">
-                    <Button
-                      onClick={showMoreProjects}
-                      className="me-2"
-                      disabled={displayedProjects >= projects.length} // Disable if all projects are displayed
-                    >
-                      Show More
-                    </Button>
-                    <Button
-                      onClick={showLessProjects}
-                      disabled={displayedProjects <= 6} // Disable if the minimum amount of projects are displayed
-                    >
-                      Show Less
-                    </Button>
-                  </div>
+                  <div className="d-flex justify-content-center mt-3">
+                {displayedProjects < projects.length && (
+                  <Button onClick={showMoreProjects} className="m-2">Show More</Button>
+                )}
+                {displayedProjects > 6 && (
+                  <Button onClick={showLessProjects} className="m-2">Show Less</Button>
+                )}
+              </div>
                 </>
               )}
             </Card.Body>

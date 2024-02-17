@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, Button, Modal } from 'react-bootstrap';
+import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 
 function FollowingPage() {
@@ -15,7 +15,7 @@ function FollowingPage() {
 
     const fetchFollowingProfiles = async () => {
         const config = {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         };
         const response = await axios.get('/api/profiles/following/', config);
         setFollowingProfiles(response.data);
@@ -29,10 +29,10 @@ function FollowingPage() {
     const confirmUnfollow = async () => {
         if (selectedProfile) {
             const config = {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
             };
             await axios.post(`/api/profiles/${selectedProfile.id}/unfollow/`, null, config);
-            fetchFollowingProfiles(); // Refetch the following list
+            fetchFollowingProfiles();
             setShowConfirmation(false);
         }
     };
@@ -41,48 +41,38 @@ function FollowingPage() {
         navigate(`/send?recipient=${profileId}`);
     };
 
-
     return (
-        <div className="my-md">
-                  <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Following ({followingProfiles.length})</h2>
-
+        <Container className="my-4">
+            <h2 className="text-center my-4">Following ({followingProfiles.length})</h2>
             {followingProfiles.map(profile => (
-                <Card key={profile.id} className="mb-3 d-flex flex-row align-items-center">
-                    <div style={{ width: '10%' , marginRight: '20px'}}>
+                <Row key={profile.id} className="mb-3 align-items-center">
+                    <Col xs={3} className="d-flex justify-content-center">
                         <Link to={`/profiles/${profile.id}`}>
-                            <Card.Img src={profile.profile_image} style={{ width: '150px', height: '200px', objectFit: 'cover' }}/>
+                            {/* Ensure width and height are equal for a perfect circle */}
+                            <img src={profile.profile_image} alt="Profile" className="img-fluid" style={{ maxWidth: '60px', maxHeight: '60px', width: '60px', height: '60px', borderRadius: '50%' }}/>
                         </Link>
-                    </div>
-                    <Card.Body className="d-flex flex-column justify-content-center" style={{ width: '50%' }}>
-                        <Card.Title>
-                            <Link to={`/profiles/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                {profile.name}
-                            </Link>
-                        </Card.Title>
-
-                        <Card.Text>
-                        {profile.short_intro.slice(0, 60)}
-                    </Card.Text>
-
-
-                    </Card.Body>
-
-                    <Button 
-                        variant="secondary" 
-                        onClick={() => handleSendMessage(profile.id)} 
-                        className="align-self-center mx-1" 
-                        style={{ width: '10%' }}>
-                        Send Message
-                    </Button>
-
-                    <Button 
-                        variant="danger" 
-                        onClick={() => handleUnfollowClick(profile)} 
-                        className="align-self-center mx-4" 
-                        style={{ width: '10%' }}>
-                        Unfollow
-                    </Button>
-                </Card>
+                    </Col>
+                    <Col xs={5} className="d-flex flex-column justify-content-center px-1">
+                        <Link to={`/profiles/${profile.id}`} className="text-decoration-none text-dark">
+                            <strong>{profile.name}</strong>
+                        </Link>
+                        <p className="d-none d-md-block">{profile.short_intro}</p> {/* Hide on xs to save space */}
+                    </Col>
+                    <Col xs={4} className="d-flex justify-content-end">
+                        <Button 
+                            variant="outline-primary" 
+                            onClick={() => handleSendMessage(profile.id)} 
+                            className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
+                            Message
+                        </Button>
+                        <Button 
+                            variant="outline-danger" 
+                            onClick={() => handleUnfollowClick(profile)} 
+                            className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
+                            Unfollow
+                        </Button>
+                    </Col>
+                </Row>
             ))}
 
             {/* Confirmation Modal */}
@@ -95,12 +85,12 @@ function FollowingPage() {
                     <Button variant="secondary" onClick={() => setShowConfirmation(false)}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={confirmUnfollow}>
+                    <Button variant="danger" onClick={confirmUnfollow}>
                         Yes, Unfollow
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
+        </Container>
     );
 }
 

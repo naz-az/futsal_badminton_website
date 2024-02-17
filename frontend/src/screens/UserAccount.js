@@ -201,7 +201,7 @@ function UserAccount() {
   };
 
   return (
-    <Container>
+    <Container fluid>
       {/* Modal component */}
       <Modal show={showAttendModal} onHide={() => setShowAttendModal(false)}>
         <Modal.Body>{attendModalMessage}</Modal.Body>
@@ -229,35 +229,24 @@ function UserAccount() {
         )}
       </Modal>
 
-      <Row>
+      <Row className="g-4">
         {/* Display profile data on the left inside a Card */}
-        <Col md={4}>
-          <Card className="profile-card">
+        <Col xs={12} md={4} lg={3}>
+          <Card className="mb-3">
             <Link to="/user/edit-account" className="btn btn-primary mb-3">
               Edit Account
             </Link>
 
-            <Card.Img
-              variant="top"
-              src={accountData.profile.profile_image}
-              alt="Profile"
-              className="profile-image"
-            />
+            <Card.Img variant="top" src={accountData.profile.profile_image} alt="Profile" />
+
             <Card.Body>
-              <div style={{ textAlign: "center", marginBottom: "20px" }}>
                 <Card.Title>{accountData.profile.name}</Card.Title>
                 <Card.Text>{accountData.profile.short_intro}</Card.Text>
 
                 <Card.Text>{accountData.profile.location}</Card.Text>
-              </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginTop: "20px",
-                }}
-              >
+
+
                 {accountData.profile.social_facebook && (
                   <a
                     href={accountData.profile.social_facebook}
@@ -327,7 +316,7 @@ function UserAccount() {
                     />
                   </a>
                 )}
-              </div>
+
 
               <Row className="mt-3 text-center">
                 <Col>
@@ -366,8 +355,7 @@ function UserAccount() {
         </Col>
 
         {/* Display projects on the right */}
-        {/* Display projects on the right */}
-        <Col md={8}>
+        <Col xs={12} md={8} lg={9}>
           {/* First Row for "Deals Posted" title and count */}
           <Row className="mb-2">
             <Col>
@@ -446,10 +434,10 @@ function UserAccount() {
             </Col>
           </Row>
 
-          <Row>
+          <Row xs={1} sm={2} md={3} className="g-4">
             {sortedProjects.map((project) => (
-              <Col md={4} key={project.id}>
-                <Card className="mb-4">
+              <Col key={project.id}>
+                <Card>
                   <Link to={`/project/${project.id}`}>
                     <Card.Img
                       variant="top"
@@ -616,12 +604,14 @@ function UserAccount() {
             ))}
           </Row>
           {/* Show More/Less Buttons */}
-          {displayedProjects < accountData.projects.length && (
-            <Button onClick={showMoreProjects}>Show More</Button>
-          )}
-          {displayedProjects > 6 && (
-            <Button onClick={showLessProjects}>Show Less</Button>
-          )}
+          <div className="d-flex justify-content-center">
+            {displayedProjects < accountData.projects.length && (
+              <Button onClick={showMoreProjects} className="m-2">Show More</Button>
+            )}
+            {displayedProjects > 6 && (
+              <Button onClick={showLessProjects} className="m-2">Show Less</Button>
+            )}
+          </div>
         </Col>
       </Row>
     </Container>

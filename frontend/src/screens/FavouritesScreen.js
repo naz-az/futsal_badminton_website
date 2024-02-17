@@ -138,10 +138,10 @@ export default function FavouritesScreen() {
 
 
   return (
-    <Container>
-      <section className="text-center">
-        <h2>Bookmarks</h2>
-        <p>{favorites.length} bookmark item{favorites.length > 1 ? "s" : ""}</p>
+    <Container fluid>
+      <Row className="justify-content-center my-4">
+        <h2 className="text-center">Bookmarks</h2>
+        <p className="text-center">{favorites.length} bookmark item{favorites.length > 1 ? "s" : ""}</p>
 
             {/* Modal component */}
             <Modal show={showAttendModal} onHide={() => setShowAttendModal(false)}>
@@ -155,8 +155,10 @@ export default function FavouritesScreen() {
           )}
         </Modal>
 
+
+
         {/* Dropdown for sorting by newest */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '50px' }}>
           {/* Dropdown for sorting by newest */}
           <Dropdown onSelect={(e) => handleSort('created', e)}> {/* Use 'created' for sorting by newest */}
             <Dropdown.Toggle variant="outline-info" id="dropdown-new">
@@ -194,131 +196,67 @@ export default function FavouritesScreen() {
 
 
         {favorites.map((favorite) => (
-          <Card className="mb-4 mt-4" key={favorite.project.id} style={{ padding: '5px 5px', marginRight: '20px' }}> {/* No need for explicit height style, let content define it */}
-            <Row noGutters={true}>
-              {/* Image Section */}
-              <Col xs={3} md={3} className="d-flex align-items-center justify-content-center">
+          <Card className="mb-3 w-100">
+            <Row noGutters className="align-items-center">
+              <Col xs={12} md={3} className="p-2">
                 <Link to={`/project/${favorite.project.id}`}>
-                <Image
-  src={favorite.project.featured_image}
-  alt={favorite.project.title + " image"}
-  style={{ width: '300px', height: '450px', objectFit: 'cover' }} // Fixed size with objectFit
-/>
-
+                  <Image src={favorite.project.featured_image} fluid className="w-100" style={{ height: '210px', objectFit: 'cover' }} />
                 </Link>
               </Col>
-              {/* Title, Voting Buttons Section */}
-              <Col xs={5} md={5} style={{ marginLeft: '15px'  }} className="d-flex flex-column justify-content-between p-2 text-start mt-3 mb-3">
-                <Card.Title>
+              <Col xs={12} md={5} className="p-2">
+                <h5>
                   <Link to={`/project/${favorite.project.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     {favorite.project.title}
                   </Link>
-                </Card.Title>
-
-                <Card.Text>
-      <Link
+                </h5>
+                <p style={{ fontSize: '0.9rem', margin: '4px 0' }}>
+                <Link
                 to={favorite.project.owner.id === currentUserId ? '/user/account' : `/profiles/${favorite.project.owner.id}`}
                 style={{ textDecoration: "none", color: "brown" }}
       >
         <img 
           src={favorite.project.owner.profile_image} // Use the appropriate property for the image URL
           alt="Profile"
-          style={{ width: '30px', height: '30px', marginRight: '10px', borderRadius: '50%' }} // Adjust the styling as necessary
+          style={{ width: '25px', height: '25px', marginRight: '10px', borderRadius: '50%' }} // Adjust the styling as necessary
         />
         {favorite.project.owner.name}
-      </Link>
-    </Card.Text>
-    <Card.Text style={{ fontSize: '22px' }}>RM {favorite.project.price}</Card.Text>
-
-
-<Card.Text>
-  <strong>Start:</strong>{" "}
-  {formatMomentDate(favorite.project.start_date)}
-  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
-    (<strong>Event starts in:</strong> {timeUntilStart(favorite.project.start_date)})
-  </span>
-</Card.Text>
-
-<Card.Text>
-  <strong>End:</strong>{" "}
-  {formatMomentDate(favorite.project.end_date)}
-  <span style={{ fontStyle: "italic", color: "orange", fontSize: "smaller" , marginLeft: "10px"}}>
-    (<strong>Event ends in:</strong> {timeUntilEnd(favorite.project.end_date)})
-  </span>
-</Card.Text>
-
-          <Card.Text>
-            <strong>Location:</strong>{" "}
-            {showFullText
-              ? favorite.project.location
-              : `${favorite.project.location.split(" ").slice(0, 8).join(" ")}...`}
-            <Button
-              variant="link"
-              onClick={() => setShowFullText(!showFullText)}
-            >
-              {showFullText ? "Show Less" : "Show More"}
-            </Button>
-          </Card.Text>
-
-
-                <VotingButtons projectId={favorite.project.id} />
-
-                </Col>
-
-                <Col xs={2} md={2} className="d-flex flex-column justify-content-center p-2" style={{ marginRight: '50px' }}>
-  <div className="mb-2 text-start"> {/* div wrapper with margin-bottom and left text alignment */}
-    {/* <Button
-      variant="warning"
-      onClick={() => {
-        const url =
-          favorite.project.deal_link.startsWith("http://") ||
-          favorite.project.deal_link.startsWith("https://")
-          ? favorite.project.deal_link
-          : "http://" + favorite.project.deal_link;
-        window.open(url, "_blank");
-      }}
-    >
-      Go to deal <i className="fa-solid fa-up-right-from-square"></i>
-    </Button> */}
-
-    <AttendButton projectId={favorite.project.id} onModalChange={handleModalChange} token={localStorage.getItem("token")} style={{ marginRight: '1rem' }} />
-
-
-
-
-  </div>
-
-  {/* Wrap tags in their own div and apply d-flex and flex-wrap for horizontal layout and wrapping */}
-  <div className="d-flex flex-wrap mb-2 mt-3">
-    {favorite.project.tags.map(tag => (
-      <Link key={tag.id} to={`/categories?tag_id=${tag.id}`} className="me-2 mb-2"> {/* Right and bottom margin for each tag */}
-        <Button variant="danger" style={{ fontSize: '12px', padding: '2px 5px' }}>
+      </Link>                </p>
+                <p style={{ fontSize: '0.9rem', margin: '4px 0' }}>Price: {favorite.project.price}</p>
+                <p style={{ fontSize: '0.9rem', margin: '4px 0' }}>Start: {moment(favorite.project.start_date).format("DD/MM/YYYY")}</p>
+                <p style={{ fontSize: '0.9rem', margin: '4px 0' }}>End: {moment(favorite.project.end_date).format("DD/MM/YYYY")}</p>
+                <p style={{ fontSize: '0.9rem', margin: '4px 0' }}>Location: {favorite.project.location}</p>
+               
+                {favorite.project.tags.map(tag => (
+      <Link key={tag.id} to={`/categories?tag_id=${tag.id}`} style={{ textDecoration: 'none', color: 'inherit' }} className="mb-2"> {/* Right and bottom margin for each tag */}
+        <Button variant="info" style={{ fontSize: '12px', padding: '2px 5px' }}>
           {tag.name}
         </Button>
       </Link>
     ))}
-  </div>
-
-  <div className="mb-2 text-start"> {/* div wrapper with margin-bottom and left text alignment */}
-    <Badge bg="dark">{favorite.project.brand}</Badge>
+              </Col>
+              <Col xs={12} md={4} className="p-2 text-center text-md-right">
+  <div className="d-flex flex-row justify-content-center justify-content-md-end align-items-center">
+    <Button variant="primary" onClick={() => handleRemove(favorite.project.id)} className="m-1" style={{ fontSize: '14px', padding: '8px 12px' }}>Remove</Button>
+    <AttendButton projectId={favorite.project.id} onModalChange={handleModalChange} className="m-1"/>
   </div>
 </Col>
 
-
-              {/* Remove Button */}
-              <Col xs={1} md={1} className="d-flex justify-content-center align-items-center">
-  <Button
-    variant="primary"
-    onClick={() => handleRemove(favorite.project.id)}
-  >
-    Remove
-  </Button>
-</Col>
 
             </Row>
           </Card>
         ))}
-      </section>
+      </Row>
+
+      {/* Attend Modal */}
+      <Modal show={showAttendModal} onHide={() => setShowAttendModal(false)}>
+        <Modal.Body>{attendModalMessage}</Modal.Body>
+        {showAttendButton && (
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowAttendModal(false)}>Close</Button>
+            <Button variant="primary" onClick={() => navigate('/attending')}>View All Attending Events</Button>
+          </Modal.Footer>
+        )}
+      </Modal>
     </Container>
   );
 }

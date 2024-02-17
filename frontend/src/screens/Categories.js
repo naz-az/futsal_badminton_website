@@ -163,16 +163,18 @@ function Categories() {
       <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Categories</h2>
 
       {auth.isAuthenticated && (
-        <div style={{ marginBottom: "25px" }}>
-          <Button onClick={() => navigate("/followed-tags")}>
-            View Followed Categories
-          </Button>
-        </div>
-      )}
+  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: "25px" }}>
+    <Button variant="warning" onClick={() => navigate("/followed-tags")}>
+      View Followed Categories
+    </Button>
+  </div>
+)}
+
 
 <div className="scroll-container" style={{ display: 'flex', alignItems: 'center' }}>
         <Button 
           className="scroll-button left" 
+          variant="warning" 
           onClick={() => handleScroll('left')} 
           style={{ margin: '0 10px 0 0' }}> {/* Added right margin */}
           <FontAwesomeIcon icon={faArrowLeft} />
@@ -186,11 +188,12 @@ function Categories() {
             <div key={tag.id}>
               <Button
                 data-id={tag.id}
+                
                 onClick={() => {
                   fetchProjectsByTag(tag.id);
                   setActiveTagId(tag.id);
                 }}
-                variant={tag.id === activeTagId ? "primary" : "secondary"}
+                variant={tag.id === activeTagId ? "warning" : "secondary"}
                 style={{ margin: '0 1px' }}> {/* Added margin for spacing between tags */}
                 {tag.name}
               </Button>
@@ -201,6 +204,7 @@ function Categories() {
         <Button 
           className="scroll-button right" 
           onClick={() => handleScroll('right')} 
+          variant="warning"
           style={{ margin: '0 0 0 10px' }}> {/* Added left margin */}
           <FontAwesomeIcon icon={faArrowRight} />
         </Button>
