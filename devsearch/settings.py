@@ -143,13 +143,8 @@ import os
 
 
 DATABASES = {
-    'default': dj_database_url.parse("postgres://kickmates_n8p4_user:UQgWiIwyLPWCHTvAdTMb2qYNt0VgiY0S@dpg-cn7lls8l6cac73anqdog-a.singapore-postgres.render.com/kickmates_n8p4")
-
+    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
 }
-
-# DATABASES = {
-#     'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-# }
 
 
 # Database
@@ -279,7 +274,6 @@ LOGGING = {
 # Add these imports at the top of your settings.py
 from storages.backends.s3boto3 import S3Boto3Storage
 
-
 # Overriding the storage settings with environment variables
 DEFAULT_FILE_STORAGE = 'devsearch.storage_backends.B2MediaStorage'  # Update with your custom storage class path
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
@@ -289,6 +283,7 @@ AWS_SECRET_ACCESS_KEY = os.getenv('B2_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('B2_BUCKET_NAME')
 AWS_S3_ENDPOINT_URL = os.getenv('B2_ENDPOINT_URL')
 # AWS_S3_CUSTOM_DOMAIN = os.getenv('B2_BUCKET_URL')
+
 
 # Add the region name of your bucket
 AWS_S3_REGION_NAME = 'us-east-005'  # Example, adjust to your bucket's region

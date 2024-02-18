@@ -50,7 +50,8 @@ function FollowersPage() {
 
     return (
         <Container className="my-4">
-            <h2 className="text-center my-4">Followers</h2>
+            <h2 className="text-center my-4">Followers ({followers.length})</h2>
+
             {followers.map(profile => (
                 <Row key={profile.id} className="mb-3 align-items-center">
                     <Col xs={3} className="d-flex justify-content-center">
@@ -62,7 +63,7 @@ function FollowersPage() {
                         <Link to={`/profiles/${profile.id}`} className="text-decoration-none text-dark">
                             <strong>{profile.name}</strong>
                         </Link>
-                        <p>{profile.short_intro}</p>
+                        {/* <p>{profile.short_intro}</p> */}
                     </Col>
                     <Col xs={4} className="d-flex justify-content-end">
                         <Button variant="outline-primary" onClick={() => handleSendMessage(profile.id)} className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>

@@ -100,21 +100,16 @@ const SettingsPage = () => {
 
 
 
-
   return (
-    <Container style={{ marginTop: "50px" }}>
+    <Container style={{ marginTop: "50px", display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Row className="justify-content-center">
-        <Col md={6}>
-        <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Settings</h2>
-
-          {/* <h4>Manage Your Account</h4> */}
-          <br />
+      <Col style={{ textAlign: 'center' }}> {/* Adjusted for central alignment */}
+          <h2 style={{ marginTop: '20px', marginBottom: '40px' }}>Settings</h2>
           <div>
             <h5>Edit Account</h5>
             <Link to="/user/edit-account" className="btn btn-light">
               Edit Account
             </Link>
-            {/* <Button variant="light" disabled>Edit Profile</Button> */}
           </div>
           <br />
           <div>
@@ -127,18 +122,15 @@ const SettingsPage = () => {
           <div>
             <h5>Notification Settings</h5>
             <Link to="/notification-settings">
-                            <Button variant="light">Notification Settings</Button>
-                        </Link>
+              <Button variant="light">Notification Settings</Button>
+            </Link>
           </div>
           <br />
           <div>
             <h5>Change Password</h5>
-            
             <Link to="/change-password">
-                            <Button variant="light">Change Password</Button>
-                        </Link>
-
-
+              <Button variant="light">Change Password</Button>
+            </Link>
           </div>
           <br />
           <div>
@@ -148,37 +140,33 @@ const SettingsPage = () => {
             </Button>
           </div>
           <br />
-
-
           <Modal show={showModal} onHide={handleCancelDeactivation}>
-      <Modal.Header closeButton>
-        <Modal.Title>Confirm Account Deactivation</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>Are you sure you want to deactivate your account? This action is not reversible and all your data will be permanently deleted.</p>
-        {/* Add a password input field for confirmation */}
-        <Form>
-          <Form.Group controlId="passwordConfirmation">
-            <Form.Label>Confirm your password to continue</Form.Label>
-            <FormControl
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Form.Group>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleCancelDeactivation}>
-          Cancel
-        </Button>
-        <Button variant="danger" onClick={handleConfirmDeactivation}>
-          Confirm Deactivation
-        </Button>
-      </Modal.Footer>
-    </Modal>
-
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Account Deactivation</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>Are you sure you want to deactivate your account? This action is not reversible and all your data will be permanently deleted.</p>
+              <Form>
+                <Form.Group controlId="passwordConfirmation">
+                  <Form.Label>Confirm your password to continue</Form.Label>
+                  <FormControl
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCancelDeactivation}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleConfirmDeactivation}>
+                Confirm Deactivation
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </Col>
       </Row>
     </Container>

@@ -250,7 +250,7 @@ const handleRemoveTagFromProject = (tagId) => {
         <Container>
             <Row className="justify-content-md-center">
                 <Col md={6}>
-                <h2>Add Event</h2>
+                <h2 className="text-center">Add Event</h2>
             {/* Success Modal */}
             <Modal show={showSuccessModal} onHide={() => setShowSuccessModal(false)} centered>
                 <Modal.Header>
@@ -271,8 +271,8 @@ const handleRemoveTagFromProject = (tagId) => {
 
                     <Form onSubmit={handleSubmit}>
                         {/* Title */}
-                        <Form.Group controlId="title">
-                            <Form.Label>Title</Form.Label>
+                        <Form.Group controlId="title" className="forms-group-margin">
+                        <Form.Label><strong>Title</strong></Form.Label>
                             <Form.Control 
                                 type="text" 
                                 placeholder="Enter event title" 
@@ -283,8 +283,8 @@ const handleRemoveTagFromProject = (tagId) => {
                         </Form.Group>
 
                         {/* Description */}
-                        <Form.Group controlId="description">
-                            <Form.Label>Description</Form.Label>
+                        <Form.Group controlId="description" className="forms-group-margin">
+                        <Form.Label><strong>Description</strong></Form.Label>
                             <Form.Control 
                                 as="textarea" 
                                 rows={3} 
@@ -294,11 +294,10 @@ const handleRemoveTagFromProject = (tagId) => {
                                 onChange={handleChange} 
                             />
                         </Form.Group>
-                        {/* ... other form groups ... */}
 
                         {/* Featured Image Input */}
-                        <Form.Group controlId="featured_image">
-                            <Form.Label>Featured Image</Form.Label>
+                        <Form.Group controlId="featured_image" className="forms-group-margin">
+                        <Form.Label><strong>Featured Image</strong></Form.Label>
                             {imagePreviews.featured_image && (
                                 <div>
                                     <img
@@ -320,8 +319,8 @@ const handleRemoveTagFromProject = (tagId) => {
 
                         {/* Additional Image Inputs */}
                         {Array.from({ length: 3 }).map((_, index) => (
-                            <Form.Group controlId={`additional_image_${index}`} key={index}>
-                                <Form.Label>{`Additional Image ${index + 1}`}</Form.Label>
+                            <Form.Group controlId={`additional_image_${index}`} key={index} className="forms-group-margin">
+                                <Form.Label><strong>{`Additional Image ${index + 1}`}</strong></Form.Label>
                                 {imagePreviews.additional_images[index] && (
                                     <div>
                                         <img
@@ -355,8 +354,8 @@ const handleRemoveTagFromProject = (tagId) => {
                         </Form.Group> */}
 
                 {/* Location Input */}
-                <Form.Group controlId="location">
-                    <Form.Label>Location</Form.Label>
+                <Form.Group controlId="location" className="forms-group-margin">
+                <Form.Label><strong>Location</strong></Form.Label>
                     <Form.Control 
                         type="text" 
                         placeholder="Enter event location" 
@@ -367,8 +366,8 @@ const handleRemoveTagFromProject = (tagId) => {
                 </Form.Group>
 
                 {/* Start Date/Time Input */}
-                <Form.Group controlId="start_date">
-                    <Form.Label>Start Date and Time</Form.Label>
+                <Form.Group controlId="start_date" className="forms-group-margin">
+                <Form.Label><strong>Start Date and Time</strong></Form.Label>
                     <Form.Control 
                         type="datetime-local" 
                         name="start_date" 
@@ -378,8 +377,8 @@ const handleRemoveTagFromProject = (tagId) => {
                 </Form.Group>
 
                 {/* End Date/Time Input */}
-                <Form.Group controlId="end_date">
-                    <Form.Label>End Date and Time</Form.Label>
+                <Form.Group controlId="end_date" className="forms-group-margin">
+                <Form.Label><strong>End Date and Time</strong></Form.Label>
                     <Form.Control 
                         type="datetime-local" 
                         name="end_date" 
@@ -390,8 +389,8 @@ const handleRemoveTagFromProject = (tagId) => {
 
 
                         {/* Price */}
-                        <Form.Group controlId="price">
-                            <Form.Label>Price (per person)</Form.Label>
+                        <Form.Group controlId="price" className="forms-group-margin">
+                        <Form.Label><strong>Price (per person)</strong></Form.Label>
                             <Form.Control 
                                 type="number" 
                                 step="0.01"
@@ -403,8 +402,8 @@ const handleRemoveTagFromProject = (tagId) => {
                         </Form.Group>
 
                         {/* Deal Link */}
-                        <Form.Group controlId="deal_link">
-                            <Form.Label>Event Link</Form.Label>
+                        <Form.Group controlId="deal_link" className="forms-group-margin">
+                        <Form.Label><strong>Event Link</strong></Form.Label>
                             <Form.Control 
                                 type="text" 
                                 placeholder="http://example.com/event"
@@ -434,8 +433,8 @@ const handleRemoveTagFromProject = (tagId) => {
 
    {/* Tags Section */}
         {/* Tags Section */}
-        <Form.Group controlId="tags">
-                            <Form.Label>Available Categories</Form.Label>
+        <Form.Group controlId="tags" className="forms-group-margin">
+        <Form.Label><strong>Available Categories</strong></Form.Label>
                             <div>
                                 {tags.slice(0, visibleTagCount).map(tag => (
                                     <Button 
@@ -465,8 +464,8 @@ const handleRemoveTagFromProject = (tagId) => {
                         </Form.Group>
 
             {/* Selected Tags Display */}
-            <Form.Group controlId="selectedTags">
-                <Form.Label>Selected Categories</Form.Label>
+            <Form.Group controlId="selectedTags" className="forms-group-margin">
+            <Form.Label><strong>Selected Categories</strong></Form.Label>
                 <div>
                     {selectedTags.map(tagId => {
                         const tag = tags.find(t => t.id === tagId);
@@ -485,20 +484,20 @@ const handleRemoveTagFromProject = (tagId) => {
             </Form.Group>
 
             {/* Add New Tag */}
-            <Form.Group controlId="newTag">
-                <Form.Label>Add New Category</Form.Label>
+            <Form.Group controlId="newTag" className="forms-group-margin">
+            <Form.Label><strong>Add New Category</strong></Form.Label>
                 <Row>
                     <Col>
                         <Form.Control type="text" name="newTag" value={projectData.newTag} onChange={handleChange} />
                     </Col>
                     <Col>
-                        <Button onClick={handleAddTag}>Add Category</Button>
+                        <Button variant="info" onClick={handleAddTag}>Add Category</Button>
                     </Col>
                 </Row>
             </Form.Group>
 
                         {/* Submit Button */}
-                        <Button variant="primary" type="submit">
+                        <Button variant="warning" type="submit">
                             Add Event
                         </Button>
                     </Form>

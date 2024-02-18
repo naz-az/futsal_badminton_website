@@ -139,6 +139,7 @@ function EditAccount() {
     return (
       <Container className="mt-5">
         <Row className="justify-content-md-center">
+
           <Col xs={12} md={8}>
             {/* Back button */}
             <Button
@@ -148,10 +149,11 @@ function EditAccount() {
             >
               Go Back
             </Button>
+            <h2 className="text-center">Edit Account</h2>
 
             <Form onSubmit={handleSubmit}>
-              <Form.Group controlId="name">
-                <Form.Label>Name</Form.Label>
+              <Form.Group controlId="name" className="form-group-margin">
+                <Form.Label><strong>Name</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="name"
@@ -161,8 +163,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="email">
-                <Form.Label>Email</Form.Label>
+              <Form.Group controlId="email" className="form-group-margin">
+                <Form.Label><strong>E-mail</strong></Form.Label>
                 <Form.Control
                   type="email"
                   name="email"
@@ -172,8 +174,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="username">
-                <Form.Label>Username</Form.Label>
+              <Form.Group controlId="username" className="form-group-margin">
+                <Form.Label><strong>Username</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="username"
@@ -183,8 +185,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="location">
-                <Form.Label>Location</Form.Label>
+              <Form.Group controlId="location" className="form-group-margin">
+                <Form.Label><strong>Location</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="location"
@@ -194,8 +196,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="bio">
-                <Form.Label>Bio</Form.Label>
+              <Form.Group controlId="bio" className="form-group-margin">
+                <Form.Label><strong>Bio</strong></Form.Label>
                 <Form.Control
                   as="textarea"
                   name="bio"
@@ -205,8 +207,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="short_intro">
-                <Form.Label>Short Intro</Form.Label>
+              <Form.Group controlId="short_intro" className="form-group-margin">
+                <Form.Label><strong>Short Intro</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="short_intro"
@@ -216,19 +218,16 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              {/* ... Repeat the same structure for other fields ... */}
-
-              <Form.Group controlId="profile_image">
-                <Form.Label>Profile Image</Form.Label>
+              <Form.Group controlId="profile_image" className="form-group-margin">
+                <Form.Label><strong>Profile Image</strong></Form.Label>
 
                 {/* Display current image URL */}
-                {/* Display current image URL */}
-                <p>
+                {/* <p>
                   Currently:{" "}
                   {typeof profile.profile_image === "string"
                     ? profile.profile_image
                     : "No image selected"}
-                </p>
+                </p> */}
 
                 {/* Display current image */}
                 <div>
@@ -245,7 +244,7 @@ function EditAccount() {
                 </div>
 
                 {/* Clear button */}
-                <Button variant="danger" onClick={clearImage} className="mb-2">
+                <Button variant="primary" onClick={clearImage} className="mb-4 mt-2">
                   Clear
                 </Button>
 
@@ -270,8 +269,8 @@ function EditAccount() {
                 )}
               </Form.Group>
 
-              <Form.Group controlId="social_facebook">
-                <Form.Label>Facebook Profile URL</Form.Label>
+              <Form.Group controlId="social_facebook" className="form-group-margin">
+                <Form.Label><strong>Facebook Profile URL</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="social_facebook"
@@ -281,8 +280,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="social_twitter">
-                <Form.Label>Twitter Profile URL</Form.Label>
+              <Form.Group controlId="social_twitter" className="form-group-margin">
+                <Form.Label><strong>Twitter Profile URL</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="social_twitter"
@@ -292,8 +291,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="social_instagram">
-                <Form.Label>Instagram Profile URL</Form.Label>
+              <Form.Group controlId="social_instagram" className="form-group-margin">
+                <Form.Label><strong>Instagram Profile URL</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="social_instagram"
@@ -303,8 +302,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="social_youtube">
-                <Form.Label>YouTube Channel URL</Form.Label>
+              <Form.Group controlId="social_youtube" className="form-group-margin">
+                <Form.Label><strong>YouTube Profile URL</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="social_youtube"
@@ -314,8 +313,8 @@ function EditAccount() {
                 />
               </Form.Group>
 
-              <Form.Group controlId="social_website">
-                <Form.Label>Website URL</Form.Label>
+              <Form.Group controlId="social_website" className="form-group-margin">
+                <Form.Label><strong>Website URL</strong></Form.Label>
                 <Form.Control
                   type="text"
                   name="social_website"
@@ -324,7 +323,7 @@ function EditAccount() {
                   placeholder="Website URL"
                 />
               </Form.Group>
-              <Button variant="primary" type="submit">
+              <Button variant="warning" type="submit">
                 Submit
               </Button>
             </Form>

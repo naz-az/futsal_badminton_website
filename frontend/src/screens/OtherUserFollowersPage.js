@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Card, Button } from 'react-bootstrap';
+import { Container, Card, Button, Row, Col } from 'react-bootstrap';
 import AuthContext from '../context/authContext';
 
 
@@ -102,56 +102,51 @@ const handleFollowToggle = async (followerProfileId, isFollowing) => {
   }
 
   return (
-    <Container className="my-md">
+    <Container className="my-4">
+<h2 className="text-center my-4">Followers ({followers.length})</h2>
 
-<h1>Followers</h1>
-
-  <h2>({followers.length}) {followers.length === 1 ? 'follower' : 'followers'}</h2>
 
   {followers.map(profile => (
-  <Card key={profile.id} className="mb-3 d-flex flex-row align-items-center">
-    <div style={{ width: '10%', marginRight: '20px' }}>
+        <Row key={profile.id} className="mb-3 align-items-center">
+          <Col xs={3} className="d-flex justify-content-center">
       {/* Conditionally render Link based on whether the profile belongs to the current user */}
       {currentUserId === profile.id ? (
         <Link to="/user/account">
-          <Card.Img src={profile.profile_image} style={{ width: '150px', height: '200px', objectFit: 'cover' }}/>
+          <img src={profile.profile_image} alt="Profile" className="img-fluid" style={{ maxWidth: '60px', maxHeight: '60px', width: '60px', height: '60px', borderRadius: '50%' }} />
         </Link>
       ) : (
         <Link to={`/profiles/${profile.id}`}>
-          <Card.Img src={profile.profile_image} style={{ width: '150px', height: '200px', objectFit: 'cover' }}/>
+          <img src={profile.profile_image} alt="Profile" className="img-fluid" style={{ maxWidth: '60px', maxHeight: '60px', width: '60px', height: '60px', borderRadius: '50%' }} />
         </Link>
       )}
-    </div>
-    <Card.Body className="d-flex flex-column justify-content-center" style={{ width: '50%' }}>
-      <Card.Title>
+          </Col>
+          <Col xs={5} className="d-flex flex-column justify-content-center px-1">
+
         {/* Conditionally render Link based on whether the profile belongs to the current user */}
         {currentUserId === profile.id ? (
           <Link to="/user/account" style={{ textDecoration: 'none', color: 'inherit' }}>
-            {profile.name}
+            <strong>{profile.name}</strong>
           </Link>
         ) : (
           <Link to={`/profiles/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            {profile.name}
+            <strong>{profile.name}</strong>
           </Link>
-        )}
-      </Card.Title>
-      <Card.Text>
-        {profile.short_intro?.slice(0, 60) ?? ''}
-      </Card.Text>
-    </Card.Body>
-    <div className="d-flex justify-content-center align-items-center" style={{ width: '40%' }}>
-    {currentUserId !== profile.id && ( // Add this condition
+)}
+      <p>{profile.short_intro?.slice(0, 60) ?? ''}</p>
+        </Col>
+    <Col xs={4} className="d-flex justify-content-end">
+                  {currentUserId !== profile.id && (
+
         <Button 
-          variant={profile.isFollowing ? "secondary" : "primary"} 
+          variant={profile.isFollowing ? "secondary" : "warning"} 
           onClick={() => handleFollowToggle(profile.id, profile.isFollowing)}
           className="mx-4">
           {profile.isFollowing ? 'Unfollow' : 'Follow'}
-        </Button>
-      )}
-    </div>
-  </Card>
-))}
-
+          </Button>
+            )}
+          </Col>
+        </Row>
+      ))}
     </Container>
   );
 }

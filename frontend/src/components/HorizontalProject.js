@@ -275,6 +275,7 @@ function HorizontalProject({ project }) {
               <Button
                 variant="outline-primary"
                 onClick={handleAddFavorite}
+                style={{ marginRight: "10px" }} 
               >
                 <i
                   className="fa-regular fa-bookmark"
