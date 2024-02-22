@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Row, Col, Button } from 'react-bootstrap';
+import { Row, Col, Button, Container} from 'react-bootstrap';
 import Profile from '../components/Profile';
 import axios from 'axios';
 import Pagination from '../components/Pagination';
@@ -44,8 +44,8 @@ function ProfileScreen() {
     const currentProfiles = filteredProfiles.slice(indexOfFirstProfile, indexOfLastProfile);
 
     return (
-        <div>
-            {/* <h1>Profiles</h1> */}
+        <Container fluid="lg" className="mt-3"> {/* Use a Container for centering and padding */}
+
             
             {/* Search Bar */}
 <div className="d-flex justify-content-center align-items-center mb-5 mt-5">
@@ -68,13 +68,14 @@ function ProfileScreen() {
 </div>
 
             
+            {/* Profiles Grid */}
             <Row>
                 {currentProfiles.map(profile => (
-                    <Col key={profile.id} sm={12} md={6} lg={4} xl={3}>
+                    <Col key={profile.id} sm={12} md={6} lg={4} xl={3} className="mb-4">
                         <Profile 
                             profile={profile} 
                             currentUserId={currentUserId} 
-                            isCurrentUser={false}  // Always false since the current user's profile is filtered out
+                            isCurrentUser={profile.id === currentUserId}
                         />
                     </Col>
                 ))}
@@ -87,7 +88,7 @@ function ProfileScreen() {
                 projectsPerPage={profilesPerPage}
                 setCurrentPage={setCurrentPage} 
             />
-        </div>
+        </Container>
     );
 }
 

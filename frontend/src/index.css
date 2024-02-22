@@ -258,3 +258,17 @@ Button.active {
 }
 
 
+/* Add this CSS to your stylesheet, adjusting values as necessary */
+@media (max-width: 768px) {
+  .pagination-button {
+      margin: 0 2px; /* Smaller margins on mobile */
+      padding: 5px 10px; /* Adjust padding as needed */
+      font-size: 12px; /* Smaller font size on mobile */
+  }
+}
+
+/* Ensure your button container wraps on small screens */
+.d-flex.justify-content-center.mt-4 {
+  flex-wrap: wrap;
+}
+

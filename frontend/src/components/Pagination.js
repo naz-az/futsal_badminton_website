@@ -9,16 +9,16 @@ function Pagination({ currentPage, projectsLength, projectsPerPage, setCurrentPa
     return (
         <div className="d-flex justify-content-center mt-4">
             <Button 
-                style={buttonStyle}
-                variant="outline-secondary" 
+    className="pagination-button" // Replace style with className
+    variant="outline-secondary" 
                 onClick={() => setCurrentPage(1)} 
                 disabled={currentPage === 1}
             >
                 First Page
             </Button>
             <Button 
-                style={buttonStyle}
-                variant="outline-secondary" 
+    className="pagination-button" // Replace style with className
+    variant="outline-secondary" 
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
                 disabled={currentPage === 1}
             >
@@ -26,8 +26,8 @@ function Pagination({ currentPage, projectsLength, projectsPerPage, setCurrentPa
             </Button>
             {Array.from({ length: Math.ceil(projectsLength / projectsPerPage) }, (_, idx) => (
                 <Button 
-                    style={buttonStyle}
-                    key={idx}
+                className="pagination-button" // Replace style with className
+                key={idx}
                     variant={idx + 1 === currentPage ? "danger" : "outline-secondary"}
                     onClick={() => setCurrentPage(idx + 1)}
                 >
@@ -35,16 +35,16 @@ function Pagination({ currentPage, projectsLength, projectsPerPage, setCurrentPa
                 </Button>
             ))}
             <Button 
-                style={buttonStyle}
-                variant="outline-secondary" 
+    className="pagination-button" // Replace style with className
+    variant="outline-secondary" 
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(projectsLength / projectsPerPage)))}
                 disabled={currentPage === Math.ceil(projectsLength / projectsPerPage)}
             >
                 Next 
             </Button>
             <Button 
-                style={buttonStyle}
-                variant="outline-secondary" 
+    className="pagination-button" // Replace style with className
+    variant="outline-secondary" 
                 onClick={() => setCurrentPage(Math.ceil(projectsLength / projectsPerPage))} 
                 disabled={currentPage === Math.ceil(projectsLength / projectsPerPage)}
             >

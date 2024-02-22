@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Image, Button } from 'react-bootstrap';
+import { Card, Image, Button, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 import axios from 'axios';
 import { useParams } from "react-router-dom";
@@ -87,66 +87,44 @@ function Profile({ profile, currentUserId, isCurrentUser  }) {
         // Add a check to determine if the profile belongs to the current user
         const isCurrentUserProfile = profile.id === currentUserId;
 
-    return (
-        <Card className="mb-4">
- <Card.Body style={{ display: 'flex', alignItems: 'center' }}>
-                {/* Redirect to user/account if it's the current user's profile */}
-                {
-                    isCurrentUser ? (
-                        <Link to="/user/account">
-                            <Image 
-                                src={profile.profile_image} 
-                                alt="Profile image" 
-                                roundedCircle
-                                style={{ width: '80px', height: '80px', marginRight: '10px' }}
-                            />
-                        </Link>
-                    ) : (
-                        <Link to={`/profiles/${profile.id}`}>
-                            <Image 
-                                src={profile.profile_image} 
-                                alt="Profile image" 
-                                roundedCircle
-                                style={{ width: '80px', height: '80px', marginRight: '10px' }}
-                            />
-                        </Link>
-                    )
-                }
-                <div>
-                    <Card.Title>
-                        {
-                            isCurrentUser ? (
-                                <Link to="/user/account" style={{ textDecoration: 'none', color: 'inherit' }}>
+        return (
+            <Card className="mb-4 shadow-sm h-100"> {/* Improved design with shadow and height */}
+                <Card.Body>
+                    <Row className="align-items-center">
+                        <Col xs={4} md={3}>
+                            <Link to={isCurrentUser ? "/user/account" : `/profiles/${profile.id}`}>
+                                <Image 
+                                    src={profile.profile_image} 
+                                    alt="Profile" 
+                                    roundedCircle 
+                                    className="img-fluid" // Responsive image
+                                    style={{ width: '80px', height: '80px' }} // Adjust size as needed
+                                />
+                            </Link>
+                        </Col>
+                        <Col xs={8} md={9}>
+                            <Card.Title>
+                                <Link to={isCurrentUser ? "/user/account" : `/profiles/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     {profile.name}
                                 </Link>
-                            ) : (
-                                <Link to={`/profiles/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    {profile.name}
-                                </Link>
-                            )
-                        }
-                    </Card.Title>
-                    <Card.Text>
-                        {profile.short_intro?.slice(0, 60) ?? ''}
-                    </Card.Text>
-
-                    {/* Conditionally render follow/unfollow button */}
-                    {
-                    !isCurrentUserProfile && !isUserBlocked && (
-                        isFollowing ? (
-                                <Button variant="outline-primary" size="sm" onClick={handleUnfollow}>Unfollow</Button>
-                            ) : (
-                                <Button variant="warning" size="sm" onClick={handleFollow}>Follow</Button>
-                            )
-                        )
-                    }
-                </div>
-            </Card.Body>
-            <Card.Text style={{ marginLeft: '10px', marginBottom: '30px' }}>
-            {profile.bio?.split(" ").slice(0, 30).join(" ") ?? ''}
-            </Card.Text>
-        </Card>
-    );
-}
-
-export default Profile;
+                            </Card.Title>
+                            <Card.Text>{profile.short_intro}</Card.Text>
+                            {/* Follow/Unfollow button logic... */}
+                            {!isCurrentUser && !isUserBlocked && (
+                                isFollowing ? (
+                                    <Button variant="outline-primary" size="sm" onClick={handleUnfollow}>Unfollow</Button>
+                                ) : (
+                                    <Button variant="warning" size="sm" onClick={handleFollow}>Follow</Button>
+                                )
+                            )}
+                        </Col>
+                    </Row>
+                </Card.Body>
+                <Card.Footer>
+                    <small className="text-muted">{profile.bio?.split(" ").slice(0, 30).join(" ")}</small>
+                </Card.Footer>
+            </Card>
+        );
+    }
+    
+    export default Profile;
