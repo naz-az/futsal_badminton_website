@@ -196,16 +196,7 @@ class Image(models.Model):
         # Save the model instance
         super().save(*args, **kwargs)
         output.close()
-# class Comment(models.Model):
-#     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='comments')
-#     user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
-#     content = models.TextField()
-#     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
-#     likes = models.ManyToManyField('users.Profile', related_name='comment_likes', blank=True)
-#     created = models.DateTimeField(auto_now_add=True)
 
-#     class Meta:
-#         ordering = ['-created']
 
 from django.db import models
 import uuid
@@ -244,23 +235,5 @@ class Like(models.Model):
 
 
 
-
-
-
-
-
-
-
-
-# from django.db import models
-# from django.contrib.auth import get_user_model
-
-# class Vote(models.Model):
-#     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-#     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-#     vote = models.IntegerField(default=0)  # -1 for downvote, 1 for upvote
-
-#     class Meta:
-#         unique_together = ('user', 'project')  # Ensure one vote per user per project
 
 

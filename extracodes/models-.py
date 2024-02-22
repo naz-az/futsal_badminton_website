@@ -1,0 +1,691 @@
+from django.db import models
+from django.contrib.auth.models import User
+import uuid
+# Create your models here.
+
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+from PIL import Image as PilImage
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import sys
+
+from devsearch.storage_backends import B2MediaStorage
+import logging
+
+logger = logging.getLogger(__name__)
+
+class Profile(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=200, blank=True, null=True)
+    email = models.EmailField(max_length=500, blank=True, null=True)
+    username = models.CharField(max_length=200, blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True, null=True)
+    short_intro = models.CharField(max_length=200, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    profile_image = models.ImageField(
+        null=True, blank=True, upload_to='profiles/', default="profiles/user-default.png", storage=B2MediaStorage())
+    social_facebook = models.CharField(max_length=200, blank=True, null=True)
+    social_twitter = models.CharField(max_length=200, blank=True, null=True)
+    social_instagram = models.CharField(max_length=200, blank=True, null=True)
+    social_youtube = models.CharField(max_length=200, blank=True, null=True)
+    social_website = models.CharField(max_length=200, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    followers = models.ManyToManyField(User, related_name='following', blank=True)
+    followers_last_checked = models.DateTimeField(auto_now_add=True, null=True)
+    blocked_users = models.ManyToManyField('self', symmetrical=False, blank=True, related_name="blocking_users")
+    followed_tags = models.ManyToManyField('projects.Tag', blank=True, related_name='followers')
+
+    notify_new_followers = models.BooleanField(default=True)
+    notify_new_messages = models.BooleanField(default=True)  # Add this line for new message notifications
+    notify_new_comment_on_project = models.BooleanField(default=True)  # New setting for comments on project
+    notify_new_replied_comment = models.BooleanField(default=True) 
+    notify_new_upvote_on_project = models.BooleanField(default=True)  # New setting for upvotes on projects
+
+    def __str__(self):
+        return str(self.username)
+
+    class Meta:
+        ordering = ['created']
+
+    @property
+    def imageURL(self):
+        if self.profile_image:
+            # Check if the file exists in storage
+            if self.profile_image.storage.exists(self.profile_image.name):
+                # If the file exists, generate a signed URL
+                url = self.profile_image.storage.url(self.profile_image.name)
+                return url
+            else:
+                # Log an error or handle the missing file case
+                logger.error(f"File does not exist in storage: {self.profile_image.name}")
+                return ''
+        return ''
+
+    
+    def has_blocked(self, user_profile_id):
+        return self.blocked_users.filter(id=user_profile_id).exists()
+
+    @property
+    def followers_count(self):
+        return self.followers.count()
+
+    @property
+    def following_count(self):
+        return self.user.following.count()
+    
+    
+    def save(self, *args, **kwargs):
+        # Debugging: Log the storage backend information
+        logger.debug(f"Using storage backend: {self.profile_image.storage}")
+        logger.debug(f"Default file name: {self.profile_image.name}")
+
+        # Check if the default image file exists in the storage backend
+        if self.profile_image and not self.profile_image.storage.exists(self.profile_image.name):
+            logger.error(f"File does not exist: {self.profile_image.name}")
+        else:
+            logger.debug(f"File exists: {self.profile_image.name}")
+
+        # Your existing image processing logic
+        if self.profile_image and hasattr(self.profile_image, 'file'):
+            img = PilImage.open(BytesIO(self.profile_image.read()))
+            img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'
+            # Check if the image needs to be resized
+            if img.height > 400 or img.width > 400:
+                output_size = (400, 400)
+                img.thumbnail(output_size, PilImage.Resampling.LANCZOS)  # Updated line
+                output = BytesIO()
+                img.save(output, format=img_format)
+                output.seek(0)
+                self.profile_image = InMemoryUploadedFile(output, 'ImageField', f"{self.profile_image.name.split('.')[0]}.{img_format.lower()}", f'image/{img_format.lower()}', sys.getsizeof(output), None)
+
+        super().save(*args, **kwargs)
+
+
+
+# models.py
+from django.db import models
+from django.contrib.auth.models import User
+import uuid
+
+from django.conf import settings
+
+
+
+class Notif(models.Model):
+    # Assuming 'Profile' is in the same app, otherwise you need to specify 'app_name.Profile'
+    user = models.ForeignKey(
+        'Profile',
+        related_name='user_notifications', 
+        null=False,  # Ensure this field cannot be null
+        on_delete=models.CASCADE
+    )
+    follower = models.ForeignKey(
+        'Profile',
+        related_name='follower_notifications',
+        on_delete=models.CASCADE,
+        null=True,  # Allow null values for non-follower notifications
+        blank=True,
+    )
+
+    read = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    notification_sent = models.BooleanField(default=False)
+
+    
+    TYPE_CHOICES = (
+    ('FOLLOWER', 'Follower'),
+    ('COMMENT', 'Comment'),
+    ('MESSAGE', 'Message'), 
+    ('VOTE', 'Vote'),  # New notification type for votes
+    ('REPLY', 'Reply'),  # New notification type for comment replies
+
+
+)
+    
+    notification_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='FOLLOWER')
+    comment = models.ForeignKey('projects.Com', on_delete=models.CASCADE, related_name='comment_notifications', null=True, blank=True)
+    
+    message = models.ForeignKey('Messg', on_delete=models.CASCADE, related_name='message_notifications', null=True, blank=True)
+
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='vote_notifications',
+        null=True,
+        blank=True
+    )
+
+    voting_user = models.ForeignKey(
+        'Profile',
+        on_delete=models.CASCADE,
+        related_name='vote_notifications',
+        null=True,
+        blank=True
+    )
+
+    replied_comment = models.ForeignKey(
+        'projects.Com',
+        on_delete=models.CASCADE,
+        related_name='reply_notifications',
+        null=True,
+        blank=True
+    )
+
+
+
+    def __str__(self):
+        if self.notification_type == 'FOLLOWER':
+            return f"{self.follower} followed {self.user}"
+        elif self.notification_type == 'COMMENT':
+            return f"{self.comment.user} commented on {self.user}'s project"
+        elif self.notification_type == 'MESSAGE':  # Add this condition
+            return f"{self.user} received a message from {self.message.sender}"
+        elif self.notification_type == 'VOTE':
+            return f"{self.voting_user} voted for {self.project.title}"
+        elif self.notification_type == 'REPLY':
+            return f"{self.user} received a reply from {self.comment.user}"
+        
+        
+import uuid
+from django.db import models
+from django.contrib.auth.models import User
+
+class Thrd(models.Model):  
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    participants = models.ManyToManyField(Profile)
+
+    def __str__(self):
+        return str(self.id)
+    
+    def latest_message_timestamp(self):
+        last_message = self.messages.order_by('-timestamp').first()
+        return last_message.timestamp if last_message else None
+
+from django.utils import timezone
+ 
+class Messg(models.Model):  
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+    sender = models.ForeignKey(Profile, related_name='sends_sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(Profile, related_name='received_messages', on_delete=models.CASCADE)
+    thread = models.ForeignKey(Thrd, related_name='messages', on_delete=models.CASCADE)
+    body = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    viewed = models.BooleanField(default=False)
+    viewed_timestamp = models.DateTimeField(null=True, blank=True)  # Add this line
+    viewed_by = models.ManyToManyField(Profile, related_name='viewed_messages', blank=True)
+
+
+    def __str__(self):
+        return f"From {self.sender} to {self.recipient} - {self.body[:30]}"
+
+
+    def is_latest_in_thread(self):
+        return self == self.thread.messages.latest('timestamp')
+
+    def mark_viewed(self, profile):
+        """Marks the message as viewed by a given profile if the profile is not the sender."""
+        if self.sender != profile and not self.viewed_by.filter(id=profile.id).exists():
+            self.viewed_by.add(profile)
+            self.viewed = True
+            self.viewed_timestamp = timezone.now()
+            self.save()
+
+
+
+
+# class ThreadParticipants(models.Model):
+#     thread = models.ForeignKey('Thread', on_delete=models.CASCADE)
+#     profile = models.ForeignKey('Profile', on_delete=models.CASCADE)
+
+#     class Meta:
+#         unique_together = ['thread', 'profile']
+
+# class Thread(models.Model):
+#     participants = models.ManyToManyField(Profile, through=ThreadParticipants)
+
+
+# class Msg(models.Model):
+#     sender = models.ForeignKey(
+#         Profile, on_delete=models.SET_NULL, null=True, blank=True)
+#     recipient = models.ForeignKey(
+#         Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name="msg_recipients")
+#     name = models.CharField(max_length=200, null=True, blank=True)
+#     email = models.EmailField(max_length=200, null=True, blank=True)
+#     subject = models.CharField(max_length=200, null=True, blank=True)
+#     parent_msg = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
+#     body = models.TextField()
+#     is_read = models.BooleanField(default=False, null=True)
+#     created = models.DateTimeField(auto_now_add=True)
+#     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, null=True)
+
+#     id = models.UUIDField(default=uuid.uuid4, unique=True,
+#                           primary_key=True, editable=False)
+
+#     def __str__(self):
+#         return self.body[:30]
+
+#     class Meta:
+#         ordering = ['is_read', '-created']
+
+
+    # def save(self, *args, **kwargs):
+    #     print("Inside the save method of Profile model") # <-- Add this print statement
+
+    #     # Open the uploaded image
+    #     img = PilImage.open(self.profile_image)
+    #     output = BytesIO()
+
+    #     # Resize the image and save it into output object to get an image sharpness & detail enhanced
+    #     img = img.resize((300,300)) 
+    #     img.save(output, format='JPEG', quality=100)
+    #     output.seek(0)
+
+    #     # Change the imagefield value to be the newley modifed image value
+    #     self.profile_image = InMemoryUploadedFile(output, 'ImageField', "%s.jpg" %self.profile_image.name.split('.')[0], 'image/jpeg', sys.getsizeof(output), None)
+
+    #     super().save(*args, **kwargs)
+
+
+
+class Skill(models.Model):
+    owner = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=200, blank=True, null=True)
+    description = models.TextField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    id = models.UUIDField(default=uuid.uuid4, unique=True,
+                          primary_key=True, editable=False)
+
+    def __str__(self):
+        return str(self.name)
+
+
+# class Message(models.Model):
+#     sender = models.ForeignKey(
+#         Profile, on_delete=models.SET_NULL, null=True, blank=True)
+#     recipient = models.ForeignKey(
+#         Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name="message_recipients")
+#     name = models.CharField(max_length=200, null=True, blank=True)
+#     email = models.EmailField(max_length=200, null=True, blank=True)
+#     subject = models.CharField(max_length=200, null=True, blank=True)
+#     body = models.TextField()
+#     is_read = models.BooleanField(default=False, null=True) 
+#     created = models.DateTimeField(auto_now_add=True)
+#     parent_message = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
+    
+#     id = models.UUIDField(default=uuid.uuid4, unique=True,
+#                           primary_key=True, editable=False)
+
+#     def __str__(self):
+#         return self.subject
+
+#     class Meta:
+#         ordering = ['is_read', '-created']
+
+#     @property
+#     def reply_count(self):
+#         count = 0
+#         message = self
+#         while message.parent_message:
+#             count += 1
+#             message = message.parent_message
+#         return count
+
+#     @property
+#     def formatted_subject(self):
+#         if self.parent_message:
+#             if not self.subject.startswith('Re: '):
+#                 return f"Re: {self.subject}"
+#         return self.subject
+
+
+#     def save(self, *args, **kwargs):
+#         # Removing this logic to avoid redundancy.
+#         # if self.parent_message and not self.subject.startswith('Re: '):
+#         #     self.subject = f'Re: {self.parent_message.subject}'
+#         super(Message, self).save(*args, **kwargs)
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('message', 'Message'),
+        ('comment', 'Comment'),
+        ('vote', 'Vote'),  # Add this
+    )
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="notifications")
+    sender = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    created = models.DateTimeField(auto_now_add=True)
+    seen = models.BooleanField(default=False)
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+
+    def __str__(self):
+        return f"{self.sender.username} {self.notification_type} {self.profile.username}"
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['user', 'project']]
+
+    def __str__(self):
+        return self.project.title
+
+
+
+from django.db import models
+import uuid
+
+from django.db.models.deletion import CASCADE
+# Create your models here.
+
+
+    # upvotes = models.IntegerField(default=0)
+    # downvotes = models.IntegerField(default=0)
+
+from PIL import Image as PilImage
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import sys
+from django.core.files.base import ContentFile
+
+from devsearch.storage_backends import B2MediaStorage
+
+class Project(models.Model):
+    owner = models.ForeignKey('users.Profile', null=True, blank=True, 
+                              on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    featured_image = models.ImageField(
+        null=True, blank=True, default="default.jpg", storage=B2MediaStorage())
+    brand = models.CharField(max_length=2000, null=True, blank=True)
+    deal_link = models.CharField(max_length=2000, null=True, blank=True)
+    tags = models.ManyToManyField('Tag', blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)  
+    location = models.CharField(max_length=1024, null=True, blank=True)  # New field for location
+    start_date = models.DateTimeField(null=True, blank=True)  # New field for event start date/time
+    end_date = models.DateTimeField(null=True, blank=True)    # New field for event end date/time
+
+    id = models.UUIDField(default=uuid.uuid4, unique=True,
+                          primary_key=True, editable=False)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['title']
+
+    @property
+    def imageURL(self):
+        try:
+            url = self.featured_image.url
+        except:
+            url = ''
+        return url
+
+    @property
+    def reviewers(self):
+        queryset = self.review_set.all().values_list('owner__id', flat=True)
+        return queryset
+
+    # Modify the save method
+    def save(self, *args, **kwargs):
+        # Process the featured image if it exists
+        if self.featured_image:
+            # Open the image directly from the InMemoryUploadedFile
+            pil_img = PilImage.open(self.featured_image)
+            output = BytesIO()
+
+            # Resize the image
+            if pil_img.height > 800 or pil_img.width > 800:
+                output_size = (800, 800)
+                pil_img.thumbnail(output_size, PilImage.Resampling.LANCZOS)
+
+            # Save the resized image to the output
+            pil_img.save(output, format='JPEG', quality=95)
+            output.seek(0)
+
+            # Change the ImageField to use the new resized image
+            self.featured_image.save(self.featured_image.name, ContentFile(output.read()), save=False)
+
+        super(Project, self).save(*args, **kwargs)
+
+    def vote_count(self):
+        up_votes = Vote.objects.filter(project=self, vote_type=Vote.UP).count()
+        down_votes = Vote.objects.filter(project=self, vote_type=Vote.DOWN).count()
+        return up_votes - down_votes
+
+
+
+class Attendance(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    attendee = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    date_joined = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['project', 'attendee']]
+
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=200)
+    created = models.DateTimeField(auto_now_add=True)
+    id = models.UUIDField(default=uuid.uuid4, unique=True,
+                          primary_key=True, editable=False)
+
+    def __str__(self):
+        return self.name
+
+
+
+# models.py
+from django.db import models
+import uuid
+
+class Vote(models.Model):
+    UP = 'UP'
+    DOWN = 'DOWN'
+    VOTE_CHOICES = [
+        (UP, 'Up'),
+        (DOWN, 'Down'),
+    ]
+
+    user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)  # Referencing Profile model
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    vote_type = models.CharField(max_length=4, choices=VOTE_CHOICES)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['user', 'project']]
+
+    def __str__(self):
+        return f"{self.user.username}: {self.vote_type} on {self.project.title}"
+
+
+
+
+
+
+
+from django.db import models
+import uuid
+
+
+class Rating(models.Model):
+    user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    value = models.IntegerField() # 1 for upvote, -1 for downvote, 0 for no vote
+
+
+
+class Review(models.Model):
+    owner = models.ForeignKey('users.Profile', on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    body = models.TextField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    seen = models.BooleanField(default=False)
+    parent_review = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
+    likes = models.PositiveIntegerField(default=0)  # This field will store the number of likes
+
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    
+    class Meta:
+        pass
+
+    def is_owner(self, user):
+        return self.owner == user.profile
+   
+    def __str__(self):
+        return self.body
+
+
+
+
+
+from django.core.files import File
+
+class Image(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_images', null=True)
+    image = models.ImageField(upload_to='images/', storage=B2MediaStorage()) 
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # Open the image using the file storage, not the local path
+        img = PilImage.open(self.image)
+        output = BytesIO()
+        
+        # Check if the image needs to be resized
+        if img.height > 800 or img.width > 800:
+            output_size = (800, 800)
+            img.thumbnail(output_size, PilImage.Resampling.LANCZOS)  # Updated line here
+        
+        # Save the resized image to the output buffer
+        img_format = 'JPEG' if img.mode == 'RGB' else 'PNG'
+        img.save(output, format=img_format)
+        output.seek(0)
+        
+        # Change the ImageField to use the new resized image
+        self.image = File(output, self.image.name)
+        
+        # Save the model instance
+        super().save(*args, **kwargs)
+        output.close()
+# class Comment(models.Model):
+#     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='comments')
+#     user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+#     content = models.TextField()
+#     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
+#     likes = models.ManyToManyField('users.Profile', related_name='comment_likes', blank=True)
+#     created = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         ordering = ['-created']
+
+from django.db import models
+import uuid
+
+
+class Com(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='comments')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.project.title}"
+
+    @property
+    def is_reply(self):
+        return self.parent is not None
+    
+
+# models.py
+from django.contrib.auth.models import User
+
+class Like(models.Model):
+    user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    comment = models.ForeignKey('Com', on_delete=models.CASCADE, related_name='likes')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['user', 'comment']]
+
+    def __str__(self):
+        return f"Like by {self.user.username} on comment {self.comment.id}"
+
+
+
+
+
+
+
+
+
+
+
+# from django.db import models
+# from django.contrib.auth import get_user_model
+
+# class Vote(models.Model):
+#     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+#     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+#     vote = models.IntegerField(default=0)  # -1 for downvote, 1 for upvote
+
+#     class Meta:
+#         unique_together = ('user', 'project')  # Ensure one vote per user per project
+
+
+
+
+from django.db import models
+import uuid
+from django.utils import timezone
+
+
+class DiscussionThread(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    participants = models.ManyToManyField(Profile, related_name='discussion_threads')
+
+    def __str__(self):
+        return str(self.id)
+
+    def latest_message_timestamp(self):
+        last_message = self.comm_messages.order_by('-timestamp').first()
+        return last_message.timestamp if last_message else None
+
+class CommMessage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+    sender = models.ForeignKey(Profile, related_name='sent_comm_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(Profile, related_name='received_comm_messages', on_delete=models.CASCADE)
+    thread = models.ForeignKey(DiscussionThread, related_name='comm_messages', on_delete=models.CASCADE)
+    body = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    viewed = models.BooleanField(default=False)
+    viewed_timestamp = models.DateTimeField(null=True, blank=True)
+    viewed_by = models.ManyToManyField(Profile, related_name='viewed_comm_messages', blank=True)
+
+    def __str__(self):
+        return f"From {self.sender} to {self.recipient} - {self.body[:30]}"
+
+    def is_latest_in_thread(self):
+        return self == self.thread.comm_messages.latest('timestamp')
+
+    def mark_viewed(self, profile):
+        if self.sender != profile and not self.viewed_by.filter(id=profile.id).exists():
+            self.viewed_by.add(profile)
+            self.viewed = True
+            self.viewed_timestamp = timezone.now()
+            self.save()

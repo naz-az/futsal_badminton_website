@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from .serializers import ProjectSerializer, UserSerializer, TagSerializer, ProfileSerializer, FavoriteSerializer, NotificationSerializer, AttendanceSerializer
+from .serializers import ProjectSerializer, UserSerializer, TagSerializer, ProfileSerializer, FavoriteSerializer, MessageSerializer, ThreadSerializer, NotificationSerializer, AttendanceSerializer
 from projects.models import Project, Review, Tag, Vote, Image, Attendance
 from projects.utils import searchProjects
 
@@ -956,199 +956,194 @@ def get_user_followers(request, profile_id):
     serializer = ProfileSerializer(followers_profiles, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
+# views.py
+from rest_framework import generics
 
 
 # views.py
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from users.models import Profile
-# from .serializers import MessageSerializer
+from users.models import Profile, Messg, Thrd
+from .serializers import MessageSerializer
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def send_message(request):
-#     data = request.data
-#     logger.debug(f"Received data for sending message: {data}")
-
-#     sender_profile = request.user.profile
-#     logger.debug(f"Sender Profile: {sender_profile}")
-
-#     try:
-#         recipient_profile = Profile.objects.get(id=data['recipientId'])
-#         logger.debug(f"Recipient Profile: {recipient_profile}")
-#     except Profile.DoesNotExist:
-#         logger.error(f"Recipient profile with id {data['recipientId']} not found")
-#         return Response({"detail": "Recipient profile not found"}, status=404)
-
-#     thread_id = data.get('threadId')
-#     parent_id = data.get('parentId', None)
-#     logger.debug(f"Thread ID: {thread_id}, Parent ID: {parent_id}")
-
-#     if not thread_id:
-#         thread = Thrd.objects.create()
-#         thread.participants.add(sender_profile, recipient_profile)
-#         logger.debug(f"New thread created: {thread}")
-#     else:
-#         try:
-#             thread = Thrd.objects.get(id=thread_id, participants=sender_profile)
-#             logger.debug(f"Found thread: {thread}")
-#         except Thrd.DoesNotExist:
-#             logger.error(f"Thread with id {thread_id} not found")
-#             return Response({"detail": "Thread not found"}, status=404)
-
-#     parent_message = None
-#     if parent_id:
-#         try:
-#             parent_message = Messg.objects.get(id=parent_id)
-#             logger.debug(f"Parent Message: {parent_message}")
-#         except Messg.DoesNotExist:
-#             logger.error(f"Parent message with id {parent_id} not found")
-#             return Response({"detail": "Parent message not found"}, status=404)
-
-#     message = Messg.objects.create(
-#         sender=sender_profile,
-#         recipient=recipient_profile,
-#         body=data['body'],
-#         thread=thread,
-#         # parent=parent_message,
-#         parent=parent_message if parent_id else None,
-
-#         # viewed=False  # Set viewed to False by default
-
-#     )
-
-#     print(f"Message created: {message}")
-
-#     # Inside your send_message function after the message is created
-
-#     if parent_message and sender_profile == parent_message.sender:
-#         notification_recipient_profile = parent_message.recipient
-#     else:
-#         notification_recipient_profile = thread.participants.exclude(id=sender_profile.id).first()
-
-#     if notification_recipient_profile.notify_new_messages:  # Ensure this is the correct attribute name
-
-#         # Create a notification for the correct recipient
-#         notif = Notif.objects.create(
-#             user=notification_recipient_profile,
-#             notification_type='MESSAGE',
-#             message=message  # Reference to the newly created message
-#         )
-
-#         print(f"Notification created: {notif}")
-
-#     serialized_data = MessageSerializer(message).data
-#     logger.debug(f"Serialized message data: {serialized_data}")
-
-#     return Response({
-#         "message": serialized_data,
-#         "thread": {"id": str(thread.id)}
-#     }, status=status.HTTP_201_CREATED)
 
 
 
-# # Existing imports...
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_message(request):
+    data = request.data
+    logger.debug(f"Received data for sending message: {data}")
 
-# logger = logging.getLogger(__name__)
+    sender_profile = request.user.profile
+    logger.debug(f"Sender Profile: {sender_profile}")
 
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def get_thread(request, thread_id):
-#     try:
-#         thread = Thrd.objects.get(id=thread_id, participants=request.user.profile)
-#         serializer = ThreadSerializer(thread, context={'request': request})
-#         logger.debug(f"Serialized thread data: {serializer.data}")
+    try:
+        recipient_profile = Profile.objects.get(id=data['recipientId'])
+        logger.debug(f"Recipient Profile: {recipient_profile}")
+    except Profile.DoesNotExist:
+        logger.error(f"Recipient profile with id {data['recipientId']} not found")
+        return Response({"detail": "Recipient profile not found"}, status=404)
 
-#         # Log the serialized data before returning
-#         logger.info(f"Backend Response for Thread: {serializer.data}")
+    thread_id = data.get('threadId')
+    parent_id = data.get('parentId', None)
+    logger.debug(f"Thread ID: {thread_id}, Parent ID: {parent_id}")
 
-#         return Response(serializer.data)
-#     except Thrd.DoesNotExist:
-#         logger.error(f"Thread with id {thread_id} not found")
-#         return Response({'detail': 'Thread not found'}, status=404)
+    if not thread_id:
+        thread = Thrd.objects.create()
+        thread.participants.add(sender_profile, recipient_profile)
+        logger.debug(f"New thread created: {thread}")
+    else:
+        try:
+            thread = Thrd.objects.get(id=thread_id, participants=sender_profile)
+            logger.debug(f"Found thread: {thread}")
+        except Thrd.DoesNotExist:
+            logger.error(f"Thread with id {thread_id} not found")
+            return Response({"detail": "Thread not found"}, status=404)
+
+    parent_message = None
+    if parent_id:
+        try:
+            parent_message = Messg.objects.get(id=parent_id)
+            logger.debug(f"Parent Message: {parent_message}")
+        except Messg.DoesNotExist:
+            logger.error(f"Parent message with id {parent_id} not found")
+            return Response({"detail": "Parent message not found"}, status=404)
+
+    message = Messg.objects.create(
+        sender=sender_profile,
+        recipient=recipient_profile,
+        body=data['body'],
+        thread=thread,
+        # parent=parent_message,
+        parent=parent_message if parent_id else None,
+
+        # viewed=False  # Set viewed to False by default
+
+    )
+
+    print(f"Message created: {message}")
+
+    # Inside your send_message function after the message is created
+
+    if parent_message and sender_profile == parent_message.sender:
+        notification_recipient_profile = parent_message.recipient
+    else:
+        notification_recipient_profile = thread.participants.exclude(id=sender_profile.id).first()
+
+    if notification_recipient_profile.notify_new_messages:  # Ensure this is the correct attribute name
+
+        # Create a notification for the correct recipient
+        notif = Notif.objects.create(
+            user=notification_recipient_profile,
+            notification_type='MESSAGE',
+            message=message  # Reference to the newly created message
+        )
+
+        print(f"Notification created: {notif}")
+
+    serialized_data = MessageSerializer(message).data
+    logger.debug(f"Serialized message data: {serialized_data}")
+
+    return Response({
+        "message": serialized_data,
+        "thread": {"id": str(thread.id)}
+    }, status=status.HTTP_201_CREATED)
 
 
 
-# logger = logging.getLogger(__name__)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_thread(request, thread_id):
+    try:
+        thread = Thrd.objects.get(id=thread_id, participants=request.user.profile)
+        serializer = ThreadSerializer(thread, context={'request': request})
+        logger.debug(f"Serialized thread data: {serializer.data}")
 
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def list_threads(request):
-#     user_profile = request.user.profile
-#     threads = Thrd.objects.filter(participants=user_profile)
-#     serializer = ThreadSerializer(threads, many=True, context={'request': request})
+        # Log the serialized data before returning
+        logger.info(f"Backend Response for Thread: {serializer.data}")
 
-#     logger.debug(f"Serialized threads data: {serializer.data}")
-
-#     return Response(serializer.data)
-
-
-# from rest_framework import status
-
-# from rest_framework import status
-# from rest_framework.decorators import api_view, permission_classes
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework.response import Response
+        return Response(serializer.data)
+    except Thrd.DoesNotExist:
+        logger.error(f"Thread with id {thread_id} not found")
+        return Response({'detail': 'Thread not found'}, status=404)
 
 
-# from rest_framework.decorators import api_view, permission_classes
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework.response import Response
-# from rest_framework import status
-# from .serializers import ThreadSerializer
+
+logger = logging.getLogger(__name__)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_threads(request):
+    user_profile = request.user.profile
+    threads = Thrd.objects.filter(participants=user_profile)
+    serializer = ThreadSerializer(threads, many=True, context={'request': request})
+
+    logger.debug(f"Serialized threads data: {serializer.data}")
+
+    return Response(serializer.data)
 
 
-# @api_view(['GET', 'DELETE'])
-# @permission_classes([IsAuthenticated])
-# def thread_detail(request, thread_id):
-#     if request.method == 'GET':
-#         try:
-#             thread = Thrd.objects.get(id=thread_id, participants=request.user.profile)
-#             # Mark messages as viewed
-#             for message in thread.messages.filter(viewed=False):
-#                 if message.sender != request.user.profile:
-#                     message.mark_viewed(request.user.profile)
+from rest_framework import status
+
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import ThreadSerializer
+
+
+@api_view(['GET', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def thread_detail(request, thread_id):
+    if request.method == 'GET':
+        try:
+            thread = Thrd.objects.get(id=thread_id, participants=request.user.profile)
+            # Mark messages as viewed
+            for message in thread.messages.filter(viewed=False):
+                if message.sender != request.user.profile:
+                    message.mark_viewed(request.user.profile)
 
                 
-#                 message.save()
-#             serializer = ThreadSerializer(thread, context={'request': request})
-#             return Response(serializer.data)
-#         except Thrd.DoesNotExist:
-#             return Response({'detail': 'Thread not found'}, status=status.HTTP_404_NOT_FOUND)
+                message.save()
+            serializer = ThreadSerializer(thread, context={'request': request})
+            return Response(serializer.data)
+        except Thrd.DoesNotExist:
+            return Response({'detail': 'Thread not found'}, status=status.HTTP_404_NOT_FOUND)
 
-#     elif request.method == 'DELETE':
-#         try:
-#             thread = Thrd.objects.get(id=thread_id, participants=request.user.profile)
-#             thread.delete()
-#             return Response(status=status.HTTP_204_NO_CONTENT)
-#         except Thrd.DoesNotExist:
-#             return Response({'detail': 'Thread not found'}, status=status.HTTP_404_NOT_FOUND)
+    elif request.method == 'DELETE':
+        try:
+            thread = Thrd.objects.get(id=thread_id, participants=request.user.profile)
+            thread.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Thrd.DoesNotExist:
+            return Response({'detail': 'Thread not found'}, status=status.HTTP_404_NOT_FOUND)
         
 
 
 
 
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def mark_message_as_viewed(request, message_id):
-#     try:
-#         message = Messg.objects.get(id=message_id, recipient=request.user.profile)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_message_as_viewed(request, message_id):
+    try:
+        message = Messg.objects.get(id=message_id, recipient=request.user.profile)
 
-#         if not message.viewed:
-#             message.viewed = True
-#             message.save()
+        if not message.viewed:
+            message.viewed = True
+            message.save()
 
-#         return Response({'status': 'success'}, status=200)
-#     except Messg.DoesNotExist:
-#         return Response({'error': 'Message not found'}, status=404)
+        return Response({'status': 'success'}, status=200)
+    except Messg.DoesNotExist:
+        return Response({'error': 'Message not found'}, status=404)
 
 
 
@@ -2014,164 +2009,3 @@ def get_attending_projects(request):
     except Exception as e:
         print(f"Error in get_attending_projects: {e}")
         return Response({'error': str(e)}, status=500)
-
-
-
-from users.models import DiscussionThread, CommMessage
-from .serializers import DiscussionThreadSerializer, CommMessageSerializer
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def send_message(request):
-    data = request.data
-    logger.debug(f"Received data for sending message: {data}")
-
-    sender_profile = request.user.profile
-    logger.debug(f"Sender Profile: {sender_profile}")
-
-    try:
-        recipient_profile = Profile.objects.get(id=data['recipientId'])
-        logger.debug(f"Recipient Profile: {recipient_profile}")
-    except Profile.DoesNotExist:
-        logger.error(f"Recipient profile with id {data['recipientId']} not found")
-        return Response({"detail": "Recipient profile not found"}, status=404)
-
-    thread_id = data.get('threadId')
-    parent_id = data.get('parentId', None)
-    logger.debug(f"Thread ID: {thread_id}, Parent ID: {parent_id}")
-
-    if not thread_id:
-        thread = DiscussionThread.objects.create()
-        thread.participants.add(sender_profile, recipient_profile)
-        logger.debug(f"New thread created: {thread}")
-    else:
-        try:
-            thread = DiscussionThread.objects.get(id=thread_id, participants=sender_profile)
-            logger.debug(f"Found thread: {thread}")
-        except DiscussionThread.DoesNotExist:
-            logger.error(f"Thread with id {thread_id} not found")
-            return Response({"detail": "Thread not found"}, status=404)
-
-    parent_message = None
-    if parent_id:
-        try:
-            parent_message = CommMessage.objects.get(id=parent_id)
-            logger.debug(f"Parent Message: {parent_message}")
-        except CommMessage.DoesNotExist:
-            logger.error(f"Parent message with id {parent_id} not found")
-            return Response({"detail": "Parent message not found"}, status=404)
-
-    message = CommMessage.objects.create(
-        sender=sender_profile,
-        recipient=recipient_profile,
-        body=data['body'],
-        thread=thread,
-        # parent=parent_message,
-        parent=parent_message if parent_id else None,
-
-        # viewed=False  # Set viewed to False by default
-
-    )
-
-    print(f"Message created: {message}")
-
-    if parent_message and sender_profile == parent_message.sender:
-        notification_recipient_profile = parent_message.recipient
-    else:
-        notification_recipient_profile = thread.participants.exclude(id=sender_profile.id).first()
-
-    if notification_recipient_profile.notify_new_messages:  # Ensure this is the correct attribute name
-
-        # Create a notification for the correct recipient
-        notif = Notif.objects.create(
-            user=notification_recipient_profile,
-            notification_type='MESSAGE',
-            message=message  # Reference to the newly created message
-        )
-
-        print(f"Notification created: {notif}")
-
-    serialized_data = CommMessageSerializer(message).data
-    logger.debug(f"Serialized message data: {serialized_data}")
-
-    return Response({
-        "message": serialized_data,
-        "thread": {"id": str(thread.id)}
-    }, status=status.HTTP_201_CREATED)
-
-
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_thread(request, thread_id):
-    try:
-        thread = DiscussionThread.objects.get(id=thread_id, participants=request.user.profile)
-        serializer = DiscussionThreadSerializer(thread, context={'request': request})
-        logger.debug(f"Serialized thread data: {serializer.data}")
-
-        # Log the serialized data before returning
-        logger.info(f"Backend Response for Thread: {serializer.data}")
-
-        return Response(serializer.data)
-    except DiscussionThread.DoesNotExist:
-        logger.error(f"Thread with id {thread_id} not found")
-        return Response({'detail': 'Thread not found'}, status=404)
-
-
-
-logger = logging.getLogger(__name__)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def list_threads(request):
-    user_profile = request.user.profile
-    threads = DiscussionThread.objects.filter(participants=user_profile)
-    serializer = DiscussionThreadSerializer(threads, many=True, context={'request': request})
-
-    logger.debug(f"Serialized threads data: {serializer.data}")
-
-    return Response(serializer.data)
-
-
-@api_view(['GET', 'DELETE'])
-@permission_classes([IsAuthenticated])
-def thread_detail(request, thread_id):
-    if request.method == 'GET':
-        try:
-            thread = DiscussionThread.objects.get(id=thread_id, participants=request.user.profile)
-            # Mark messages as viewed
-            for message in thread.comm_messages.filter(viewed=False):
-                if message.sender != request.user.profile:
-                    message.mark_viewed(request.user.profile)
-
-                
-                message.save()
-            serializer = DiscussionThreadSerializer(thread, context={'request': request})
-            return Response(serializer.data)
-        except DiscussionThread.DoesNotExist:
-            return Response({'detail': 'Thread not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    elif request.method == 'DELETE':
-        try:
-            thread = DiscussionThread.objects.get(id=thread_id, participants=request.user.profile)
-            thread.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except DiscussionThread.DoesNotExist:
-            return Response({'detail': 'Thread not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def mark_message_as_viewed(request, message_id):
-    try:
-        message = CommMessage.objects.get(id=message_id, recipient=request.user.profile)
-
-        if not message.viewed:
-            message.viewed = True
-            message.save()
-
-        return Response({'status': 'success'}, status=200)
-    except CommMessage.DoesNotExist:
-        return Response({'error': 'Message not found'}, status=404)
-

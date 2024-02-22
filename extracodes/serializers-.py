@@ -4,7 +4,7 @@ from users.models import Profile, Favorite
 from projects.models import Attendance  # Import the Attendance model
 from users.models import Notif
 from projects.models import Com
-
+from users.models import Messg, Thrd
 from users.models import Profile
 # from .serializers import ProfileSerializer
 
@@ -172,44 +172,9 @@ class ComSerializer(serializers.ModelSerializer):
 
 
 
-# class MessageSerializer(serializers.ModelSerializer):
-#     sender = ProfileSerializer(read_only=True)
-#     recipient = ProfileSerializer(read_only=True)
-#     viewed_by = ProfileSerializer(many=True, read_only=True)
 
-#     parent = serializers.PrimaryKeyRelatedField(read_only=True)
 
-#     class Meta:
-#         model = Messg
-#         fields = ['id', 'sender', 'recipient', 'thread', 'body', 'timestamp', 'parent', 'viewed', 'viewed_timestamp', 'viewed_by']  # Add 'viewed_by' here
-
-# class ThreadSerializer(serializers.ModelSerializer):
-#     participants = ProfileSerializer(many=True, read_only=True)
-#     messages = MessageSerializer(many=True, read_only=True)
-#     latest_message_timestamp = serializers.SerializerMethodField()
-#     seen_by_user = serializers.SerializerMethodField()
-
-#     def get_seen_by_user(self, obj):
-#         request = self.context.get('request', None)
-#         if request:
-#             latest_message = obj.messages.last()
-#             # Check if the latest message is not sent by the current user and if it has been viewed.
-#             if latest_message and latest_message.sender != request.user.profile and latest_message.viewed:
-#                 return True
-#             return False
-#         return None  # or appropriate default
-
-#     class Meta:
-#         model = Thrd
-#         fields = ['id', 'participants', 'messages', 'latest_message_timestamp', 'seen_by_user']
-
-#     def get_latest_message_timestamp(self, obj):
-#         return obj.latest_message_timestamp()
-    
-
-from users.models import DiscussionThread, CommMessage
-
-class CommMessageSerializer(serializers.ModelSerializer):
+class MessageSerializer(serializers.ModelSerializer):
     sender = ProfileSerializer(read_only=True)
     recipient = ProfileSerializer(read_only=True)
     viewed_by = ProfileSerializer(many=True, read_only=True)
@@ -217,19 +182,19 @@ class CommMessageSerializer(serializers.ModelSerializer):
     parent = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
-        model = CommMessage
+        model = Messg
         fields = ['id', 'sender', 'recipient', 'thread', 'body', 'timestamp', 'parent', 'viewed', 'viewed_timestamp', 'viewed_by']  # Add 'viewed_by' here
 
-class DiscussionThreadSerializer(serializers.ModelSerializer):
+class ThreadSerializer(serializers.ModelSerializer):
     participants = ProfileSerializer(many=True, read_only=True)
-    comm_messages  = CommMessageSerializer(many=True, read_only=True)
+    messages = MessageSerializer(many=True, read_only=True)
     latest_message_timestamp = serializers.SerializerMethodField()
     seen_by_user = serializers.SerializerMethodField()
 
     def get_seen_by_user(self, obj):
         request = self.context.get('request', None)
         if request:
-            latest_message = obj.comm_messages.last()
+            latest_message = obj.messages.last()
             # Check if the latest message is not sent by the current user and if it has been viewed.
             if latest_message and latest_message.sender != request.user.profile and latest_message.viewed:
                 return True
@@ -237,19 +202,20 @@ class DiscussionThreadSerializer(serializers.ModelSerializer):
         return None  # or appropriate default
 
     class Meta:
-        model = DiscussionThread
-        fields = ['id', 'participants', 'comm_messages', 'latest_message_timestamp', 'seen_by_user']
+        model = Thrd
+        fields = ['id', 'participants', 'messages', 'latest_message_timestamp', 'seen_by_user']
 
     def get_latest_message_timestamp(self, obj):
         return obj.latest_message_timestamp()
     
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     user = ProfileSerializer(read_only=True)
     follower = ProfileSerializer(read_only=True)
 
     comment = ComSerializer(read_only=True)
-    message = CommMessageSerializer(read_only=True)
+    message = MessageSerializer(read_only=True)
 
     voting_user = ProfileSerializer(read_only=True)  # Add this line to include voting user details
 
@@ -260,6 +226,3 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notif
         fields = '__all__'  # Or list the fields you want to include.
-
-
-

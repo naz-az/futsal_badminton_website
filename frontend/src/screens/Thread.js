@@ -23,15 +23,15 @@ function Thread() {
       const response = await axios.get(`/api/threads/${threadId}/`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}`, },
       });
-      // console.log("Thread data received:", response.data);
-      // console.log(
-      //   "Full Response Data:",
-      //   JSON.stringify(response.data, null, 2)
-      // );
+      console.log("Thread data received:", response.data);
+      console.log(
+        "Full Response Data:",
+        JSON.stringify(response.data, null, 2)
+      );
 
       if (
         response.data &&
-        "messages" in response.data &&
+        "comm_messages" in response.data &&
         "participants" in response.data
       ) {
         setThread(response.data);
@@ -87,7 +87,7 @@ function Thread() {
 // Add this function within your Thread component
 // Add this function within your Thread component
 const findParentMessage = (parentId) => {
-  return thread.messages.find(message => message.id === parentId);
+  return thread.comm_messages.find(message => message.id === parentId);
 };
 
 
@@ -95,7 +95,7 @@ const renderMessages = (messages) => {
   return messages.map((message) => (
     <div key={message.id}>
       <Row className="align-items-center">
-        {message.sender.id === thread.messages[0].sender.id ? (
+        {message.sender.id === thread.comm_messages[0].sender.id ? (
           // Layout for the original sender
           <>
             <Col xs={1} className="d-flex justify-content-start">
@@ -150,7 +150,7 @@ const renderMessages = (messages) => {
 
       {isReplying === message.id && (
         <Row>
-          {message.sender.id === thread.messages[0].sender.id ? (
+          {message.sender.id === thread.comm_messages[0].sender.id ? (
             <Col xs={6}>
               <Form.Group className="mt-2">
                 <Form.Control as="textarea" value={individualReply} onChange={(e) => setIndividualReply(e.target.value)} />
@@ -188,8 +188,8 @@ const renderMessages = (messages) => {
         Back to Inbox
       </Button>
 
-      {thread && thread.messages ? (
-        renderMessages(thread.messages)
+      {thread && thread.comm_messages ? (
+        renderMessages(thread.comm_messages)
       ) : (
         <p>Loading thread...</p>
       )}

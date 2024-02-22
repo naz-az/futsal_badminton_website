@@ -37,7 +37,7 @@ function ThreadMessages() {
     // Find the thread based on threadId
     const thread = threads.find(t => t.id === threadId);
     // Get the latest message from this thread
-    const latestMessage = thread?.messages[thread.messages.length - 1];
+    const latestMessage = thread?.comm_messages[thread.comm_messages.length - 1];
   
     // Check if latestMessage is defined and has a 'viewedBy' property
     if (latestMessage && Array.isArray(latestMessage.viewedBy)) {
@@ -154,10 +154,10 @@ function ThreadMessages() {
   return (
     <Container>
       <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Inbox</h2>
-      <Button variant="secondary" style={{marginBottom: "30px"}} onClick={() => navigate("/send")}>Create New Message</Button>
+      <Button style={{marginBottom: "30px"}} onClick={() => navigate("/send")}>Create New Message</Button>
 <br></br>
       <Button
-        variant="primary"
+        variant="danger"
         onClick={() => setShowDeleteConfirm(true)}
         disabled={selectedThreads.length === 0}
       >
@@ -200,9 +200,9 @@ function ThreadMessages() {
 
             const otherParticipant = getOtherParticipant(thread.participants);
 
-            const latestMessageDetails = getLatestMessageDetails(thread.messages);
+            const latestMessageDetails = getLatestMessageDetails(thread.comm_messages);
           
-            const latestMessage = thread.messages[thread.messages.length - 1];
+            const latestMessage = thread.comm_messages[thread.comm_messages.length - 1];
             // console.log(`Latest message viewed status: ${latestMessage?.viewed}`); // This will log the viewed status
 
             const isSeenByCurrentUser = latestMessage.sender.username !== auth.user.profile.username && latestMessage.viewed;
@@ -264,7 +264,7 @@ function ThreadMessages() {
   </div>
 </td>
 
-                <td style={rowStyle}>{getLatestMessage(thread.messages)}</td>
+                <td style={rowStyle}>{getLatestMessage(thread.comm_messages)}</td>
                 <td style={rowStyle}>{formatDate(thread.latest_message_timestamp)}</td>
 
                 <td style={rowStyle}>
