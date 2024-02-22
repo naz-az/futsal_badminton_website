@@ -233,7 +233,7 @@ function UserAccount() {
         {/* Display profile data on the left inside a Card */}
         <Col xs={12} md={4} lg={3}>
           <Card className="mb-3">
-            <Link to="/user/edit-account" className="btn btn-primary mb-3">
+            <Link to="/user/edit-account" className="btn btn-danger mb-3">
               Edit Account
             </Link>
 
@@ -348,10 +348,12 @@ function UserAccount() {
               </Row>
             </Card.Body>
           </Card>
+          <div className="d-flex justify-content-center">
+  <Button variant="secondary" onClick={() => navigate("/followed-tags")}>
+    View Followed Categories
+  </Button>
+</div>
 
-          <Button onClick={() => navigate("/followed-tags")}>
-            View Followed Categories
-          </Button>
         </Col>
 
         {/* Display projects on the right */}

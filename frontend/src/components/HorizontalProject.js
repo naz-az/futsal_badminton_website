@@ -15,13 +15,11 @@ function HorizontalProject({ project }) {
   const [isFavorited, setIsFavorited] = useState(false);
   const navigate = useNavigate();
 
-  // Determine if the current user is the owner of the project
-  const isCurrentUserOwner =
-    auth.user && auth.user.profile.id === project.owner.id;
 
   const [showFullText, setShowFullText] = useState(false);
 
-  const currentUserId = auth.user?.profile.id; // Get the current user's ID
+  const currentUserId = auth.user?.profile?.id || auth.user?.id;
+  console.log("user's id in homepage", currentUserId);
 
   // Modal state
   const [showAttendModal, setShowAttendModal] = useState(false);
@@ -285,7 +283,12 @@ function HorizontalProject({ project }) {
               </Button>
             )}
 
-<AttendButton projectId={project.id} onModalChange={handleModalChange} className="m-1"/>
+<AttendButton
+  projectId={project.id}
+  token={localStorage.getItem("token")} // Pass the token from local storage
+  onModalChange={handleModalChange}
+  className="m-1"
+/>
 
             <Card.Text style={{ fontSize: "16px" }}>
               <Badge bg="dark">{project.brand}</Badge>

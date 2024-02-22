@@ -28,7 +28,7 @@ function Pagination({ currentPage, projectsLength, projectsPerPage, setCurrentPa
                 <Button 
                     style={buttonStyle}
                     key={idx}
-                    variant={idx + 1 === currentPage ? "primary" : "outline-secondary"}
+                    variant={idx + 1 === currentPage ? "danger" : "outline-secondary"}
                     onClick={() => setCurrentPage(idx + 1)}
                 >
                     {idx + 1}

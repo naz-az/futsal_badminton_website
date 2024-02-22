@@ -47,9 +47,10 @@ function ChangePasswordForm() {
   };
 
   return (
-    <Card className="mt-4">
+    <Card className="mt-2">
       <Card.Body>
-        <Card.Title>Change Password</Card.Title>
+        <h2 className="text-center mb-5">Change Password</h2>
+
         {message && <Alert variant={variant}>{message}</Alert>}
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
@@ -78,7 +79,7 @@ function ChangePasswordForm() {
               />
             </InputGroup>
           </Form.Group>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-4">
             <InputGroup>
               <InputGroup.Text>
                 <i className="bi bi-shield-lock-fill"></i>
@@ -91,9 +92,13 @@ function ChangePasswordForm() {
               />
             </InputGroup>
           </Form.Group>
+          <div className="text-center">
+
           <Button variant="primary" type="submit">
             Change Password
           </Button>
+          </div>
+
         </Form>
       </Card.Body>
     </Card>

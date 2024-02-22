@@ -19,7 +19,7 @@ export default function FavouritesScreen() {
   const [error, setError] = useState(null);
 
   const auth = useContext(AuthContext); // Access the AuthContext
-  const currentUserId = auth.user?.profile.id; // Get the current user's ID
+  const currentUserId = auth.user?.id; // Get the current user's ID
 
   const [showFullText, setShowFullText] = useState(false);
   const navigate = useNavigate();

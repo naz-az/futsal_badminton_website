@@ -47,7 +47,8 @@ function UserProfileDetail() {
   const [sortType, setSortType] = useState("newest"); // New state to track sorting
 
   const auth = useContext(AuthContext);
-  const currentUserId = auth.user ? auth.user.profile.id : null;
+  // const currentUserId = auth.user ? auth.user.profile.id : null;
+  const currentUserId = auth.user?.profile?.id || auth.user?.id;
 
   // Function to check if user is authenticated
   const isAuthenticated = () => {
@@ -459,7 +460,7 @@ function UserProfileDetail() {
 
               <Row className="mt-3">
                 {profile.id !== currentUserId && !isUserBlocked && (
-                  <Col>
+                  <Col className="d-flex justify-content-center">
                     <Button
                       variant="secondary"
                       onClick={() => {
@@ -477,7 +478,7 @@ function UserProfileDetail() {
               </Row>
 
               <Row className="mt-3">
-                <Col>
+              <Col className="d-flex justify-content-center">
                   {profile.id !== currentUserId &&
                     !isUserBlocked &&
                     (isFollowing ? (

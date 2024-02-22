@@ -43,7 +43,7 @@ function FollowingPage() {
 
     return (
         <Container className="my-4">
-            <h2 className="text-center my-4">Following ({followingProfiles.length})</h2>
+            <h2 className="text-center my-4"> {followingProfiles.length} Following</h2>
             {followingProfiles.map(profile => (
                 <Row key={profile.id} className="mb-3 align-items-center">
                     <Col xs={3} className="d-flex justify-content-center">
@@ -59,18 +59,19 @@ function FollowingPage() {
                         <p className="d-none d-md-block">{profile.short_intro}</p> {/* Hide on xs to save space */}
                     </Col>
                     <Col xs={4} className="d-flex justify-content-end">
-                        <Button 
+                    <Button 
                             variant="outline-primary" 
-                            onClick={() => handleSendMessage(profile.id)} 
-                            className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
-                            Message
-                        </Button>
-                        <Button 
-                            variant="outline-danger" 
                             onClick={() => handleUnfollowClick(profile)} 
                             className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
                             Unfollow
                         </Button>
+                        <Button 
+                            variant="outline-info" 
+                            onClick={() => handleSendMessage(profile.id)} 
+                            className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
+                                  <i class="fa-regular fa-envelope"></i>      
+                        </Button>
+
                     </Col>
                 </Row>
             ))}

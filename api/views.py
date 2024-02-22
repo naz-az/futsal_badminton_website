@@ -1934,6 +1934,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['POST'])
 def register_user(request):
+    user = None  # Initialize user to None
     try:
         print("Request received with data:", request.data)
 
@@ -1945,10 +1946,18 @@ def register_user(request):
             email=data['email'],
             password=make_password(data['password'])  # Hashes the password
         )
-        print(f"User {user.username} created with ID: {user.id}")
+        
+        # Check if a profile already exists for the user
+        profile, created = Profile.objects.get_or_create(user=user)
+        
+        # Update profile fields
+        profile.name = data.get('name', '')  # Set or update the name
+        profile.email = data.get('email', user.email)  # Set or update the email
+        profile.username = data.get('username', user.username)  # Set or update the username
+        # Save any changes to the profile
+        profile.save()
 
-        user.save()
-        print(f"User {user.username} saved to database.")
+        print(f"User {user.username} created with ID: {user.id}")
 
         print("Generating JWT token...")
         refresh = RefreshToken.for_user(user)  # Generate JWT token
@@ -1963,11 +1972,11 @@ def register_user(request):
         return Response(response_data, status=status.HTTP_201_CREATED)
 
     except Exception as e:
+        if user is not None:
+            # Only attempt to delete the user if it was successfully created
+            User.objects.filter(id=user.id).delete()
         print("An error occurred:", str(e))
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 
 

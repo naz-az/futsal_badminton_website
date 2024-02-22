@@ -101,7 +101,7 @@ const SettingsPage = () => {
 
 
   return (
-    <Container style={{ marginTop: "50px", display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <Container style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Row className="justify-content-center">
       <Col style={{ textAlign: 'center' }}> {/* Adjusted for central alignment */}
           <h2 style={{ marginTop: '20px', marginBottom: '40px' }}>Settings</h2>

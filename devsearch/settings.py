@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'default_secret_key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 
 
@@ -137,14 +137,14 @@ import os
 #     'default': dj_database_url.parse(DATABASE_URL)
 # }
 
-import dj_database_url
+
 
 import os
 
 
-DATABASES = {
-    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-}
+# DATABASES = {
+#     'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+# }
 
 
 # Database
@@ -179,6 +179,11 @@ DATABASES = {
 #     'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
 # }
 
+import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.parse("postgres://kickmates_n8p4_user:UQgWiIwyLPWCHTvAdTMb2qYNt0VgiY0S@dpg-cn7lls8l6cac73anqdog-a.singapore-postgres.render.com/kickmates_n8p4")
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -278,12 +283,17 @@ from storages.backends.s3boto3 import S3Boto3Storage
 DEFAULT_FILE_STORAGE = 'devsearch.storage_backends.B2MediaStorage'  # Update with your custom storage class path
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-AWS_ACCESS_KEY_ID = os.getenv('B2_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('B2_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('B2_BUCKET_NAME')
-AWS_S3_ENDPOINT_URL = os.getenv('B2_ENDPOINT_URL')
+# AWS_ACCESS_KEY_ID = os.getenv('B2_ACCESS_KEY_ID')
+# AWS_SECRET_ACCESS_KEY = os.getenv('B2_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = os.getenv('B2_BUCKET_NAME')
+# AWS_S3_ENDPOINT_URL = os.getenv('B2_ENDPOINT_URL')
 # AWS_S3_CUSTOM_DOMAIN = os.getenv('B2_BUCKET_URL')
 
+
+AWS_ACCESS_KEY_ID = '005cb95ae8965b90000000004'
+AWS_SECRET_ACCESS_KEY = 'K005yFjPPAInt7CIBYxThVgpBKbeiT4'
+AWS_STORAGE_BUCKET_NAME = 'kickmates'
+AWS_S3_ENDPOINT_URL = 'https://s3.us-east-005.backblazeb2.com'  # Change to your B2 endpoint
 
 # Add the region name of your bucket
 AWS_S3_REGION_NAME = 'us-east-005'  # Example, adjust to your bucket's region
@@ -297,10 +307,10 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 # from datetime import timedelta
 
 # # Set signed URL expiration to 1 day
-# AWS_S3_OBJECT_PARAMETERS = {
-#     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
-#     'CacheControl': 'max-age=94608000',
-# }
+AWS_S3_OBJECT_PARAMETERS = {
+    'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+    'CacheControl': 'max-age=94608000',
+}
 
 
 if os.getcwd() == '/app':

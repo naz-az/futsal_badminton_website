@@ -12,7 +12,9 @@ function ProfileScreen() {
     const profilesPerPage = 8; // Limit profiles to 8 per page
 
     const auth = useContext(AuthContext);
-    const currentUserId = auth.user?.profile.id; // Ensure this is the correct path to the user ID
+    // const currentUserId = auth.user?.id ?? null;
+    const currentUserId = auth.user?.profile?.id || auth.user?.id;
+
     console.log("user's id", currentUserId);
 
     const fetchProfiles = async (query = '') => {
@@ -24,13 +26,17 @@ function ProfileScreen() {
         fetchProfiles();  // fetch all profiles on initial load
     }, []);
 
+    useEffect(() => {
+        console.log('Current user data in ProfileScreen:', auth.user);
+      }, [auth.user]);
+      
     const handleSubmit = (e) => {
         e.preventDefault();  // Prevent the default form submission behavior
         fetchProfiles(query);
     };
 
     // Filter out the current user's profile
-    const filteredProfiles = profiles.filter(profile => profile.id !== currentUserId);
+    const filteredProfiles = profiles.filter(profile => currentUserId && profile.id !== currentUserId);
 
     // Get current profiles to display based on current page
     const indexOfLastProfile = currentPage * profilesPerPage;
@@ -42,19 +48,25 @@ function ProfileScreen() {
             {/* <h1>Profiles</h1> */}
             
             {/* Search Bar */}
-            <div className="d-flex justify-content-center align-items-center mb-5 mt-5">
-                <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
+<div className="d-flex justify-content-center align-items-center mb-5 mt-5">
+    <div className="container">
+        <div className="row justify-content-center">
+            <div className="col-12 col-sm-10 col-md-8 col-lg-6">
+                <form onSubmit={handleSubmit} className="d-flex align-items-center">
                     <input
                         type="text"
                         placeholder="Search for members"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         className="form-control"
-                        style={{ width: '300px', marginRight: '10px' }}
                     />
-                    <Button variant="outline-secondary" type="submit">Search</Button>
+                    <button className="btn btn-outline-secondary ms-1" type="submit">Search</button>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
             
             <Row>
                 {currentProfiles.map(profile => (

@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Button, ListGroup, Container, Image } from 'react-bootstrap';
 import AuthContext from '../context/authContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 const BlockedUsersPage = () => {
     const [blockedUsers, setBlockedUsers] = useState([]);
@@ -95,9 +97,14 @@ const BlockedUsersPage = () => {
                 ))}
             </ListGroup>
 
-            <Button variant="primary" onClick={() => setShowProfiles(!showProfiles)} className="my-4">
-                {showProfiles ? 'Hide Users' : 'Block new user'}
-            </Button>
+            <div className="text-center">
+    <Button variant="primary" onClick={() => setShowProfiles(!showProfiles)} className="my-4 mx-auto">
+        {!showProfiles && <FontAwesomeIcon icon={faPlus} />} {/* Only show icon when "Block new user" is visible */}
+        {showProfiles ? 'Hide Users' : 'Block new user'}
+    </Button>
+</div>
+
+
 
             {showProfiles && (
     <>

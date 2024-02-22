@@ -48,6 +48,7 @@ function EditAccount() {
                 console.log(response.data);  // <-- Insert this line here
                 if (response.data) {
                     setProfile(response.data.profile);
+                    console.log("Updated profile state with fetched data:", response.data.profile); // Debug line to confirm state update
 
                 }
             } catch (error) {

@@ -423,12 +423,3 @@ class Favorite(models.Model):
     def __str__(self):
         return self.project.title
 
-
-from django.db import models
-import uuid
-
-
-
-
-
-

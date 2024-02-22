@@ -31,7 +31,8 @@ function ProjectScreen() {
   const { id } = useParams();
   const auth = useContext(AuthContext);
 
-  const currentUserId = auth.user?.profile.id; // Ensure you have a safe check for `user` and `profile`.
+  // const currentUserId = auth.user?.profile.id; // Ensure you have a safe check for `user` and `profile`.
+  const currentUserId = auth.user?.profile?.id || auth.user?.id;
 
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyContent, setReplyContent] = useState("");

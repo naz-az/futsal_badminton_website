@@ -36,30 +36,33 @@ function RegisterForm() {
     }
   
     try {
-      // Use relative URL path here
+      // Registration request
       const response = await axios.post('/api/register/', {
+        name: formData.name,
         username: formData.username,
         email: formData.email,
         password: formData.password
       });
       localStorage.setItem('token', response.data.access);
   
-      // Fetch the user's profile with the token using relative URL path
+      // Fetch the user's profile with the token
       const profileResponse = await axios.get('/api/user/account/', {
         headers: {
           Authorization: `Bearer ${response.data.access}`
         }
       });
   
-      // Update the AuthContext
-      auth.login(profileResponse.data);
+      // Update the AuthContext with the new user's data
+      auth.login(profileResponse.data); // Assuming login method updates both user and isAuthenticated state
   
-      navigate('/user/edit-account');  // Navigate to edit profile after registration
+      // Navigate to the edit-account page
+      
+      navigate('/user/edit-account', { replace: true });
     } catch (error) {
       console.error('Registration failed:', error);
-      // Handle registration failure
     }
   };
+  
   
   
   return (

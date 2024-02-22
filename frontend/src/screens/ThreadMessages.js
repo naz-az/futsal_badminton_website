@@ -154,10 +154,10 @@ function ThreadMessages() {
   return (
     <Container>
       <h2 style={{ textAlign: 'center',marginTop: '20px',marginBottom: '40px' }}>Inbox</h2>
-      <Button style={{marginBottom: "30px"}} onClick={() => navigate("/send")}>Create New Message</Button>
+      <Button variant="secondary" style={{marginBottom: "30px"}} onClick={() => navigate("/send")}>Create New Message</Button>
 <br></br>
       <Button
-        variant="danger"
+        variant="primary"
         onClick={() => setShowDeleteConfirm(true)}
         disabled={selectedThreads.length === 0}
       >

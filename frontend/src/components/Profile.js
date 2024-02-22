@@ -134,9 +134,9 @@ function Profile({ profile, currentUserId, isCurrentUser  }) {
                     {
                     !isCurrentUserProfile && !isUserBlocked && (
                         isFollowing ? (
-                                <Button variant="outline-info" size="sm" onClick={handleUnfollow}>Unfollow</Button>
+                                <Button variant="outline-primary" size="sm" onClick={handleUnfollow}>Unfollow</Button>
                             ) : (
-                                <Button variant="info" size="sm" onClick={handleFollow}>Follow</Button>
+                                <Button variant="warning" size="sm" onClick={handleFollow}>Follow</Button>
                             )
                         )
                     }

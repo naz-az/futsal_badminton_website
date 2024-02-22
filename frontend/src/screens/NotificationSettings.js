@@ -176,7 +176,7 @@ const handleConfirmToggle = async () => {
     <Container className="mt-4">
       <Row className="justify-content-center">
         <Col md={8}>
-          <h1 className="text-center mb-4">Notification Settings</h1>
+          <h1 className="text-center mb-5">Notification Settings</h1>
           {Object.keys(notificationSettings).map((type) => (
             <div key={type} className="mb-5">
               <h5 className="mb-3">{formatNotificationType(type)}</h5>
