@@ -344,7 +344,7 @@ function UserProfileDetail() {
                   marginTop: "20px",
                 }}
               >
-                <Card.Title>{profile.name}</Card.Title>
+                <Card.Title style={{ fontWeight: 'bold' }}>{profile.name}</Card.Title>
                 <Card.Text>{profile.short_intro}</Card.Text>
                 {profile.location && (
                   <Card.Text>Based in {profile.location}</Card.Text>

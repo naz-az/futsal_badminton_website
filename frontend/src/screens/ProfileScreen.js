@@ -71,7 +71,7 @@ function ProfileScreen() {
             {/* Profiles Grid */}
             <Row>
                 {currentProfiles.map(profile => (
-                    <Col key={profile.id} sm={12} md={6} lg={4} xl={3} className="mb-4">
+                    <Col key={profile.id} sm={12} md={6} lg={6} xl={3} className="mb-4">
                         <Profile 
                             profile={profile} 
                             currentUserId={currentUserId} 

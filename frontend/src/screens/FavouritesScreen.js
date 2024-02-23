@@ -132,9 +132,9 @@ export default function FavouritesScreen() {
     return <div>Error: {error}</div>;
   }
 
-  if (!favorites || favorites.length === 0) {
-    return <div>You have no bookmarks.</div>;
-  }
+  // if (!favorites || favorites.length === 0) {
+  //   return <div>You have no bookmarks.</div>;
+  // }
 
 
   return (

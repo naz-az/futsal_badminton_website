@@ -422,24 +422,26 @@ const [showViewBookmarksButton, setShowViewBookmarksButton] = useState(false);
               </ListGroup.Item>
 
               <ListGroup.Item>
-                <Row>
-                  <Col>
-                    <Button
-                      variant="warning"
-                      onClick={() => {
-                        const url =
-                          project.deal_link.startsWith("http://") ||
-                          project.deal_link.startsWith("https://")
-                            ? project.deal_link
-                            : "http://" + project.deal_link;
-                        window.open(url, "_blank");
-                      }}
-                    >
-                      Go to Link
-                    </Button>
-                  </Col>
-                </Row>
-              </ListGroup.Item>
+  <Row>
+    <Col>
+      {project.deal_link && (
+        <Button
+          variant="warning"
+          onClick={() => {
+            const url =
+              project.deal_link.startsWith("http://") ||
+              project.deal_link.startsWith("https://")
+                ? project.deal_link
+                : "http://" + project.deal_link;
+            window.open(url, "_blank");
+          }}
+        >
+          Go to Link
+        </Button>
+      )}
+    </Col>
+  </Row>
+</ListGroup.Item>
 
 
 

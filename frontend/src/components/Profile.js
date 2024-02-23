@@ -91,24 +91,27 @@ function Profile({ profile, currentUserId, isCurrentUser  }) {
             <Card className="mb-4 shadow-sm h-100"> {/* Improved design with shadow and height */}
                 <Card.Body>
                     <Row className="align-items-center">
-                        <Col xs={4} md={3}>
+                        <Col xs={4} md={4}>
                             <Link to={isCurrentUser ? "/user/account" : `/profiles/${profile.id}`}>
                                 <Image 
                                     src={profile.profile_image} 
                                     alt="Profile" 
                                     roundedCircle 
                                     className="img-fluid" // Responsive image
-                                    style={{ width: '80px', height: '80px' }} // Adjust size as needed
+                                    style={{ width: '70px', height: '70px' }} // Adjust size as needed
                                 />
                             </Link>
                         </Col>
-                        <Col xs={8} md={9}>
+                        <Col xs={5} md={4}>
                             <Card.Title>
                                 <Link to={isCurrentUser ? "/user/account" : `/profiles/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                     {profile.name}
                                 </Link>
                             </Card.Title>
                             <Card.Text>{profile.short_intro}</Card.Text>
+                        </Col>
+                        <Col xs={1} md={1}>
+
                             {/* Follow/Unfollow button logic... */}
                             {!isCurrentUser && !isUserBlocked && (
                                 isFollowing ? (

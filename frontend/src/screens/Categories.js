@@ -212,18 +212,18 @@ function Categories() {
 
 
       <div>
-
-
-        <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+    {/* Title showing active tag name */}
     {activeTagName && (
-      <h3 style={{ marginRight: '20px' }}>Events for {activeTagName}</h3>
+      <h3>Events for {activeTagName}</h3>
     )}
+
     {/* Follow/Unfollow Button for Active Tag */}
     {activeTagId && (
       <Button
         onClick={() => toggleFollowTag(activeTagId)}
-        variant={followedTags.has(activeTagId) ? "warning" : "light"}
-        style={{ fontSize: '18px' }}
+        variant={followedTags.has(activeTagId) ? "primary" : "light"}
+        style={{ fontSize: '18px', marginTop: '10px', marginBottom: '10px' }} // Added marginTop for spacing
       >
         {followedTags.has(activeTagId) ? `Unfollow ${activeTagName}` : `Follow ${activeTagName}`}
       </Button>

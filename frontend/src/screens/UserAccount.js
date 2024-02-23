@@ -240,83 +240,87 @@ function UserAccount() {
             <Card.Img variant="top" src={accountData.profile.profile_image} alt="Profile" />
 
             <Card.Body>
-                <Card.Title>{accountData.profile.name}</Card.Title>
-                <Card.Text>{accountData.profile.short_intro}</Card.Text>
-
-                <Card.Text>{accountData.profile.location}</Card.Text>
 
 
+            <div className="text-center">
+            <Card.Title style={{ fontWeight: 'bold' }}>{accountData.profile.name}</Card.Title>
+    <Card.Text>{accountData.profile.short_intro}</Card.Text>
+    <Card.Text>{accountData.profile.location}</Card.Text>
 
-                {accountData.profile.social_facebook && (
-                  <a
-                    href={accountData.profile.social_facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FontAwesomeIcon
-                      icon={faFacebook}
-                      color="#4267B2"
-                      style={{ margin: "0 10px" }}
-                    />
-                  </a>
-                )}
+    </div>
 
-                {accountData.profile.social_twitter && (
-                  <a
-                    href={accountData.profile.social_twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FontAwesomeIcon
-                      icon={faTwitter}
-                      color="#1DA1F2"
-                      style={{ margin: "0 10px" }}
-                    />
-                  </a>
-                )}
 
-                {accountData.profile.social_instagram && (
-                  <a
-                    href={accountData.profile.social_instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FontAwesomeIcon
-                      icon={faInstagram}
-                      color="#C13584"
-                      style={{ margin: "0 10px" }}
-                    />
-                  </a>
-                )}
+                <div className="d-flex justify-content-center">
+    {accountData.profile.social_facebook && (
+      <a
+        href={accountData.profile.social_facebook}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FontAwesomeIcon
+          icon={faFacebook}
+          color="#4267B2"
+          style={{ margin: "0 10px" }}
+        />
+      </a>
+    )}
 
-                {accountData.profile.social_youtube && (
-                  <a
-                    href={accountData.profile.social_youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FontAwesomeIcon
-                      icon={faYoutube}
-                      color="red"
-                      style={{ margin: "0 10px" }}
-                    />
-                  </a>
-                )}
+    {accountData.profile.social_twitter && (
+      <a
+        href={accountData.profile.social_twitter}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FontAwesomeIcon
+          icon={faTwitter}
+          color="#1DA1F2"
+          style={{ margin: "0 10px" }}
+        />
+      </a>
+    )}
 
-                {accountData.profile.social_website && (
-                  <a
-                    href={accountData.profile.social_website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FontAwesomeIcon
-                      icon={faGlobe}
-                      color="black"
-                      style={{ margin: "0 10px" }}
-                    />
-                  </a>
-                )}
+    {accountData.profile.social_instagram && (
+      <a
+        href={accountData.profile.social_instagram}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FontAwesomeIcon
+          icon={faInstagram}
+          color="#C13584"
+          style={{ margin: "0 10px" }}
+        />
+      </a>
+    )}
 
+    {accountData.profile.social_youtube && (
+      <a
+        href={accountData.profile.social_youtube}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FontAwesomeIcon
+          icon={faYoutube}
+          color="red"
+          style={{ margin: "0 10px" }}
+        />
+      </a>
+    )}
+
+    {accountData.profile.social_website && (
+      <a
+        href={accountData.profile.social_website}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <FontAwesomeIcon
+          icon={faGlobe}
+          color="black"
+          style={{ margin: "0 10px" }}
+        />
+      </a>
+    )}
+  </div>
 
               <Row className="mt-3 text-center">
                 <Col>

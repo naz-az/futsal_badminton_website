@@ -272,3 +272,22 @@ Button.active {
   flex-wrap: wrap;
 }
 
+
+.my-container {
+  padding: 20px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .my-container h2 {
+    font-size: 1.5rem; /* Smaller heading for smaller screens */
+  }
+
+  .my-container .button-group {
+    flex-direction: column; /* Stack buttons vertically on smaller screens */
+    align-items: stretch; /* Ensure buttons stretch to fill the container width */
+  }
+}
