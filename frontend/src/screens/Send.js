@@ -231,9 +231,12 @@ const handleDeselectQueryRecipient = () => {
 </Modal>
 
 
-            <h1>Send Message</h1>
+            <h2 className="text-center mb-5 mt-3">Send Message</h2>
+
             <Col>
-                <Button variant="info" onClick={() => navigate('/thread')}>Back to Inbox</Button>
+            <Button variant="info" className="mb-4" onClick={() => navigate('/thread')}>
+    <i class="fa-solid fa-arrow-left me-2"></i> Back to Inbox 
+</Button>
             </Col>
             <Form onSubmit={handleSubmit}>
 
@@ -260,7 +263,7 @@ const handleDeselectQueryRecipient = () => {
                 {!recipientFromQuery && (
                     <>
                         <Form.Group controlId="searchRecipient">
-                            <Form.Label>Search Recipient:</Form.Label>
+                        <Form.Label style={{ fontWeight: 'bold', fontSize: '18px' }}>Search Recipient:</Form.Label>
                             {selectedProfile ? (
                                 <div className="selected-recipient d-flex align-items-center" style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px' }}>
                                     <Image 
@@ -278,6 +281,7 @@ const handleDeselectQueryRecipient = () => {
                                     placeholder="Enter username" 
                                     value={searchInput} 
                                     onChange={handleSearchChange}
+                                    className="mb-4"
                                 />
                             )}
                         </Form.Group>
@@ -309,8 +313,8 @@ const handleDeselectQueryRecipient = () => {
                     </>
                 )}
 
-                <Form.Group controlId="body">
-                    <Form.Label>Body</Form.Label>
+                <Form.Group controlId="body" className="mb-4">
+                <Form.Label style={{ fontWeight: 'bold', fontSize: '18px' }}>Body</Form.Label>
                     <Form.Control 
                         as="textarea" 
                         rows={3} 
@@ -319,7 +323,7 @@ const handleDeselectQueryRecipient = () => {
                         onChange={handleChange} 
                     />
                 </Form.Group>
-                <Button variant="dark" type="submit">Submit</Button>
+                <Button variant="dark" type="submit" class="d-block">Submit</Button>
             </Form>
 
             {responseMessage && (

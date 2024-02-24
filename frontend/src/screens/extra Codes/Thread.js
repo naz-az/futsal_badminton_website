@@ -125,7 +125,7 @@ function Thread() {
                   </strong>
                 </Link>
               </Col>
-              <Col xs={11} className="speech-bubble right">
+              <Col xs={3} className="speech-bubble right">
                 <div className="message-content">
                   {message.body}
                   <div className="text-muted">
@@ -135,29 +135,29 @@ function Thread() {
                   </div>
                 </div>
               </Col>
-              {/* <Col xs={8}>
+              <Col xs={8}>
                 <Button
                   variant="primary"
                   onClick={() => handleReplyClick(message.id)}
                 >
                   Reply
                 </Button>
-              </Col> */}
+              </Col>
             </>
           ) : (
             // Mirrored layout for other participants
             <>
-              {/* <Col xs={0}></Col>{" "} */}
+              <Col xs={7}></Col>{" "}
               {/* Empty space to push the content to the right */}
-              {/* <Col xs={1}>
+              <Col xs={1}>
                 <Button
                   variant="primary"
                   onClick={() => handleReplyClick(message.id)}
                 >
                   Reply
                 </Button>
-              </Col> */}
-              <Col xs={11} className="speech-bubble left">
+              </Col>
+              <Col xs={3} className="speech-bubble left">
                 <div className="message-content">
                   {message.body}
                   <div className="text-muted">

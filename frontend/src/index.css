@@ -161,7 +161,7 @@ Button.active {
 
 .speech-bubble {
   position: relative;
-  background: linear-gradient(to right, #f9f9ff, #fff9fe, #fdf6f6);
+  background: linear-gradient(to right, #f9f9ff, #fff9fe, #fdf6f6); /* Default background */
   border-radius: 10px;
   padding: 10px;
   margin: 10px 0;
@@ -171,30 +171,40 @@ Button.active {
   content: '';
   position: absolute;
   border: 10px solid transparent;
-  border-top-color: #f0f0f0;
+  border-top-color: #f0f0f0; /* Default arrow color */
 }
 
-/* For messages on the right */
+/* For messages on the right, change the background color */
+.speech-bubble.right {
+  background: linear-gradient(to right top, #ffe5fe, #ffe5fd, #ffe6fc, #ffe6fb, #ffe7fa, #fee8f9, #fee9f9, #fdeaf8, #fbebf7, #f9edf7, #f8eef6, #f6eff5);
+}
+
 .speech-bubble.right:after {
   right: 100%;
   top: 50%;
-  border-right-color: #f0f0f0;
+  border-right-color: #e9e4f3; /* Arrow color matching the bubble */
   border-top: none;
   margin-top: -10px;
 }
 
-/* For messages on the left */
+/* For messages on the left, use a different background color */
+.speech-bubble.left {
+  background: inear-gradient(to right top, #e5fcff, #e5fdff, #e6fdff, #e6fefe, #e7fefe, #e8fdfe, #e8fdfd, #e9fcfd, #eafafc, #ecf8fa, #eef6f8, #eff4f6);
+}
+
 .speech-bubble.left:after {
   left: 100%;
   top: 50%;
-  border-left-color: #f0f0f0;
+  border-left-color: #cfecef; /* Arrow color matching the bubble */
   border-top: none;
   margin-top: -10px;
 }
 
 .message-content {
+  font-size: 18px; /* Sets the font size to 14 pixels */
   margin-bottom: 0;
 }
+
 
 .reply-button {
   margin-left: 10px; /* or margin-right for left aligned messages */
@@ -290,4 +300,18 @@ Button.active {
     flex-direction: column; /* Stack buttons vertically on smaller screens */
     align-items: stretch; /* Ensure buttons stretch to fill the container width */
   }
+}
+
+.vertical-center {
+  vertical-align: middle;
+  text-align: center; /* Assuming you want to center content horizontally as well */
+}
+
+.vertical-center-img {
+  vertical-align: middle; /* For table cell alignment */
+  text-align: center; /* For text alignment */
+  display: flex; /* Makes the element a flex container */
+  justify-content: center; /* Centers children horizontally */
+  align-items: center; /* Centers children vertically */
+  flex-direction: column; /* Stacks children vertically */
 }
