@@ -189,13 +189,13 @@ Button.active {
 
 /* For messages on the left, use a different background color */
 .speech-bubble.left {
-  background: inear-gradient(to right top, #e5fcff, #e5fdff, #e6fdff, #e6fefe, #e7fefe, #e8fdfe, #e8fdfd, #e9fcfd, #eafafc, #ecf8fa, #eef6f8, #eff4f6);
+  background: linear-gradient(to right top, #e5fcff, #e5fdff, #e6fdff, #e6fefe, #e7fefe, #e8fdfe, #e8fdfd, #e9fcfd, #eafafc, #ecf8fa, #eef6f8, #eff4f6);
 }
 
 .speech-bubble.left:after {
   left: 100%;
   top: 50%;
-  border-left-color: #cfecef; /* Arrow color matching the bubble */
+  border-left-color: #e3fcff; /* Arrow color matching the bubble */
   border-top: none;
   margin-top: -10px;
 }
@@ -315,3 +315,63 @@ Button.active {
   align-items: center; /* Centers children vertically */
   flex-direction: column; /* Stacks children vertically */
 }
+
+
+/* Wrapper to hold the profile info and allow full-width lines */
+.profile-info-wrapper {
+  position: relative;
+  width: 100%;
+  /* Ensure there's space for the bottom line */
+  padding-top: 2px; /* Space for the top line */
+  padding-bottom: 2px; /* Space for the bottom line */
+  margin-bottom: 2rem; /* Adjust spacing as needed */
+}
+
+.profile-info-container {
+  display: inline-block; /* or 'block' depending on your layout */
+  margin: 0 auto;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(153, 153, 153, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+/* Utilize the wrapper for full-width top and bottom lines */
+.profile-info-wrapper::before,
+.profile-info-wrapper::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(0,0,0,0.2) 50%, rgba(255,255,255,0) 100%);
+  z-index: 0; /* Ensures lines are below the container */
+}
+.profile-info-wrapper::before {
+  top: 0; /* Line at the top of the wrapper */
+}
+
+.profile-info-wrapper::after {
+  bottom: 0; /* Line at the bottom of the wrapper */
+}
+
+/* Styling for the profile image */
+.profilex-image {
+  width: 50px; /* Adjust size as needed */
+  height: 50px; /* Adjust size as needed */
+  border-radius: 50%; /* Circular image */
+}
+
+/* Styling for the username */
+.profilex-username {
+  margin-top: 0.5rem; /* Spacing between image and username */
+  font-weight: bold; /* Strong emphasis on username */
+}
+
+/* Optional: Enhance the hover effect on the profile info container */
+.profile-info-container:hover {
+  box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2); /* More pronounced shadow on hover */
+}
+

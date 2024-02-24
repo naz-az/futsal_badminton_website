@@ -27,13 +27,24 @@ function Thread() {
         "Full Response Data:",
         JSON.stringify(response.data, null, 2)
       );
-
+  
       if (
         response.data &&
         "comm_messages" in response.data &&
         "participants" in response.data
       ) {
-        setThread(response.data);
+        // Sort messages by their timestamp in ascending order before setting the state
+        const sortedMessages = response.data.comm_messages.sort(
+          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+        );
+  
+        // Update the thread data with sorted messages
+        const updatedThreadData = {
+          ...response.data,
+          comm_messages: sortedMessages,
+        };
+  
+        setThread(updatedThreadData);
       } else {
         console.error("Invalid thread data structure:", response.data);
       }
@@ -41,6 +52,7 @@ function Thread() {
       console.error("Error fetching thread:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchThread();
@@ -88,13 +100,15 @@ function Thread() {
   };
 
   const renderMessages = (messages) => {
+
+
     return messages.map((message) => (
       <div key={message.id}>
-        <Row className="align-items-center">
+        <Row className="align-items-center mb-3">
           {message.sender.id === thread.comm_messages[0].sender.id ? (
             // Layout for the original sender
             <>
-              <Col xs={1} className="d-flex justify-content-start">
+              {/* <Col xs={2} className="d-flex justify-content-start">
                 <Link
                   to={
                     auth.user.profile.id === message.sender.id
@@ -124,8 +138,8 @@ function Thread() {
                     {message.sender.username}
                   </strong>
                 </Link>
-              </Col>
-              <Col xs={11} className="speech-bubble right">
+              </Col> */}
+              <Col xs={9} className="speech-bubble right">
                 <div className="message-content">
                   {message.body}
                   <div className="text-muted">
@@ -147,7 +161,7 @@ function Thread() {
           ) : (
             // Mirrored layout for other participants
             <>
-              {/* <Col xs={0}></Col>{" "} */}
+              <Col xs={3}></Col>{" "} 
               {/* Empty space to push the content to the right */}
               {/* <Col xs={1}>
                 <Button
@@ -157,7 +171,7 @@ function Thread() {
                   Reply
                 </Button>
               </Col> */}
-              <Col xs={11} className="speech-bubble left">
+              <Col xs={9} className="speech-bubble left">
                 <div className="message-content">
                   {message.body}
                   <div className="text-muted">
@@ -167,7 +181,7 @@ function Thread() {
                   </div>
                 </div>
               </Col>
-              <Col xs={1} className="d-flex justify-content-end">
+              {/* <Col xs={1} className="d-flex justify-content-end">
                 <Link
                   to={
                     auth.user.profile.id === message.sender.id
@@ -197,7 +211,7 @@ function Thread() {
                     {message.sender.username}
                   </strong>
                 </Link>
-              </Col>
+              </Col> */}
             </>
           )}
         </Row>
@@ -243,25 +257,46 @@ function Thread() {
     ));
   };
 
+    // Identify the other participant
+    const otherParticipant = thread?.participants.find(p => p.id !== auth.user.profile.id);
+
+    
   return (
     <div className="thread-container">
-      <div>
-        <h1>Thread</h1>
+      
+        <h1 className="text-center">Thread</h1>
 
         <Button
           style={{ marginBottom: "30px" }}
-          variant="primary"
+          variant="info"
           onClick={() => navigate("/thread")}
         >
           Back to Inbox
         </Button>
+<br></br>
+<div className="text-center profile-info-wrapper">
+{/* Render the other participant's profile image and username */}
+{otherParticipant && (
+      <div className="text-center profile-info-container">
+        <Image
+          src={otherParticipant.profile_image}
+          alt={otherParticipant.username}
+          roundedCircle
+          fluid
+          className="profilex-image" // Correct the class name if necessary
+        />
+        <div className="profilex-username"><strong>{otherParticipant.username}</strong></div>
+      </div>
+    )}
+</div>
+
 
         {thread && thread.comm_messages ? (
           renderMessages(thread.comm_messages)
         ) : (
           <p>Loading thread...</p>
         )}
-        <Form.Group style={{ marginTop: "30px" }}>
+        <Form.Group style={{ marginTop: "20px" }}>
           <Form.Control
             as="textarea"
             value={mainReply}
@@ -269,14 +304,15 @@ function Thread() {
             placeholder="Write a message..."
           />
           <Button
-            className="mt-2"
+            className="mt-4"
+            variant="danger"
             onClick={() => sendReply(null, thread.participants[1].id)}
           >
             Send
           </Button>
         </Form.Group>
       </div>
-    </div>
+
   );
 }
 
