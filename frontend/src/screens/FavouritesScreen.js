@@ -236,8 +236,9 @@ export default function FavouritesScreen() {
               </Col>
               <Col xs={12} md={4} className="p-2 text-center text-md-right">
   <div className="d-flex flex-row justify-content-center justify-content-md-end align-items-center">
+    <AttendButton projectId={favorite.project.id} token={localStorage.getItem("token")} onModalChange={handleModalChange} className="m-1"/>
     <Button variant="primary" onClick={() => handleRemove(favorite.project.id)} className="m-1" style={{ fontSize: '14px', padding: '8px 12px' }}>Remove</Button>
-    <AttendButton projectId={favorite.project.id} onModalChange={handleModalChange} className="m-1"/>
+
   </div>
 </Col>
 
@@ -253,7 +254,7 @@ export default function FavouritesScreen() {
         {showAttendButton && (
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowAttendModal(false)}>Close</Button>
-            <Button variant="primary" onClick={() => navigate('/attending')}>View All Attending Events</Button>
+            <Button variant="dark" onClick={() => navigate('/attending')}>View All Attending Events</Button>
           </Modal.Footer>
         )}
       </Modal>

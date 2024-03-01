@@ -159,4 +159,6 @@ urlpatterns = [
 
     path('messages/<uuid:message_id>/mark_as_viewed/', views.mark_message_as_viewed, name='mark_message_as_viewed'),
 
+    path('verify-email/', views.verify_email, name='verify-email'),
+
 ]

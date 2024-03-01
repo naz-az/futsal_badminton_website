@@ -1565,6 +1565,16 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.shortcuts import redirect
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+
 @api_view(['POST'])
 def register_user(request):
     user = None  # Initialize user to None
@@ -1596,6 +1606,47 @@ def register_user(request):
         refresh = RefreshToken.for_user(user)  # Generate JWT token
         print("JWT token generated.")
 
+        # Send welcome email
+        # send_mail(
+        #     'Welcome to Our Platform!',
+        #     'Hello, thank you for registering with us. Enjoy our services!',
+        #     settings.EMAIL_HOST_USER,
+        #     [user.email],
+        #     fail_silently=False,
+        # )
+
+        # After creating the user and profile, send verification email
+        token = RefreshToken.for_user(user).access_token
+        verification_url = request.build_absolute_uri(reverse('verify-email')) + f"?token={str(token)}"
+        
+        # send_mail(
+        #     'Verify Your Email',
+        #     f'Please click on the link below to confirm your registration: {verification_url}',
+        #     'from@example.com',
+        #     [user.email],
+        #     fail_silently=False,
+        # )
+        
+            # Define the context to pass to the email template
+        context = {
+            'username': user.username,
+            'verification_url': verification_url,
+        }
+
+        # Render HTML email content
+        html_content = render_to_string('email_verification_template.html', context)
+        text_content = strip_tags(html_content)  # this strips the html, so people will have the text as well.
+
+        # Create email message with both plain and HTML content
+        email = EmailMultiAlternatives(
+            'Verify Your Email',
+            text_content,
+            settings.EMAIL_HOST_USER,
+            [user.email]
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send()
+
         response_data = {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
@@ -1611,7 +1662,22 @@ def register_user(request):
         print("An error occurred:", str(e))
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# Create a new view for email verification
+@api_view(['GET'])
+def verify_email(request):
+    token = request.GET.get('token')
+    try:
+        token = AccessToken(token)
+        user_id = token['user_id']
+        user = User.objects.get(id=user_id)
+        profile = Profile.objects.get(user=user)
+        profile.verified = True  # Assuming you have a 'verified' field in your Profile model
+        profile.save()
+        return redirect('Frontend URL where you want to redirect after verification')  # Redirect to a success page or login page
+    except Exception as e:
+        # Handle invalid or expired token
+        return Response({'error': 'Verification failed'}, status=status.HTTP_400_BAD_REQUEST)
+    
 
 # In get_notifications view to check retrieval
 @api_view(['GET'])

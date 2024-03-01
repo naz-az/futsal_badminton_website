@@ -24,6 +24,10 @@ import PostComment from "../components/PostComment";
 
 import moment from 'moment';
 
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css'; // Ensure you import Leaflet's CSS
+
+
 function ProjectScreen() {
   const [project, setProject] = useState({ project_images: [], attendees: [] });
   const [comments, setComments] = useState([]);
@@ -391,6 +395,55 @@ const [showViewBookmarksButton, setShowViewBookmarksButton] = useState(false);
                   </Col>
                 </Row>
               </ListGroup.Item>
+
+{/* Map showing New York
+<ListGroup.Item>
+  <MapContainer center={[40.7128, -74.0060]} zoom={13} style={{ height: '200px', width: '100%' }}>
+    <TileLayer
+      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    />
+    <Marker position={[40.7128, -74.0060]}>
+      <Popup>
+        New York, NY
+      </Popup>
+    </Marker>
+  </MapContainer>
+</ListGroup.Item> */}
+
+
+{/* Dynamic Map based on project coordinates */}
+{/* <ListGroup.Item>
+  {project.latitude && project.longitude && (
+    <MapContainer center={[project.latitude, project.longitude]} zoom={13} style={{ height: '200px', width: '100%' }}>
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <Marker position={[project.latitude, project.longitude]}>
+        <Popup>
+          {project.location}
+        </Popup>
+      </Marker>
+    </MapContainer>
+  )}
+</ListGroup.Item> */}
+
+<ListGroup.Item>
+  <div style={{ cursor: 'pointer' }} onClick={() => navigate(`/map/${project.latitude}/${project.longitude}`)}>
+    {project.latitude && project.longitude && (
+      <MapContainer center={[project.latitude, project.longitude]} zoom={13} style={{ height: '200px', width: '100%' }}>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={[project.latitude, project.longitude]}>
+          <Popup>
+            {project.location}
+          </Popup>
+        </Marker>
+      </MapContainer>
+    )}
+  </div>
+</ListGroup.Item>
+
 
               {/* Add this section for the tags */}
               <ListGroup.Item>

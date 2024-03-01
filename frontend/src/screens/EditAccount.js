@@ -231,23 +231,33 @@ function EditAccount() {
                 </p> */}
 
                 {/* Display current image */}
-                <div>
-                  <img
-                    src={profile.profile_image}
-                    alt="Current Profile"
-                    className="preview-image"
-                    style={{
-                      width: "300px",
-                      height: "300px",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
+                <div
+  className="image-container"
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  }}
+>
+  <img
+    src={profile.profile_image}
+    alt="Current Profile"
+    className="preview-image mt-4"
+    style={{
+      width: "300px",
+      height: "300px",
+      objectFit: "cover",
+    }}
+  />
 
-                {/* Clear button */}
-                <Button variant="primary" onClick={clearImage} className="mb-4 mt-2">
+                  {/* Clear button */}
+                  <Button variant="outline-primary" onClick={clearImage} className="mb-4 mt-3">
                   Clear
                 </Button>
+</div>
+
+
+
 
                 <Form.Control
                   type="file"
@@ -324,7 +334,7 @@ function EditAccount() {
                   placeholder="Website URL"
                 />
               </Form.Group>
-              <Button variant="warning" type="submit">
+              <Button variant="dark" type="submit">
                 Submit
               </Button>
             </Form>

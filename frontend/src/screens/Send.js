@@ -234,7 +234,7 @@ const handleDeselectQueryRecipient = () => {
             <h2 className="text-center mb-5 mt-3">Send Message</h2>
 
             <Col>
-            <Button variant="info" className="mb-4" onClick={() => navigate('/thread')}>
+            <Button variant="secondary" className="mb-5" onClick={() => navigate('/thread')}>
     <i class="fa-solid fa-arrow-left me-2"></i> Back to Inbox 
 </Button>
             </Col>
@@ -265,7 +265,7 @@ const handleDeselectQueryRecipient = () => {
                         <Form.Group controlId="searchRecipient">
                         <Form.Label style={{ fontWeight: 'bold', fontSize: '18px' }}>Search Recipient:</Form.Label>
                             {selectedProfile ? (
-                                <div className="selected-recipient d-flex align-items-center" style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px' }}>
+                                <div className="selected-recipient d-flex align-items-center mb-4" style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px' }}>
                                     <Image 
                                         src={selectedProfile.profile_image} 
                                         alt={`${selectedProfile.username}'s profile`} 

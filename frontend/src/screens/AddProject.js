@@ -18,6 +18,8 @@ const AddProject = () => {
         location: '',         // New state variable for location
         start_date: '',       // New state variable for start date/time
         end_date: '',         // New state variable for end date/time
+        latitude: null,
+        longitude: null,
     });
 
     const [imagePreviews, setImagePreviews] = useState({
@@ -46,6 +48,8 @@ const AddProject = () => {
     const [additionalImages, setAdditionalImages] = useState([null, null, null]);
     const [additionalImagePreviews, setAdditionalImagePreviews] = useState(['', '', '']);
     
+    const [locationSuggestions, setLocationSuggestions] = useState([]);
+
     // Function to load more tags
     const loadMoreTags = () => {
         const newCount = visibleTagCount + 10;
@@ -188,39 +192,94 @@ const handleRemoveTagFromProject = (tagId) => {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        let formData = new FormData();
-        formData.append('featured_image', projectData.featured_image);
-        console.log('Additional Images Type:', typeof projectData.additional_images);
-        console.log('Additional Images:', projectData.additional_images);
+      // Geocoding function using OpenStreetMap Nominatim
+  const geocodeLocation = async (location) => {
+    const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+    if (response.data && response.data.length > 0) {
+      const { lat, lon } = response.data[0];
+      return { lat, lng: lon };
+    }
+    return null;
+  };
 
-        
-        projectData.additional_images.forEach((image, index) => {
+      // Function to fetch location suggestions from Nominatim
+      const fetchLocationSuggestions = async (query) => {
+        if (query.length > 2) { // To avoid too many requests, start searching after 2 characters
+            const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+            setLocationSuggestions(response.data);
+        } else {
+            setLocationSuggestions([]);
+        }
+    };
+
+    // Function to handle location input change and fetch suggestions
+    // const handleLocationChange = async (e) => {
+    //     const value = e.target.value;
+    //     setProjectData({ ...projectData, location: value });
+    //     if (value.length > 2) {
+    //         const response = await axios.get(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(value)}&apiKey=xxx`);
+    //         setLocationSuggestions(response.data.features);
+    //     } else {
+    //         setLocationSuggestions([]);
+    //     }
+    // };
+
+    // Updated handleLocationChange function
+const handleLocationChange = async (e) => {
+    const value = e.target.value;
+    setProjectData({ ...projectData, location: value });
+    if (value.length > 2) { // Wait for at least 3 characters
+        await fetchLocationSuggestions(value);
+    } else {
+        setLocationSuggestions([]);
+    }
+};
+
+
+    // Function to handle location suggestion selection
+    const handleLocationSelect = (feature) => {
+        setProjectData({ ...projectData, location: feature.properties.formatted });
+        setLocationSuggestions([]);
+    };
+
+    // Select a suggestion
+    const selectLocation = (location) => {
+        setProjectData({ ...projectData, location: location.display_name });
+        setLocationSuggestions([]); // Clear suggestions after selection
+    };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Perform geocoding to get latitude and longitude from the location
+    const geoData = await geocodeLocation(projectData.location);
+
+    if (geoData) {
+        // Update projectData with the geocoded latitude and longitude
+        const updatedProjectData = { ...projectData, latitude: geoData.lat, longitude: geoData.lng };
+
+        let formData = new FormData();
+        // Append project data except for the additional images and tags
+        Object.keys(updatedProjectData).forEach(key => {
+            if (key !== 'additional_images' && key !== 'tags') {
+                formData.append(key, updatedProjectData[key]);
+            }
+        });
+
+        // Append additional images
+        updatedProjectData.additional_images.forEach((image, index) => {
             if (image) {
                 formData.append(`additional_images_${index}`, image);
             }
         });
 
-        // let formData = new FormData();
-        for (let key in projectData) {
-            if (key !== 'tags') {
-                formData.append(key, projectData[key]);
-            }
-        }
-        // Add only valid UUIDs
+        // Append tags
         selectedTags.filter(isValidUUID).forEach(tagId => {
             formData.append('tags', tagId);
         });
-        
-        // Append each tag ID as a separate entry in formData
-        selectedTags.forEach(tagId => {
-            formData.append('tags', tagId);
-        });
-    
-        console.log("FormData before sending:", formData);  // Add this line to log FormData
-    
+
+        console.log("FormData before sending:", formData); // For debugging
+
         try {
             const response = await axios.post('/api/create-project/', formData, {
                 headers: {
@@ -231,19 +290,24 @@ const handleRemoveTagFromProject = (tagId) => {
             console.log(response.data);
             setShowSuccessModal(true);
             setTimeout(() => {
-                setShowSuccessModal(false); // Hide modal after a delay
-                navigate('/'); // Redirect to home page
-            }, 1500); // Delay of 3 seconds
-                } catch (error) {
+                setShowSuccessModal(false);
+                navigate('/'); // Redirect to home page or a confirmation page
+            }, 1500); // Adjust timing as needed
+        } catch (error) {
+            // Error handling
             if (error.response && error.response.data) {
-                // Assuming the error message is in error.response.data
                 setServerError(Object.values(error.response.data).join(' '));
             } else {
                 setServerError("An unexpected error occurred.");
             }
         }
-    };
-    
+    } else {
+        // Handle geocoding failure
+        console.error('Geocoding failed or no results found');
+        setServerError('Failed to geocode location');
+    }
+};
+
 
 
     return (
@@ -354,16 +418,59 @@ const handleRemoveTagFromProject = (tagId) => {
                         </Form.Group> */}
 
                 {/* Location Input */}
-                <Form.Group controlId="location" className="forms-group-margin">
+                {/* <Form.Group controlId="location" className="forms-group-margin">
                 <Form.Label><strong>Location</strong></Form.Label>
                     <Form.Control 
                         type="text" 
                         placeholder="Enter event location" 
                         name="location" 
                         value={projectData.location}
-                        onChange={handleChange} 
+                        // onChange={handleChange} 
+                        onChange={(e) => setProjectData({ ...projectData, location: e.target.value })}
+
                     />
-                </Form.Group>
+                </Form.Group> */}
+
+{/* <Form.Group controlId="location" className="forms-group-margin">
+                    <Form.Label><strong>Location</strong></Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Enter event location"
+                        name="location"
+                        value={projectData.location}
+                        onChange={handleLocationChange}
+                    />
+                    {locationSuggestions.length > 0 && (
+                        <ListGroup>
+                            {locationSuggestions.map((feature, index) => (
+                                <ListGroup.Item key={index} onClick={() => handleLocationSelect(feature)}>
+                                    {feature.properties.formatted}
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    )}
+                </Form.Group> */}
+
+
+
+<Form.Group controlId="location" className="forms-group-margin">
+    <Form.Label><strong>Location</strong></Form.Label>
+    <Form.Control
+        type="text"
+        placeholder="Enter event location"
+        name="location"
+        value={projectData.location}
+        onChange={handleLocationChange}
+    />
+    <ListGroup>
+        {locationSuggestions.map((suggestion, index) => (
+            <ListGroup.Item key={index} onClick={() => selectLocation(suggestion)}>
+                {suggestion.display_name}
+            </ListGroup.Item>
+        ))}
+    </ListGroup>
+</Form.Group>
+
 
                 {/* Start Date/Time Input */}
                 <Form.Group controlId="start_date" className="forms-group-margin">
@@ -440,7 +547,7 @@ const handleRemoveTagFromProject = (tagId) => {
                                     <Button 
                                     key={tag.id} 
                                     onClick={() => handleToggleTagToProject(tag.id)} 
-                                    variant={Array.isArray(projectData.tags) && projectData.tags.includes(tag.id) ? "primary" : "outline-primary"}
+                                    variant={Array.isArray(projectData.tags) && projectData.tags.includes(tag.id) ? "danger" : "outline-danger"}
                                     className="m-1"
                                 >
                                     {tag.name} {selectedTags.includes(tag.id) ? "-" : "+"}
@@ -453,11 +560,14 @@ const handleRemoveTagFromProject = (tagId) => {
                                 <Button 
                                     onClick={loadMoreTags} 
                                     disabled={visibleTagCount >= tags.length}
-                                    className="mr-2">
-<i className="fa-solid fa-arrow-down"></i>                                </Button>
+                                    className="me-2"
+                                    variant='danger'>
+                                    <i className="fa-solid fa-arrow-down"></i>                                
+                                    </Button>
                                 <Button 
                                     onClick={loadLessTags} 
-                                    disabled={visibleTagCount <= 10}>
+                                    disabled={visibleTagCount <= 10}
+                                    variant='danger'>
                                     <i className="fa-solid fa-arrow-up"></i> 
                                 </Button>
                             </div>
@@ -491,13 +601,13 @@ const handleRemoveTagFromProject = (tagId) => {
                         <Form.Control type="text" name="newTag" value={projectData.newTag} onChange={handleChange} />
                     </Col>
                     <Col>
-                        <Button variant="info" onClick={handleAddTag}>Add Category</Button>
+                        <Button variant="secondary" onClick={handleAddTag}>Add Category</Button>
                     </Col>
                 </Row>
             </Form.Group>
 
                         {/* Submit Button */}
-                        <Button variant="warning" type="submit">
+                        <Button variant="dark" type="submit">
                             Add Event
                         </Button>
                     </Form>

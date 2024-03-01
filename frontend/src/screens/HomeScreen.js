@@ -34,21 +34,41 @@ function HomeScreen() {
   //     }
   //   };
 
+  // const fetchProjects = async (query = "", sortBy = "", sortOrder = "desc") => {
+  //   try {
+  //     const { data } = await api.get(
+  //       `projects/?search_query=${query}&sort_by=${sortBy}&sort_order=${sortOrder}`,
+  //       {
+  //         timeout: 10000, // Setting timeout to 10 seconds
+  //       }
+  //     );
+  //     setProjects(data);
+  //   } catch (error) {
+  //     // Handle the error here
+  //     console.error(error);
+  //   }
+  // };
+
   const fetchProjects = async (query = "", sortBy = "", sortOrder = "desc") => {
     try {
       const { data } = await api.get(
         `projects/?search_query=${query}&sort_by=${sortBy}&sort_order=${sortOrder}`,
         {
-          timeout: 10000, // Setting timeout to 10 seconds
+          timeout: 10000, // Consider increasing this if necessary
         }
       );
       setProjects(data);
     } catch (error) {
-      // Handle the error here
-      console.error(error);
+      if (error.code === "ECONNABORTED") {
+        console.error("Request timed out. Please try again.");
+        // Here, you can notify the user or implement retry logic
+      } else {
+        console.error(error);
+      }
     }
   };
 
+  
   const fetchTopProjects = () => {
     fetchProjects(query, "upvotes");
   };
@@ -206,14 +226,14 @@ function HomeScreen() {
       <div className="mb-3 mt-4 d-flex ">
         <Button
           onClick={handleHorizontalLayout}
-          variant={layout === "horizontal" ? "danger" : "secondary"}
+          variant={layout === "horizontal" ? "dark" : "secondary"}
           className="me-2" // Right margin (margin-end) of 2 units
         >
           <i className="fa-solid fa-grip-vertical"></i>
         </Button>
         <Button
           onClick={handleVerticalLayout}
-          variant={layout === "vertical" ? "danger" : "secondary"}
+          variant={layout === "vertical" ? "dark" : "secondary"}
         >
           <i className="fa-solid fa-grip"></i>
         </Button>

@@ -66,10 +66,10 @@ function FollowingPage() {
                             Unfollow
                         </Button>
                         <Button 
-                            variant="outline-info" 
+                            variant="outline-dark" 
                             onClick={() => handleSendMessage(profile.id)} 
                             className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
-                                  <i class="fa-regular fa-envelope"></i>      
+                                  <i class="fa-regular fa-envelope" style={{ marginRight: '4px', marginLeft: '4px' }}></i>      
                         </Button>
 
                     </Col>

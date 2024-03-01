@@ -38,7 +38,7 @@ const PostComment = ({ projectId, onCommentPosted }) => {
         placeholder="Write a comment..."
         rows={3}
       />
-      <Button variant="primary" type="submit" className="mt-2">
+      <Button variant="dark" type="submit" className="mt-2">
         Post Comment
       </Button>
     </Form>

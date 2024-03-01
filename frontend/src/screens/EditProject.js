@@ -328,7 +328,7 @@ const EditProject = () => {
     <Container>
       <Row className="justify-content-md-center">
         <Col md={6}>
-          <h2 className="text-center">Edit Event</h2>
+          <h2 className="text-center mb-5">Edit Event</h2>
 
           <Form onSubmit={handleSubmit}>
             {/* Title */}
@@ -369,23 +369,29 @@ const EditProject = () => {
                     <strong>Featured Image</strong>
                   </Form.Label>
                   {imagePreviews.featured_image && (
-                    <div>
-                      {/* Existing Featured Image */}
+                <div
+                className="image-container"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >                      {/* Existing Featured Image */}
                       <img
                         src={imagePreviews.featured_image}
                         alt="Existing Featured Image"
                         style={{
-                          width: "200px",
-                          height: "200px",
+                          width: "300px",
+                          height: "300px",
                           objectFit: "cover",
                         }}
-                        className="mb-2"
+                        className="mb-2 mt-4"
                       />
                       {/* <p>Current File: {imagePreviews.featured_image.split('/').pop()}</p> */}
                       <Button
-                        variant="primary"
+                        variant="outline-primary"
                         onClick={() => clearImage("featured_image")}
-                        className="mb-2 ms-4"
+                        className="mb-4 ms-4 mt-3"
                       >
                         Clear
                       </Button>
@@ -409,8 +415,8 @@ const EditProject = () => {
                       src={imagePreviews.featured_image_new}
                       alt="New Featured Image"
                       style={{
-                        width: "200px",
-                        height: "200px",
+                        width: "300px",
+                        height: "300px",
                         objectFit: "cover",
                       }}
                       className="mb-2"
@@ -431,22 +437,29 @@ const EditProject = () => {
 
                     {/* Existing Image Preview */}
                     {imagePreviews.project_images[index] && (
-                      <div>
+                                      <div
+                                      className="image-container"
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                      }}
+                                    >
                         <img
                           src={imagePreviews.project_images[index]}
                           alt={`Existing Additional Image ${index + 1}`}
                           style={{
-                            width: "200px",
-                            height: "200px",
+                            width: "300px",
+                            height: "300px",
                             objectFit: "cover",
                           }}
-                          className="mb-2"
+                          className="mb-2 mt-4"
                         />
                         {/* <p>Current File: {imagePreviews.project_images[index].split('/').pop()}</p> */}
                         <Button
-                          variant="primary"
+                          variant="outline-primary"
                           onClick={() => clearImage("additional_image", index)}
-                          className="mb-2 ms-4"
+                          className="mb-4 ms-4 mt-3"
                         >
                           Clear
                         </Button>
@@ -639,7 +652,7 @@ const EditProject = () => {
                   />
                 </Col>
                 <Col>
-                  <Button variant="info" onClick={handleAddTag}>
+                  <Button variant="secondary" onClick={handleAddTag}>
                     Add Category
                   </Button>
                 </Col>
@@ -647,7 +660,7 @@ const EditProject = () => {
             </Form.Group>
 
             {/* Submit Button */}
-            <Button variant="warning" type="submit">
+            <Button variant="dark" type="submit">
               Edit Project
             </Button>
           </Form>

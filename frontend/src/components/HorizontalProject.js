@@ -244,7 +244,7 @@ function HorizontalProject({ project }) {
               {" "}
               {/* Right and bottom margin for each tag */}
               <Button
-                variant="info"
+                variant="danger"
                 style={{ fontSize: "12px", padding: "2px 5px" }}
               >
                 {tag.name}
@@ -258,7 +258,7 @@ function HorizontalProject({ project }) {
           <div className="d-flex flex-row justify-content-center justify-content-md-end align-items-center">
             {isFavorited ? (
               <Button
-                variant="primary"
+                variant="info"
                 onClick={handleRemoveFavorite}
                 style={{ marginRight: "10px" }} // Adding a right margin to the "Remove" button
 
@@ -271,7 +271,7 @@ function HorizontalProject({ project }) {
               </Button>
             ) : (
               <Button
-                variant="outline-primary"
+                variant="outline-info"
                 onClick={handleAddFavorite}
                 style={{ marginRight: "10px" }} 
               >

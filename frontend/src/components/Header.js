@@ -254,9 +254,11 @@ const clearMessageNotifications = async () => {
               <Nav.Link>Events</Nav.Link>
             </LinkContainer>
 
-            <LinkContainer to="/profiles">
-              <Nav.Link>Members</Nav.Link>
-            </LinkContainer>
+            {auth.isAuthenticated && (
+    <LinkContainer to="/profiles">
+      <Nav.Link>Members</Nav.Link>
+    </LinkContainer>
+  )}
 
             <LinkContainer to="/swipe-page">
               <Nav.Link>Swipe</Nav.Link>

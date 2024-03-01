@@ -43,24 +43,16 @@ function ThreadMessages() {
 
   const getLatestMessage = (messages) => {
     if (messages.length === 0) return "No messages yet";
-  
     const messageBody = messages[messages.length - 1].body;
-    const words = messageBody.split(/\s+/); // Split message into words
-    
-    if (words.length > 6) {
-      return words.slice(0, 6).join(" ") + "..."; // Join first 20 words and append ellipsis
-    } else {
-      return messageBody; // Return the original message if it's 20 words or less
-    }
+    const words = messageBody.split(/\s+/);
+    return words.length > 6 ? words.slice(0, 6).join(" ") + "..." : messageBody;
   };
-  
 
   const getLatestMessageDetails = (messages) => {
     if (messages.length === 0) {
       return { body: "No messages yet", sender: null };
     }
-    const lastMessage = messages[messages.length - 1];
-    return { body: lastMessage.body, sender: lastMessage.sender };
+    return messages[messages.length - 1];
   };
 
   const showDeleteModal = (threadId, event) => {
@@ -115,7 +107,7 @@ function ThreadMessages() {
       <h2 className="text-center mt-3 mb-4">Inbox</h2>
       <div className="d-flex justify-content-between flex-wrap mb-3">
         <Button variant="secondary" onClick={() => navigate("/send")}>
-          <i class="fa-solid fa-plus"></i> Create New Message
+          <i className="fa-solid fa-plus"></i> Create New Message
         </Button>
         <Button
           variant="primary"
@@ -127,16 +119,16 @@ function ThreadMessages() {
       </div>
 
       <div className="table-responsive">
-        <Table striped bordered hover>
+        <Table hover className="table-borderless">
           <thead>
             <tr>
-              <th className="vertical-center" >
+              <th className="vertical-center">
                 <span
                   onClick={selectAllThreads}
                   style={{
                     textDecoration: "none",
                     cursor: "pointer",
-                    color: "#FFA07A",
+                    color: "#0a3d28",
                   }}
                 >
                   {selectedThreads.length === threads.length
@@ -144,11 +136,11 @@ function ThreadMessages() {
                     : "Select All"}
                 </span>
               </th>
-              <th className="vertical-center">User</th>
+              {/* <th className="vertical-center">User</th>
               <th className="vertical-center">Message</th>
-              <th className="vertical-center" >Date/Time</th>
+              <th className="vertical-center">Date/Time</th>
               <th></th>
-              <th className="vertical-center">Actions</th>
+              <th className="vertical-center">Actions</th> */}
             </tr>
           </thead>
           <tbody>
@@ -157,102 +149,49 @@ function ThreadMessages() {
               const latestMessageDetails = getLatestMessageDetails(
                 thread.comm_messages
               );
-              const latestMessage =
-                thread.comm_messages[thread.comm_messages.length - 1];
-              const seenColumn =
-                latestMessage.sender.username !== auth.user.profile.username
-                  ? latestMessage.viewed
-                    ? "Viewed"
-                    : "Not Viewed"
-                  : "";
-              const isBold =
-                seenColumn === "Not Viewed" &&
-                latestMessage.sender.username !== auth.user.profile.username;
-              const rowStyle = isBold ? { fontWeight: "bold" } : {};
+              const rowStyle = { cursor: "pointer" };
 
               return (
                 <tr
                   key={thread.id}
                   onClick={() => handleThreadClick(thread.id)}
-                  style={{ cursor: "pointer" }}
+                  style={rowStyle}
+                  className="align-middle"
                 >
                   <td className="vertical-center">
-                    {" "}
-                    {/* Center checkbox */}
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      {" "}
-                      {/* Centering wrapper for checkbox */}
-                      <input
-                        type="checkbox"
-                        checked={selectedThreads.includes(thread.id)}
-                        onChange={() => toggleThreadSelection(thread.id)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
+                    <input
+                      type="checkbox"
+                      checked={selectedThreads.includes(thread.id)}
+                      onChange={() => toggleThreadSelection(thread.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </td>
                   <td>
-                    <div 
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {" "}
-                      {/* Adjusted for column layout */}
+                    <div className="vertical-center">
                       <img
                         src={otherParticipant.profile_image}
                         alt={otherParticipant.username}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          objectFit: "cover",
-                          borderRadius: "50%",
-                          marginBottom: "5px",
-                        }}
+                        className="rounded-circle"
+                        style={{ width: "40px", height: "40px", objectFit: "cover" }}
                       />
-                      <span
-                        style={{
-                          fontWeight: "bold",
-                          color: "black",
-                          textAlign: "center",
-                        }}
-                      >
-                        {otherParticipant.username}
-                      </span>
+                      <div>{otherParticipant.username}</div>
                     </div>
                   </td>
-                  <td className="vertical-center" style={rowStyle}>
-                    {getLatestMessage(thread.comm_messages)}
-                  </td>{" "}
-                  {/* Text center */}
-                  <td className="vertical-center" style={rowStyle}>
-                    {formatDate(thread.latest_message_timestamp)}
-                  </td>{" "}
-                  {/* Text center */}
-                  <td className="vertical-center" style={rowStyle}>
-                    {" "}
-                    {/* Center "Your Turn" button if needed */}
+                  <td className="vertical-center">{getLatestMessage(thread.comm_messages)}</td>
+                  <td className="vertical-center">{formatDate(thread.latest_message_timestamp)}</td>
+                  <td className="vertical-center">
                     {latestMessageDetails.sender &&
                       latestMessageDetails.sender.username !==
                         auth.user.profile.username && (
-                        <div
-                          style={{ display: "flex", justifyContent: "center" }}
-                        >
-                          {" "}
-                          {/* Centering wrapper */}
-                          <Button variant="secondary" disabled>
-                            Your turn
-                          </Button>
-                        </div>
+                        <Button variant="outline-dark" size="sm" disabled>
+                          Your turn
+                        </Button>
                       )}
                   </td>
                   <td className="vertical-center">
-                    {" "}
-                    {/* Center delete button */}
                     <Button
                       variant="primary"
+                      size="sm"
                       onClick={(e) => showDeleteModal(thread.id, e)}
                     >
                       Delete
@@ -274,13 +213,10 @@ function ThreadMessages() {
         </Modal.Header>
         <Modal.Body>Are you sure you want to delete this thread?</Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowDeleteConfirm(false)}
-          >
+          <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
             Close
           </Button>
-          <Button variant="danger" onClick={deleteSelectedThreads}>
+          <Button variant="primary" onClick={deleteSelectedThreads}>
             Delete
           </Button>
         </Modal.Footer>

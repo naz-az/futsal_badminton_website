@@ -37,7 +37,9 @@ function ProjectAttending({ project, onRemoveProject, onModalChange }) {
   const [bookmarkModalMessage, setBookmarkModalMessage] = useState("");
   const [showViewAllBookmarks, setShowViewAllBookmarks] = useState(false);
 
-  const currentUserId = auth.user?.profile.id; // Get the current user's ID
+  // const currentUserId = auth.user?.profile.id; // Get the current user's ID
+
+  const currentUserId = auth.user?.profile?.id || auth.user?.id;
 
   useEffect(() => {
     // Implement logic to check if the project is already favorited

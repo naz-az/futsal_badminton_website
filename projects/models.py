@@ -32,6 +32,9 @@ class Project(models.Model):
     start_date = models.DateTimeField(null=True, blank=True)  # New field for event start date/time
     end_date = models.DateTimeField(null=True, blank=True)    # New field for event end date/time
 
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    
     id = models.UUIDField(default=uuid.uuid4, unique=True,
                           primary_key=True, editable=False)
 

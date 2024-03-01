@@ -164,7 +164,7 @@ function Categories() {
 
       {auth.isAuthenticated && (
   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: "25px" }}>
-    <Button variant="warning" onClick={() => navigate("/followed-tags")}>
+    <Button variant="secondary" onClick={() => navigate("/followed-tags")}>
       View Followed Categories
     </Button>
   </div>
@@ -174,7 +174,7 @@ function Categories() {
 <div className="scroll-container" style={{ display: 'flex', alignItems: 'center' }}>
         <Button 
           className="scroll-button left" 
-          variant="warning" 
+          variant="dark" 
           onClick={() => handleScroll('left')} 
           style={{ margin: '0 10px 0 0' }}> {/* Added right margin */}
           <FontAwesomeIcon icon={faArrowLeft} />
@@ -193,7 +193,7 @@ function Categories() {
                   fetchProjectsByTag(tag.id);
                   setActiveTagId(tag.id);
                 }}
-                variant={tag.id === activeTagId ? "warning" : "secondary"}
+                variant={tag.id === activeTagId ? "dark" : "secondary"}
                 style={{ margin: '0 1px' }}> {/* Added margin for spacing between tags */}
                 {tag.name}
               </Button>
@@ -204,7 +204,7 @@ function Categories() {
         <Button 
           className="scroll-button right" 
           onClick={() => handleScroll('right')} 
-          variant="warning"
+          variant="dark"
           style={{ margin: '0 0 0 10px' }}> {/* Added left margin */}
           <FontAwesomeIcon icon={faArrowRight} />
         </Button>
@@ -222,7 +222,7 @@ function Categories() {
     {activeTagId && (
       <Button
         onClick={() => toggleFollowTag(activeTagId)}
-        variant={followedTags.has(activeTagId) ? "primary" : "light"}
+        variant={followedTags.has(activeTagId) ? "outline-primary" : "light"}
         style={{ fontSize: '18px', marginTop: '10px', marginBottom: '10px' }} // Added marginTop for spacing
       >
         {followedTags.has(activeTagId) ? `Unfollow ${activeTagName}` : `Follow ${activeTagName}`}

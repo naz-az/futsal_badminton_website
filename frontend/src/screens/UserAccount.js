@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import {
   Container,
@@ -28,6 +28,8 @@ import {
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import moment from "moment";
+import AuthContext from "../context/authContext";
+import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
 function UserAccount() {
   const [accountData, setAccountData] = useState({
@@ -39,6 +41,8 @@ function UserAccount() {
 
   const [displayedProjects, setDisplayedProjects] = useState(6); // New state for managing displayed projects
   const [sortType, setSortType] = useState("newest"); // New state to track sorting
+
+  const { user } = useContext(AuthContext);
 
   const showMoreProjects = () => {
     setDisplayedProjects((prev) => prev + 6);
@@ -247,10 +251,27 @@ function UserAccount() {
     <Card.Text>{accountData.profile.short_intro}</Card.Text>
     <Card.Text>{accountData.profile.location}</Card.Text>
 
+    {/* <Card.Text>Status: {user?.profile?.verified ? 'Verified' : 'Not Verified'}</Card.Text> */}
+
+
+    <Card.Text className="mb-4">
+          {user?.profile?.verified ? (
+            <span className="text">
+                      <strong>Verified</strong>{" "}
+                      <FontAwesomeIcon icon={faCheckCircle} color="blue" />            
+                      </span>
+          ) : (
+            <span className="text-danger">
+                      <strong>Not Verified</strong>{" "}
+                      <FontAwesomeIcon icon={faTimesCircle} color="red" />            
+                      </span>
+          )}
+        </Card.Text>
+
     </div>
 
 
-                <div className="d-flex justify-content-center">
+                <div className="d-flex justify-content-center mb-4">
     {accountData.profile.social_facebook && (
       <a
         href={accountData.profile.social_facebook}
@@ -352,7 +373,7 @@ function UserAccount() {
               </Row>
             </Card.Body>
           </Card>
-          <div className="d-flex justify-content-center">
+          <div className="d-flex justify-content-center mb-4">
   <Button variant="secondary" onClick={() => navigate("/followed-tags")}>
     View Followed Categories
   </Button>
@@ -371,13 +392,13 @@ function UserAccount() {
 
           {/* Second Row for buttons */}
           <Row className="mb-3">
-            <Col md={3} className="d-flex align-items-center">
+          <Col xs={6} sm={6} md={6} lg={6} className="d-flex align-items-center">
               {/* "Add Deal" button aligned to the left */}
               <Link to="/add-project" className="btn btn-warning">
                 <i className="fa-solid fa-plus"></i> Add Event
               </Link>
             </Col>
-            <Col md={9}>
+            <Col xs={6} sm={6} md={6} lg={6}>
               <div className="d-flex justify-content-end align-items-center">
                 {/* Button group for sort buttons aligned to the right */}
                 <ButtonGroup>
@@ -590,7 +611,7 @@ function UserAccount() {
 
                     <div>
                       <Button
-                        variant="light"
+                        variant="dark"
                         size="sm"
                         onClick={() => editProject(project.id)}
                       >

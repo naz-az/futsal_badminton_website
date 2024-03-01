@@ -52,22 +52,22 @@ const handleTagClick = (tagId) => {
   
   return (
     <Container>
-      <h1>Followed Tags</h1>
+      <h2 className="text-center mt-4 mb-5">Followed Tags</h2>
 
       <div style={{ marginBottom: '25px' }}> {/* Container with margin */}
-        <Button onClick={() => navigate('/categories')}>View all Tags</Button>
+        <Button variant="secondary" onClick={() => navigate('/categories')}>View all Tags</Button>
       </div>
 
       <div>
         {followedTags.map(tag => (
-          <Card key={tag.id} style={{ margin: '10px' }}>
+          <Card key={tag.id} style={{ marginBottom: '10px' }}>
             <Card.Body>
               <Row className="align-items-center">
-                <Col xs={8} onClick={() => handleTagClick(tag.id)}>
+                <Col xs={9} lg={11} onClick={() => handleTagClick(tag.id)}>
                   <Card.Title style={{ cursor: 'pointer' }}>{tag.name}</Card.Title>
                 </Col>
-                <Col xs={4}>
-                  <Button variant="danger" onClick={(e) => { e.stopPropagation(); handleUnfollowClick(tag); }}>Unfollow</Button>
+                <Col xs={3} lg={1}>
+                  <Button  variant="primary" onClick={(e) => { e.stopPropagation(); handleUnfollowClick(tag); }}>Unfollow</Button>
                 </Col>
               </Row>
             </Card.Body>
@@ -76,8 +76,19 @@ const handleTagClick = (tagId) => {
       </div>
 
       <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)}>
-        {/* ... Modal content ... */}
-      </Modal>
+                <Modal.Header closeButton>
+                    <Modal.Title>Unfollow</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Are you sure you want to unfollow this tag?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+                        Close
+                    </Button>
+                    <Button variant="outline-primary" onClick={confirmUnfollow}>
+                        Yes, Unfollow
+                    </Button>
+                </Modal.Footer>
+            </Modal>      
     </Container>
   );
 }

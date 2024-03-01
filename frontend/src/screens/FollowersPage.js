@@ -70,9 +70,9 @@ function FollowersPage() {
     </Col>
     <Col xs={4} className="d-flex justify-content-end">
     <Button variant="outline-primary" onClick={() => handleRemoveClick(profile.id)} className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
-        Remove
+    <i className="fa-solid fa-xmark" style={{ marginRight: '2px', marginLeft: '2px' }}></i>
       </Button>
-      <Button variant="outline-info" onClick={() => handleSendMessage(profile.id)} className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
+      <Button variant="outline-dark" onClick={() => handleSendMessage(profile.id)} className="mx-1" style={{ padding: '0.375rem 0.5rem' }}>
       <i class="fa-regular fa-envelope"></i>      
       </Button>
 

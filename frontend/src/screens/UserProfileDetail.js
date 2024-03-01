@@ -31,6 +31,10 @@ import {
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 import moment from "moment";
+import {
+  faCheckCircle,
+  faTimesCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 function UserProfileDetail() {
   const [profile, setProfile] = useState({});
@@ -103,6 +107,8 @@ function UserProfileDetail() {
   }, [id]);
 
   const [isUserBlocked, setIsUserBlocked] = useState(false);
+
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     const checkIfBlocked = async () => {
@@ -326,7 +332,7 @@ function UserProfileDetail() {
       </Modal>
 
       <Row>
-      <Col xs={12} lg={4} xl={3}>
+        <Col xs={12} lg={4} xl={3}>
           <Card className="mb-4">
             {" "}
             {/* Add a custom class for styling */}
@@ -344,12 +350,33 @@ function UserProfileDetail() {
                   marginTop: "20px",
                 }}
               >
-                <Card.Title style={{ fontWeight: 'bold' }}>{profile.name}</Card.Title>
+                <Card.Title style={{ fontWeight: "bold" }}>
+                  {profile.name}
+                </Card.Title>
                 <Card.Text>{profile.short_intro}</Card.Text>
                 {profile.location && (
                   <Card.Text>Based in {profile.location}</Card.Text>
                 )}
+
+                {/* <Card.Text>Status: {user?.profile?.verified ? 'Verified' : 'Not Verified'}</Card.Text> */}
+
+                {/* Verification status with icons */}
+                <Card.Text>
+                  {/* Status:{" "} */}
+                  {profile.verified ? (
+                    <span className="text">
+                      <strong>Verified</strong>{" "}
+                      <FontAwesomeIcon icon={faCheckCircle} color="blue" />
+                    </span>
+                  ) : (
+                    <span className="text-danger">
+                      <strong>Not Verified</strong>{" "}
+                      <FontAwesomeIcon icon={faTimesCircle} color="red" />
+                    </span>
+                  )}
+                </Card.Text>
               </div>
+
 
               <div
                 style={{
@@ -478,7 +505,7 @@ function UserProfileDetail() {
               </Row>
 
               <Row className="mt-3">
-              <Col className="d-flex justify-content-center">
+                <Col className="d-flex justify-content-center">
                   {profile.id !== currentUserId &&
                     !isUserBlocked &&
                     (isFollowing ? (
@@ -500,7 +527,7 @@ function UserProfileDetail() {
         </Col>
 
         <Col xs={12} lg={8} xl={9}>
-        <Card className="mb-4">
+          <Card className="mb-4">
             <Card.Header>About Me</Card.Header>
             <Card.Body>
               <Card.Text>{profile.bio}</Card.Text>
@@ -777,13 +804,17 @@ function UserProfileDetail() {
 
                   {/* Show more or less projects buttons */}
                   <div className="d-flex justify-content-center mt-3">
-                {displayedProjects < projects.length && (
-                  <Button onClick={showMoreProjects} className="m-2">Show More</Button>
-                )}
-                {displayedProjects > 6 && (
-                  <Button onClick={showLessProjects} className="m-2">Show Less</Button>
-                )}
-              </div>
+                    {displayedProjects < projects.length && (
+                      <Button onClick={showMoreProjects} className="m-2">
+                        Show More
+                      </Button>
+                    )}
+                    {displayedProjects > 6 && (
+                      <Button onClick={showLessProjects} className="m-2">
+                        Show Less
+                      </Button>
+                    )}
+                  </div>
                 </>
               )}
             </Card.Body>

@@ -268,7 +268,7 @@ function Thread() {
 
         <Button
           style={{ marginBottom: "30px" }}
-          variant="info"
+          variant="secondary"
           onClick={() => navigate("/thread")}
         >
           Back to Inbox
@@ -278,14 +278,18 @@ function Thread() {
 {/* Render the other participant's profile image and username */}
 {otherParticipant && (
       <div className="text-center profile-info-container">
-        <Image
-          src={otherParticipant.profile_image}
-          alt={otherParticipant.username}
-          roundedCircle
-          fluid
-          className="profilex-image" // Correct the class name if necessary
-        />
-        <div className="profilex-username"><strong>{otherParticipant.username}</strong></div>
+<Image
+  src={otherParticipant.profile_image}
+  alt={otherParticipant.username}
+  roundedCircle
+  fluid
+  className="profile-image" // Corrected class name
+  style={{ width: '40px', height: '40px', marginRight: '15px' }} // Set specific size
+/>
+
+        {/* <div className="profilex-username"> */}
+          <strong>{otherParticipant.username}</strong>
+          {/* </div> */}
       </div>
     )}
 </div>
@@ -305,7 +309,7 @@ function Thread() {
           />
           <Button
             className="mt-4"
-            variant="danger"
+            variant="dark"
             onClick={() => sendReply(null, thread.participants[1].id)}
           >
             Send

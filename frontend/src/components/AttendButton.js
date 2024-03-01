@@ -53,7 +53,7 @@ function AttendButton({ projectId, token, onAttendChange, onModalChange, fontSiz
   return (
     <div>
       {isAttending ? (
-        <Button variant="primary" onClick={handleAttendance} style={{ fontSize: fontSize }}>
+        <Button variant="outline-primary" onClick={handleAttendance} style={{ fontSize: fontSize }}>
           <i className="fa-solid fa-xmark" style={{ marginRight: '8px' }}></i>Cancel Attending
         </Button>
       ) : (

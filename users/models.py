@@ -45,6 +45,8 @@ class Profile(models.Model):
     notify_new_replied_comment = models.BooleanField(default=True) 
     notify_new_upvote_on_project = models.BooleanField(default=True)  # New setting for upvotes on projects
 
+    verified = models.BooleanField(default=False)  # Add this line
+
     def __str__(self):
         return str(self.username)
 

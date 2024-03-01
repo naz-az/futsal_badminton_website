@@ -67,6 +67,7 @@ import Main from './SwipeFunction/Main/Main';
 
 import AttendingProjects from './screens/AttendingProjects';
 
+import LargeMapScreen from './components/LargeMapScreen';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -186,6 +187,8 @@ function App() {
               <Route path='/main' element={<Main />} />
 
               <Route path='/attending' element={<AttendingProjects />} />
+
+              <Route path='/map/:latitude/:longitude' element={<LargeMapScreen />} />
 
 
             </Routes>
