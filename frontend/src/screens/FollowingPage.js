@@ -86,7 +86,7 @@ function FollowingPage() {
                     <Button variant="secondary" onClick={() => setShowConfirmation(false)}>
                         Close
                     </Button>
-                    <Button variant="danger" onClick={confirmUnfollow}>
+                    <Button variant="primary" onClick={confirmUnfollow}>
                         Yes, Unfollow
                     </Button>
                 </Modal.Footer>

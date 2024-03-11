@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "react-bootstrap";
+import { useNavigate } from 'react-router-dom';
 
 const VotingButtons = ({ projectId }) => {
   const [vote, setVote] = useState(null);
   const [voteCount, setVoteCount] = useState(0); // New state for vote count
+  const navigate = useNavigate();
 
   const config = {
     headers: {
@@ -37,7 +39,7 @@ const VotingButtons = ({ projectId }) => {
   const handleVote = (voteType) => {
     const token = localStorage.getItem("token");
     if (!token) {
-      window.location.href = "/login";
+      navigate('/login');
       return;
     }
   

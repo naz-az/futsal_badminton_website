@@ -26,6 +26,7 @@ import moment from 'moment';
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'; // Ensure you import Leaflet's CSS
+import { useLocation } from 'react-router-dom';
 
 
 function ProjectScreen() {
@@ -49,6 +50,8 @@ function ProjectScreen() {
   
   const currentUserProfile = auth.user?.profile; // Assuming `profile` is part of the user object
 
+  // Inside your component
+  const location = useLocation();
 
   const currentUser = auth.user; // Assuming `user` holds the current user information
   // console.log("Current User:", currentUser);
@@ -92,6 +95,17 @@ function ProjectScreen() {
       setSelectedImage(image);
     };
 
+
+    useEffect(() => {
+      if (location.state?.scrollToTop) {
+        window.scrollTo(0, 0);
+        // Clear the state after scrolling to prevent unintended scrolls on back navigation
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }, [location, navigate]);
+    
+
+    
   useEffect(() => {
     async function fetchRelatedProjects(tags) {
       const promises = tags.map((tag) =>
@@ -236,25 +250,55 @@ function ProjectScreen() {
   };
   
 
-  useEffect(() => {
-    const fetchAttendees = async () => {
-        try {
-            // Configuration for the authorization header
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            };
+//   useEffect(() => {
+//     const fetchAttendees = async () => {
+//         try {
+//             // Configuration for the authorization header
+//             const config = {
+//                 headers: {
+//                     Authorization: `Bearer ${localStorage.getItem("token")}`,
+//                 },
+//             };
 
-            const response = await axios.get(`/api/projects/${id}/attendees/`, config);
-            setAttendees(response.data);
-        } catch (error) {
-            console.error('Error fetching attendees:', error);
+//             const response = await axios.get(`/api/projects/${id}/attendees/`, config);
+//             setAttendees(response.data);
+//         } catch (error) {
+//             console.error('Error fetching attendees:', error);
+//         }
+//     };
+
+//     fetchAttendees();
+// }, [id]);
+
+useEffect(() => {
+  const fetchAttendees = async () => {
+    if (!auth.isAuthenticated) {
+      // User is not authenticated, handle accordingly
+      console.log("User is not authenticated.");
+      // Optionally, redirect to login or hide attendee information
+    } else {
+      try {
+        // Configuration for the authorization header
+        const config = {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        };
+
+        const response = await axios.get(`/api/projects/${id}/attendees/`, config);
+        setAttendees(response.data);
+      } catch (error) {
+        console.error('Error fetching attendees:', error);
+        // Handle specific error codes if necessary
+        if (error.response && error.response.status === 401) {
+          // Handle unauthorized error
         }
-    };
+      }
+    }
+  };
 
-    fetchAttendees();
-}, [id]);
+  fetchAttendees();
+}, [id, auth.isAuthenticated]);
 
 const formatMomentDate = (dateString) => {
   return dateString 

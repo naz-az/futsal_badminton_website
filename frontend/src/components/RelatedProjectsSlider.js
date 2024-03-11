@@ -92,7 +92,9 @@ const RelatedProjectsSlider = ({ relatedProjects, currentProjectId }) => {
           .map((relatedProject) => (
             <div key={relatedProject.id} style={{ padding: "0 10px" }}> {/* Added horizontal padding for each card */}
               <Card className="mb-4" style={{ padding: "5px", width: '95%' }}> {/* Decreased width and removed padding */}
-                <Link to={`/project/${relatedProject.id}`}>
+                {/* <Link to={`/project/${relatedProject.id}`}> */}
+                <Link to={{ pathname: `/project/${relatedProject.id}`, state: { scrollToTop: true } }}>
+
                   <Card.Img
                     variant="top"
                     src={relatedProject.featured_image}

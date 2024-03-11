@@ -52,10 +52,10 @@ const handleTagClick = (tagId) => {
   
   return (
     <Container>
-      <h2 className="text-center mt-4 mb-5">Followed Tags</h2>
+      <h2 className="text-center mt-4 mb-5">Followed Categories</h2>
 
       <div style={{ marginBottom: '25px' }}> {/* Container with margin */}
-        <Button variant="secondary" onClick={() => navigate('/categories')}>View all Tags</Button>
+        <Button variant="secondary" onClick={() => navigate('/categories')}>View all Categories</Button>
       </div>
 
       <div>

@@ -243,58 +243,22 @@ function SwipePage() {
   };
   
 
-  // const handleMouseMove = (event) => {
-  //   if (isDragging) {
-  //     const currentX = event.clientX;
-  //     const deltaX = currentX - dragStartX;
-  //     // Apply negative rotation for left swipe and positive for right swipe
-  //     const rotation = deltaX / 90; // Adjust the divisor for sensitivity
-  //     setDragStyle({
-  //       transform: `rotate(${rotation}deg)`,
-  //       transition: 'transform 0.1s',
-  //       opacity: 0.8
-  //     });
-  //   }
-  // };
-  
-  // const handleMouseMove = (event) => {
-  //   if (isDragging) {
-  //     const currentX = event.clientX;
-  //     const deltaX = currentX - dragStartX;
-  //     // Apply negative rotation for left swipe and positive for right swipe
-  //     const rotation = deltaX / -60; // Adjust the divisor for sensitivity
-  //     setDragStyle({
-  //       transform: `rotate(${rotation}deg)`,
-  //       transition: 'transform 0.1s',
-  //       opacity: 0.8
-  //     });
-  //   }
-  // };
- 
   const handleMouseMove = (event) => {
     if (isDragging) {
       const currentX = event.clientX;
+      const currentY = event.clientY;
       const deltaX = currentX - dragStartX;
-      const deltaY = event.clientY - dragStartY; // You can use deltaY if needed for vertical movements
-  
-      console.log('deltaX:', deltaX, 'deltaY:', deltaY); // Debugging line
-  
-      let rotation;
-      if (deltaX > 760) { // Dragging to the right
-        rotation = deltaX / 80;
-      } else { // Dragging to the left
-        rotation = deltaX / -80;
-      }
-  
+      // Calculate rotation for feedback
+      const rotation = deltaX / 10; // This is a simple example, adjust as needed
+      
       setDragStyle({
         transform: `rotate(${rotation}deg)`,
-        transition: 'transform 0.5s',
-        opacity: 0.8
+        transition: 'transform 0.1s',
+        opacity: 0.7
       });
     }
   };
   
-
   const [showFullText, setShowFullText] = useState(false);
 
 // Remember to remove the 'mousemove' event listener in `handleDragEnd` as well
@@ -335,47 +299,6 @@ const timeUntilEnd = (endDate) => {
 };
 
 
-
-// Touch event handlers
-const handleTouchStart = (event) => {
-  const touch = event.touches[0];
-  dragStartX = touch.clientX;
-  dragStartY = touch.clientY;
-  setIsDragging(true);
-};
-const handleTouchMove = (event) => {
-  if (!isDragging) return;
-  const touch = event.touches[0];
-  const currentX = touch.clientX;
-  const deltaX = currentX - dragStartX;
-  const deltaY = event.clientY - dragStartY; // You can use deltaY if needed for vertical movements
-
-  // Apply negative rotation for left swipe and positive for right swipe
-  // const rotation = deltaX / 20; // Adjust the divisor for sensitivity
-
-  console.log('deltaX TM:', deltaX, 'deltaY TM:', deltaY); // Debugging line
-  
-  let rotation;
-  if (deltaX > 200) { // Dragging to the right
-    rotation = deltaX / 90;
-  } else { // Dragging to the left
-    rotation = deltaX / -90;
-  }
-
-  setDragStyle({
-    transform: `rotate(${rotation}deg)`,
-    transition: 'transform 0.5s',
-    opacity: 0.7
-  });
-};
-
-
-const handleTouchEnd = () => {
-  setIsDragging(false);
-  setDragStyle({});
-};
-
-
       // Modal state
       const [showAttendModal, setShowAttendModal] = useState(false);
       const [attendModalMessage, setAttendModalMessage] = useState('');
@@ -387,7 +310,6 @@ const handleTouchEnd = () => {
         setAttendModalMessage(message);
         setShowAttendButton(showButton);
       };
-
 
   return (
     <Container>
@@ -404,76 +326,93 @@ const handleTouchEnd = () => {
           )}
         </Modal>
   
-
-
-
-
-  <div className="card-container">
-
-
-  <div className="return-button-container"> {/* Updated class name */}
-  <Button variant="warning" onClick={handleReturn} className="voting-button return">
-    <i className="fa-solid fa-rotate-left"></i>
-  </Button>
-</div>
-
-<div
+  
+      <div
         style={{
           display: "flex",
           flexDirection: "row",
           justifyContent: "center",
           alignItems: "center", // This makes sure everything is vertically centered
           marginTop: "20px",
-
         }}
       >
 
 
+{/* Dislike Button */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            marginRight: "100px", // Spacing between the button and the card
+          }}
+        >
+<Button variant="primary" onClick={handleDislike} style={{ fontSize: '30px', padding: '10px 20px' }}>
+<i className="fa-solid fa-xmark"></i>
+          </Button>
+        </div>
+  
+        {/* Card */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {/* {currentProject.deal_link && (
+            <Button
+              variant="warning"
+              style={{ marginBottom: "40px", fontSize: '20px', padding: '10px 20px' }}
+              onClick={() => {
+                const url =
+                  currentProject.deal_link.startsWith("http://") ||
+                  currentProject.deal_link.startsWith("https://")
+                    ? currentProject.deal_link
+                    : "http://" + currentProject.deal_link;
+                window.open(url, "_blank");
+              }}
+            >
+              Go to event <i className="fa-solid fa-arrow-up-right-from-square" style={{marginLeft: "8px"}}></i>
+            </Button>
+          )} */}
+  
+        {/* Return Button */}
+        <div
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    marginTop: "50px", // Adjust as needed
+    marginBottom: "50px", // Adjust as needed
 
-<Button variant="primary" onClick={handleDislike} className="voting-button dislike">
-      <i className="fa-solid fa-xmark"></i>
-    </Button>
-
+  }}
+>
+  <Button variant="warning" onClick={handleReturn} style={{ fontSize: '30px', padding: '10px 20px' }}>
+    <i className="fa-solid fa-rotate-left"></i> {/* Choose an appropriate icon */}
+  </Button>
+</div>
 
   <Card
-    style={{ ...dragStyle, width: '90vw', height: '40vh', cursor: isDragging ? 'grabbing' : 'grab', marginTop:"40px" }}
-    onMouseDown={handleDragStart}
-    onMouseMove={handleMouseMove}
-    onMouseUp={handleDragEnd}
-    onTouchStart={handleTouchStart}
-    onTouchMove={handleTouchMove}
-    onTouchEnd={handleTouchEnd}
-    onDoubleClick={isFavorited ? confirmRemoveFavorite : handleAddFavorite}
-  >
-    <Link to={`/project/${currentProject.id}/`} style={{ textDecoration: 'none', color: 'black' }}>
-      <Card.Img
-        variant="top"
-        src={currentProject.featured_image}
-        alt="project thumbnail"
-        style={{ ...dragStyle, width: '100%', height: "450px", objectFit: "cover", cursor: 'grab', opacity: isDragging ? 0.7 : 1, transition: 'opacity 0.2s ease-in-out', marginTop: "20px",
-      }} 
-        onMouseDown={handleDragStart}
-        draggable="false"
-      />
-    </Link>
-    {/* Position the buttons over the image for mobile screens */}
-    <div className="voting-buttons-mobile">
-      <Button variant="primary" onClick={handleDislike}>
-        <i className="fa-solid fa-xmark"></i>
-      </Button>
-      <Button variant="warning" onClick={handleReturn}>
-    <i className="fa-solid fa-rotate-left"></i> 
-  </Button>
-      <Button variant="success" onClick={handleLike}>
-        <i className="fa-regular fa-heart"></i>
-      </Button>
-    </div>
+  style={{ ...dragStyle, width: '450px', height: '900px',cursor: isDragging ? 'grabbing' : 'grab', marginTop:"30px" }} // Apply dynamic styles for dragging
+  onMouseDown={handleDragStart} // Update the mouse down handler
+  onDoubleClick={isFavorited ? confirmRemoveFavorite : handleAddFavorite}
+>
+  <Link to={`/project/${currentProject.id}/`} style={{ textDecoration: 'none', color: 'black' }}>
+    <Card.Img
+      variant="top"
+      src={currentProject.featured_image}
+      alt="project thumbnail"
+      style={{ ...dragStyle, width: '100%', height: "450px", objectFit: "cover", cursor: 'grab', opacity: isDragging ? 0.7 : 1, transition: 'opacity 0.2s ease-in-out' }} 
+      onMouseDown={handleDragStart} // Add the mouse down event handler only to the image
+      draggable="false" // This prevents the default browser image dragging
+    />
+      </Link>
+
     <Card.Body onMouseDown={handleDragStart} style={{ cursor: 'grab', minHeight: "300px" }}>
-
-    <Card.Title className="project-title" style={{ marginBottom: "15px" }}>
-  {currentProject.title}
-</Card.Title>
-
+      <Card.Title style={{ fontSize: "30px", marginBottom:"15px" }}>
+        {currentProject.title}
+      </Card.Title>
       <Card.Text style={{ marginBottom:"20px", fontSize: "18px" }}>
   {currentProject.owner && (
     <img 
@@ -541,19 +480,23 @@ const handleTouchEnd = () => {
                 </Card.Text> */}
 
                 </Card.Body>
-  </Card>
-
-
-  <Button variant="success" onClick={handleLike} className="voting-button like">
-      <i className="fa-regular fa-heart"></i>
-    </Button>
-
-
-</div>
-
-
-</div>
-
+</Card>
+        </div>
+  
+        {/* Like Button */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            marginLeft: "100px", // Spacing between the card and the button
+          }}
+        >
+          <Button variant="success" onClick={handleLike} style={{ fontSize: '30px', padding: '10px 20px' }}>
+            <i className="fa-regular fa-heart"></i>
+          </Button>
+        </div>
+      </div>
       
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
@@ -596,5 +539,3 @@ const handleTouchEnd = () => {
 }
 
 export default SwipePage;
-
-

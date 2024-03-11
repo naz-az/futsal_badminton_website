@@ -379,3 +379,83 @@ Button.active {
 .vertical-line {
   border-right: 1px solid #dee2e6; /* Adjust the color to match your table's theme */
 }
+
+
+.voting-buttons-mobile {
+  position: absolute;
+  top: 20px; 
+  left: 140px; 
+  display: none; 
+
+}
+
+/* Adjusting the font size and padding for buttons inside .voting-buttons-mobile */
+.voting-buttons-mobile button {
+  font-size: 30px; /* Larger font size for visibility */
+  padding: 5px 20px; /* Larger padding for easier interaction */
+  margin: 0 5px; /* Add some space between the buttons */
+
+}
+.voting-buttons-desktop {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 100px;
+}
+
+
+/* Desktop specific styles */
+@media (min-width: 769px) {
+  .return-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+  }
+}
+
+@media (max-width: 768px) { 
+  .voting-buttons-mobile {
+    position: absolute;
+    top: -90px; /* Adjust this value as needed to position the buttons */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: space-between; /* This will add space between the two buttons */
+    width: 100% ;
+    font-size: 30px;
+    padding: 10px 20px;
+    margin-top: 20px;
+
+  }
+
+  .voting-button.dislike, .voting-button.like, .voting-button.return{
+    display: none; 
+  }
+
+
+}
+
+.voting-button.return {
+  font-size: 30px; 
+  padding: 10px 20px;
+
+}
+
+
+.voting-button.dislike {
+  margin-right: 120px; /* Adjust spacing as needed */
+  font-size: 30px; 
+  padding: 10px 20px;
+  margin-top: 480px;
+
+}
+
+.voting-button.like {
+  margin-left: 120px; 
+  font-size: 30px; 
+  padding: 10px 20px;
+  margin-top: 480px;
+
+}
+
+
